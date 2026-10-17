@@ -1,16 +1,29 @@
 """Configuration and environment settings for AMD Developer Hackathon ACT III."""
 import os
 from dataclasses import dataclass
+from pathlib import Path
+
+# Automatically load .env from project root if present
+_ENV_PATH = Path(__file__).resolve().parent.parent / ".env"
+if _ENV_PATH.exists():
+    for _line in _ENV_PATH.read_text(encoding="utf-8").splitlines():
+        _s = _line.strip()
+        if _s and not _s.startswith("#") and "=" in _s:
+            _k, _v = _s.split("=", 1)
+            _k = _k.strip()
+            _v = _v.strip().strip('"').strip("'")
+            if _k and _k not in os.environ:
+                os.environ[_k] = _v
 
 
 @dataclass
 class Settings:
     # AMD Infrastructure / Token Factory / vLLM (OpenAI-compatible endpoint)
     AMD_API_BASE_URL: str = os.getenv(
-        "AMD_API_BASE_URL", "https://notebooks.amd.com/tokenfactory/v1"
+        "AMD_API_BASE_URL", "https://developer.amd.com.cn/radeon/api/v1"
     )
     AMD_API_KEY: str = os.getenv("AMD_API_KEY", "")
-    AMD_MODEL_NAME: str = os.getenv("AMD_MODEL_NAME", "google/gemma-2-27b-it")
+    AMD_MODEL_NAME: str = os.getenv("AMD_MODEL_NAME", "Gemma-4-31B-IT")
     AMD_GPU_DEVICE: str = os.getenv(
         "AMD_GPU_DEVICE", "AMD Instinct MI300X (192GB HBM3, ROCm 6.3)"
     )

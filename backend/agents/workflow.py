@@ -948,11 +948,11 @@ async def resolve_clarification(disruption_id: str, selected_po_id: str) -> None
             {"thought": f"Buyer confirmed Purchase Order: {selected_po_id}. Resuming automated exception pipeline..."},
         )
 
-        # Resume pipeline past the gate
-        asyncio.create_task(run_workflow_until_gate(disruption_id))
-
     finally:
         conn.close()
+
+    # Resume pipeline past the gate and wait for completion
+    await run_workflow_until_gate(disruption_id)
 
 
 async def process_human_decision(

@@ -156,7 +156,7 @@ async def call_amd_llm(
             "model": settings.AMD_MODEL_NAME,
             "messages": [{"role": "user", "content": user_content}],
             "temperature": temperature,
-            "max_tokens": 1500,
+            "max_tokens": 350,
         }
         if response_model is not None:
             # Encourage strictly valid JSON matching schema

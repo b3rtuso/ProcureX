@@ -234,15 +234,24 @@ async def extract_disruption_facts(
         conn=conn,
     )
 
+    det_facts = _deterministic_extract_facts(signal)
+
+    # Normalize PO ID from live LLM output: if email has no PO# in text, enforce None -> Clarification Gate
+    if det_facts.po_id is None:
+        facts.po_id = None
+        facts.confidence = 0.58
+    else:
+        if not facts.po_id or str(facts.po_id).lower() in ("null", "none", "unknown", "n/a"):
+            facts.po_id = det_facts.po_id
+        if facts.delay_days == 0 and det_facts.delay_days > 0:
+            facts.delay_days = det_facts.delay_days
+        if facts.shipped_qty is None and det_facts.shipped_qty is not None:
+            facts.shipped_qty = det_facts.shipped_qty
+
     # Safety guarantee: ensure evidence_quotes are verbatim substrings
     verified_quotes = [q for q in facts.evidence_quotes if q in signal.raw_text]
     if not verified_quotes:
-        # Fallback to the first available non-empty line
-        for line in signal.raw_text.splitlines():
-            line_str = line.strip()
-            if len(line_str) > 20 and line_str in signal.raw_text:
-                verified_quotes.append(line_str)
-                break
+        verified_quotes = det_facts.evidence_quotes
     facts.evidence_quotes = verified_quotes
 
     # Safety guarantee: if po_id is None, ensure confidence is 0.58

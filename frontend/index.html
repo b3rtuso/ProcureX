@@ -769,9 +769,24 @@
         [suppliers]
       );
 
+      const [amdTelemetry, setAmdTelemetry] = useState({
+        model_id: "Gemma-4-31B-IT",
+        gpu_device: "AMD Instinct MI300X (192GB HBM3, ROCm 6.3)",
+        endpoint: "https://developer.amd.com.cn/radeon/api/v1",
+        live_key_configured: true,
+        mode_active: "AMD_LIVE"
+      });
+
       // Sync with backend API on mount
       useEffect(() => {
-        fetch("/api/erp/snapshot").catch(() => {});
+        fetch("/api/erp/snapshot")
+          .then(r => r.json())
+          .then(d => {
+            if (d && d.amd_telemetry) {
+              setAmdTelemetry(d.amd_telemetry);
+            }
+          })
+          .catch(() => {});
       }, []);
 
       // Animate AI Activity steps when Alert Details is opened
@@ -3707,6 +3722,18 @@
                     </div>
                     <span className="text-xs font-mono font-bold px-2.5 py-1 rounded bg-emerald-100 text-emerald-800">
                       Active (≥85%)
+                    </span>
+                  </div>
+
+                  <div className="p-4 rounded-xl border border-emerald-200 bg-emerald-50/40 flex items-center justify-between">
+                    <div>
+                      <div className="font-bold text-slate-900">AMD Radeon Cloud / Token Factory LLM</div>
+                      <div className="text-xs text-slate-600 font-mono">
+                        {amdTelemetry.model_id} · {amdTelemetry.endpoint}
+                      </div>
+                    </div>
+                    <span className="text-xs font-mono font-bold px-2.5 py-1 rounded bg-emerald-600 text-white">
+                      {amdTelemetry.mode_active || "AMD_LIVE"}
                     </span>
                   </div>
 

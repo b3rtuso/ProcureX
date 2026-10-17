@@ -209,26 +209,19 @@ async def _draft_single_rfq(
     po = erp_context.po
 
     system_prompt = (
-        "You are the AMD Strategic Procurement Negotiation Agent. Draft an executive B2B RFQ email "
-        "to a pre-approved backup supplier to mitigate an urgent production stockout.\n"
-        "You must include: exact material specification, disrupted PO reference, requested quantity in tons, "
-        "and target delivery date (D+X).\n"
-        "Draft professional, persuasive, commercial negotiation text."
+        "You are the AMD Strategic Procurement Negotiation Agent. Write a concise 2-sentence "
+        "executive commercial negotiation note for a backup supplier RFQ email."
     )
 
     feedback_instruction = ""
     if buyer_feedback and buyer_feedback.strip():
-        feedback_instruction = f"\nBUYER REVISION MANDATE: {buyer_feedback}\nYou must explicitly adopt this in the email text.\n"
+        feedback_instruction = f"\nBUYER REVISION MANDATE: {buyer_feedback}\n"
 
     user_prompt = (
         f"Supplier: {supplier.name} ({supplier.archetype_label})\n"
         f"Material: {mat.name} (Spec: {mat.spec})\n"
-        f"Disrupted PO: {po.id}\n"
-        f"Bridge Quantity Needed: {bridge_qty_tons} tons\n"
-        f"Supplier Lead Time: {supplier.lead_time_days} days\n"
-        f"Need-By Day: D+{need_by_day}\n"
-        f"{feedback_instruction}\n"
-        f"Draft the negotiation email body and subject line:"
+        f"Disrupted PO: {po.id}, Bridge Quantity: {bridge_qty_tons} tons by D+{need_by_day}.{feedback_instruction}\n"
+        f"Write a 2-sentence commercial negotiation closing note:"
     )
 
     def fallback() -> RfqDraft:
@@ -236,25 +229,29 @@ async def _draft_single_rfq(
             supplier, erp_context, bridge_qty_tons, need_by_day, archetype_index, buyer_feedback
         )
 
-    # In replay mode, the deterministic generator produces verified structured text
-    # In live mode, call AMD Token Factory
-    try:
-        draft, metric = await call_amd_llm(
-            prompt=user_prompt,
-            system_instruction=system_prompt,
-            agent_name="SourcingAgent",
-            deterministic_fallback=fallback,
-            conn=conn,
-        )
+    draft = fallback()
+    from backend.core.llm import create_deterministic_metric, record_inference_metric
 
-        if not isinstance(draft, RfqDraft):
-            draft = fallback()
-
-    except Exception as exc:
-        logger.warning("LLM call failed for supplier %s, using fallback: %s", supplier.name, exc)
-        draft = fallback()
-        from backend.core.llm import create_deterministic_metric
+    # Call live AMD Token Factory for the primary supplier to avoid concurrent rate-limit throttling
+    if archetype_index == 0:
+        try:
+            llm_text, metric = await call_amd_llm(
+                prompt=user_prompt,
+                system_instruction=system_prompt,
+                agent_name="SourcingAgent",
+                deterministic_fallback=fallback,
+                conn=conn,
+            )
+            if isinstance(llm_text, str) and len(llm_text.strip()) > 15:
+                clean_note = llm_text.strip().replace("```", "")
+                draft.body = f"{draft.body}\n\n[AMD Gemma-4-31B-IT Live Negotiation Note]:\n{clean_note}"
+        except Exception as exc:
+            logger.warning("LLM call failed for supplier %s, using fallback: %s", supplier.name, exc)
+            metric = create_deterministic_metric(agent_name="SourcingAgent")
+            record_inference_metric(metric, conn=conn)
+    else:
         metric = create_deterministic_metric(agent_name="SourcingAgent")
+        record_inference_metric(metric, conn=conn)
 
     # Validate the resulting draft against ERP context
     passed, notes = validate_rfq_draft(draft, erp_context)
