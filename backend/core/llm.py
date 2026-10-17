@@ -165,7 +165,7 @@ async def call_amd_llm(
         endpoint = f"{settings.AMD_API_BASE_URL.rstrip('/')}/chat/completions"
 
         try:
-            async with httpx.AsyncClient(timeout=15.0) as client:
+            async with httpx.AsyncClient(timeout=25.0) as client:
                 resp = await client.post(endpoint, json=payload, headers=headers)
                 resp.raise_for_status()
                 data = resp.json()
