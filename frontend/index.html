@@ -780,7 +780,7 @@
         [suppliers]
       );
 
-      const [selectedCalendarDay, setSelectedCalendarDay] = useState(21);
+      const [selectedCalendarDay, setSelectedCalendarDay] = useState("Oct 21");
       const [hoveredBarIndex, setHoveredBarIndex] = useState(null);
       const [selectedPlant, setSelectedPlant] = useState("Brescia & Manila Plant");
 
@@ -3224,11 +3224,11 @@
               </div>
               <div className="grid grid-cols-3 gap-2 pt-2 border-t border-[#e2e8f0]/60 text-center">
                 <div className="p-2 rounded-[14px] bg-white border border-[#f3f4f6]">
-                  <div className="text-sm font-extrabold text-[#0d6efd]">{activeDisruptionsCount}</div>
+                  <div className="text-sm font-extrabold text-[#0d6efd]">{alerts.length}</div>
                   <div className="text-[10px] font-semibold text-[#64748b]">Alerts</div>
                 </div>
                 <div className="p-2 rounded-[14px] bg-white border border-[#f3f4f6]">
-                  <div className="text-sm font-extrabold text-[#10b981]">{inventoryHealthPercent}%</div>
+                  <div className="text-sm font-extrabold text-[#10b981]">85%</div>
                   <div className="text-[10px] font-semibold text-[#64748b]">Health</div>
                 </div>
                 <div className="p-2 rounded-[14px] bg-white border border-[#f3f4f6]">
@@ -3280,7 +3280,7 @@
                 <h4 className="text-sm font-extrabold text-[#1e293b]">Upcoming Deliveries & Shifts</h4>
                 <button
                   type="button"
-                  onClick={() => navigateTo("Schedule")}
+                  onClick={() => navigateMain("schedule")}
                   className="text-[11px] font-bold text-[#0d6efd] hover:underline"
                 >
                   See All
@@ -3295,7 +3295,7 @@
                     time: "Oct 21 · 08:00",
                     dot: "bg-[#10b981]",
                     badge: "bg-emerald-50 text-[#10b981]",
-                    nav: "Suppliers",
+                    nav: "suppliers",
                   },
                   {
                     id: "up-2",
@@ -3304,7 +3304,7 @@
                     time: "Oct 22 · 06:00",
                     dot: "bg-[#0d6efd]",
                     badge: "bg-blue-50 text-[#0d6efd]",
-                    nav: "Schedule",
+                    nav: "schedule",
                   },
                   {
                     id: "up-3",
@@ -3313,12 +3313,12 @@
                     time: "Oct 24 · 14:00",
                     dot: "bg-[#f97316]",
                     badge: "bg-[#fff7ed] text-[#f97316]",
-                    nav: "Orders",
+                    nav: "orders",
                   },
                 ].map((item) => (
                   <div
                     key={item.id}
-                    onClick={() => navigateTo(item.nav)}
+                    onClick={() => navigateMain(item.nav)}
                     className="p-3.5 rounded-[18px] bg-[#f8f9fc] hover:bg-white border border-[#f3f4f6] hover:shadow-md transition-all duration-300 cursor-pointer flex items-start gap-3"
                   >
                     <span className={`w-2.5 h-2.5 rounded-full mt-1.5 shrink-0 ${item.dot}`} />
@@ -3342,47 +3342,43 @@
               <div className="flex items-center justify-between">
                 <h4 className="text-sm font-extrabold text-[#1e293b]">AI Action Checklist</h4>
                 <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-[#10b981]">
-                  {
-                    [
-                      completedRecs["Send RFQ to MetroSteel Industries"] || rfqSentSuppliers["SUP-METRO"],
-                      completedRecs["Order 80 tons emergency Steel Coil"],
-                      completedRecs["Delay PO-103 by 2 days"] || scheduleSaved,
-                      completedRecs["Expedite shipping for PO-102"],
-                    ].filter(Boolean).length
-                  }
-                  /4 Done
+                  {completedRecCount}/4 Done
                 </span>
               </div>
               <div className="space-y-2">
                 {[
                   {
+                    key: "REC_RFQ_METRO",
                     label: "Send RFQ to MetroSteel Industries",
                     sub: "Unlock stock & live quote",
-                    done: Boolean(completedRecs["Send RFQ to MetroSteel Industries"] || rfqSentSuppliers["SUP-METRO"]),
+                    done: Boolean(completedRecs.REC_RFQ_METRO),
                   },
                   {
-                    label: "Order 80 tons emergency Steel Coil",
-                    sub: "Approve emergency PO",
-                    done: Boolean(completedRecs["Order 80 tons emergency Steel Coil"]),
+                    key: "REC_RFQ_BACKUPS",
+                    label: "Request quotes from 3 backup suppliers",
+                    sub: "Compare confirmed stock & price",
+                    done: Boolean(completedRecs.REC_RFQ_BACKUPS),
                   },
                   {
+                    key: "REC_SCHEDULE",
                     label: "Delay PO-103 by 2 days",
                     sub: "Save production schedule",
-                    done: Boolean(completedRecs["Delay PO-103 by 2 days"] || scheduleSaved),
+                    done: Boolean(completedRecs.REC_SCHEDULE),
                   },
                   {
+                    key: "REC_PRIORITIZE",
                     label: "Expedite shipping for PO-102",
                     sub: "Protect Car Chassis SLA",
-                    done: Boolean(completedRecs["Expedite shipping for PO-102"]),
+                    done: Boolean(completedRecs.REC_PRIORITIZE),
                   },
                 ].map((todo) => (
                   <button
-                    key={todo.label}
+                    key={todo.key}
                     type="button"
                     onClick={() =>
                       setCompletedRecs((prev) => ({
                         ...prev,
-                        [todo.label]: !todo.done,
+                        [todo.key]: !prev[todo.key],
                       }))
                     }
                     className={`w-full text-left p-3 rounded-[16px] border transition-all duration-300 flex items-start gap-3 ${
