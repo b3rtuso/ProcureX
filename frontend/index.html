@@ -6,10 +6,10 @@
   <title>SupplyChain AI Command Center — Autonomous Supply Chain Exception Handler</title>
   <meta name="description" content="SupplyChain AI Command Center — Autonomous Supply Chain Exception Handler MVP for detecting shipment delays, analyzing inventory & order impact, drafting backup supplier RFQs, and recommending production schedule changes with human-in-the-loop approval.">
 
-  <!-- Modern Clean SaaS Typography -->
+  <!-- Plus Jakarta Sans (400-800) & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -18,6 +18,12 @@
       theme: {
         extend: {
           colors: {
+            canvas: '#f8f9fc',
+            primary: '#0d6efd',
+            secondary: '#f97316',
+            success: '#10b981',
+            pinkAccent: '#ec4899',
+            purpleAccent: '#a855f7',
             navy: {
               950: '#090E1A',
               900: '#0F172A',
@@ -28,8 +34,8 @@
               50: '#EFF6FF',
               100: '#DBEAFE',
               500: '#3B82F6',
-              600: '#2563EB',
-              700: '#1D4ED8'
+              600: '#0d6efd',
+              700: '#0b5ed7'
             }
           },
           fontFamily: {
@@ -49,8 +55,8 @@
   <style>
     body {
       font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-      background-color: #F1F5F9;
-      color: #0F172A;
+      background-color: #f8f9fc;
+      color: #1e293b;
       -webkit-font-smoothing: antialiased;
       overflow-x: hidden;
     }
@@ -58,24 +64,29 @@
       font-variant-numeric: tabular-nums;
     }
     .saas-card {
-      background: #FFFFFF;
-      border: 1px solid #E2E8F0;
-      border-radius: 12px;
-      box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.04), 0 1px 2px -1px rgba(15, 23, 42, 0.03);
+      background: #ffffff;
+      border: 1px solid #f3f4f6;
+      border-radius: 24px;
+      box-shadow: 0 1px 2px 0 rgba(30, 41, 59, 0.03), 0 4px 16px -4px rgba(30, 41, 59, 0.03);
+      transition: all 300ms ease-in-out;
     }
     .saas-card-hover {
-      transition: all 160ms ease;
+      transition: all 300ms ease-in-out;
     }
     .saas-card-hover:hover {
-      border-color: #CBD5E1;
-      box-shadow: 0 4px 12px -2px rgba(15, 23, 42, 0.07);
+      transform: translateY(-2px);
+      border-color: #e2e8f0;
+      box-shadow: 0 12px 24px -6px rgba(13, 110, 253, 0.08), 0 4px 10px -2px rgba(30, 41, 59, 0.04);
+    }
+    .chart-bar-transition {
+      transition: height 400ms ease-in-out, transform 300ms ease-in-out, opacity 300ms ease-in-out;
     }
     @keyframes fadeSlide {
-      from { opacity: 0; transform: translateY(6px); }
+      from { opacity: 0; transform: translateY(8px); }
       to { opacity: 1; transform: translateY(0); }
     }
     .animate-in {
-      animation: fadeSlide 220ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      animation: fadeSlide 300ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
   </style>
 </head>
@@ -769,6 +780,10 @@
         [suppliers]
       );
 
+      const [selectedCalendarDay, setSelectedCalendarDay] = useState(21);
+      const [hoveredBarIndex, setHoveredBarIndex] = useState(null);
+      const [selectedPlant, setSelectedPlant] = useState("Brescia & Manila Plant");
+
       const [amdTelemetry, setAmdTelemetry] = useState({
         model_id: "Gemma-4-31B-IT",
         gpu_device: "AMD Instinct MI300X (192GB HBM3, ROCm 6.3)",
@@ -1197,11 +1212,11 @@
       const completedRecCount = Object.values(completedRecs).filter(Boolean).length;
 
       return (
-        <div className="min-h-screen flex bg-[#F1F5F9] text-slate-900">
+        <div className="min-h-screen flex bg-[#f8f9fc] text-[#1e293b]">
           {/* Toast Notification */}
           {toast && (
-            <div className="fixed bottom-5 right-5 z-50 bg-navy-900 text-white px-4 py-3 rounded-xl shadow-lg border border-slate-700 flex items-center gap-3 text-sm max-w-md animate-in">
-              <span className="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+            <div className="fixed bottom-5 right-5 z-50 bg-[#111827] text-white px-4 py-3 rounded-[16px] shadow-xl border border-slate-700 flex items-center gap-3 text-sm max-w-md animate-in">
+              <span className="w-6 h-6 rounded-full bg-[#10b981]/20 text-[#10b981] flex items-center justify-center shrink-0">
                 <Icon name="check" className="w-4 h-4" />
               </span>
               <span>{toast}</span>
@@ -1209,71 +1224,114 @@
           )}
 
           {/* =========================================================================
-              DARK NAVY BLUE SIDEBAR — STRICTLY 5 MAIN NAVIGATION ITEMS + GEAR ICON
+              COLUMN 1: LEFT NAVIGATION SIDEBAR (256px · #ffffff · 1px #f3f4f6 border)
+              Includes 2-Circle Glyph Logo, #fff7ed Org Selector, 5 Nav Links with
+              #0d6efd Active State + Rounded Vertical Pill, and Bottom Gradient Promo Card
              ========================================================================= */}
           {mobileSidebarOpen && (
             <div
               onClick={() => setMobileSidebarOpen(false)}
-              className="fixed inset-0 z-40 bg-slate-950/60 lg:hidden"
+              className="fixed inset-0 z-40 bg-slate-950/40 backdrop-blur-xs lg:hidden"
             />
           )}
 
           <aside
             aria-label="Main Sidebar Navigation"
-            className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-navy-900 text-slate-100 flex flex-col justify-between transition-transform duration-200 ease-out shrink-0 ${
+            className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-[#ffffff] border-r border-[#f3f4f6] text-[#1e293b] flex flex-col justify-between transition-transform duration-300 ease-in-out shrink-0 ${
               mobileSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
             }`}
           >
-            <div>
-              <div className="px-6 py-5 border-b border-slate-800 flex items-center justify-between">
+            <div className="p-5 space-y-5">
+              {/* Brand Logo with Two Overlapping Circular Glyphs (#0d6efd & #f97316) */}
+              <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-brand-600 text-white flex items-center justify-center font-bold text-base shadow-sm">
-                    SC
+                  <div className="relative w-12 h-9 flex items-center shrink-0">
+                    <span className="w-7 h-7 rounded-full border-[4px] border-[#0d6efd] bg-blue-50/40 inline-block" />
+                    <span className="w-7 h-7 rounded-full border-[4px] border-[#f97316] bg-orange-50/40 inline-block -ml-3" />
                   </div>
                   <div>
-                    <div className="font-bold text-base tracking-tight text-white leading-tight">
+                    <div className="font-extrabold text-base tracking-tight text-[#1e293b] leading-tight">
                       SupplyChain AI
                     </div>
-                    <div className="text-[11px] text-slate-400 leading-tight mt-0.5">
-                      Exception Handler
+                    <div className="text-[11px] font-medium text-[#64748b] leading-tight mt-0.5">
+                      ProcureX Command
                     </div>
                   </div>
                 </div>
                 <button
                   onClick={() => setMobileSidebarOpen(false)}
-                  className="lg:hidden text-slate-400 hover:text-white p-1"
+                  className="lg:hidden text-[#64748b] hover:text-[#1e293b] p-1"
                   aria-label="Close sidebar"
                 >
                   <Icon name="x" className="w-5 h-5" />
                 </button>
               </div>
 
-              {/* ONLY 5 MAIN NAVIGATION ITEMS */}
-              <nav className="p-4 space-y-1.5" aria-label="Primary Sidebar Links">
+              {/* Organization / Plant Selector Button (Orange #fff7ed, 12px radius) */}
+              <button
+                type="button"
+                onClick={() => {
+                  const next =
+                    selectedPlant === "Brescia & Manila Plant"
+                      ? "Laguna & Cebu Stamping"
+                      : "Brescia & Manila Plant";
+                  setSelectedPlant(next);
+                  showToast(`Switched active plant view to: ${next}`);
+                }}
+                className="w-full bg-[#fff7ed] hover:bg-orange-100/70 border border-orange-200/60 rounded-[12px] p-3 flex items-center justify-between text-left transition-all duration-300"
+              >
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <span className="w-7 h-7 rounded-[10px] bg-[#f97316] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs">
+                    P1
+                  </span>
+                  <div className="truncate">
+                    <div className="text-xs font-bold text-[#c2410c] truncate">
+                      {selectedPlant}
+                    </div>
+                    <div className="text-[10px] font-medium text-[#ea580c]/80">
+                      Active Plant Workspace
+                    </div>
+                  </div>
+                </div>
+                <span className="text-[#f97316] text-xs font-bold shrink-0">⇅</span>
+              </button>
+
+              {/* STRICTLY 5 MAIN NAVIGATION ITEMS with #0d6efd Active State + Rounded Vertical Indicator Pill */}
+              <nav className="space-y-1.5" aria-label="Primary Sidebar Links">
+                <div className="px-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-[#64748b]">
+                  Main Navigation
+                </div>
                 {SIDEBAR_ITEMS.map((item) => {
                   const isActive = activeNav === item.id;
                   return (
                     <button
                       key={item.id}
                       onClick={() => navigateMain(item.id)}
-                      className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                      className={`relative w-full flex items-center justify-between p-3 rounded-[12px] text-sm transition-all duration-300 ${
                         isActive
-                          ? "bg-brand-600 text-white shadow-sm"
-                          : "text-slate-300 hover:bg-navy-800 hover:text-white"
+                          ? "bg-blue-50/80 text-[#0d6efd] font-bold"
+                          : "text-[#64748b] font-medium hover:bg-[#f8f9fc] hover:text-[#1e293b]"
                       }`}
                     >
-                      <div className="flex items-center gap-3">
-                        <Icon name={item.icon} className="w-5 h-5" />
+                      {/* Rounded Vertical Indicator Pill */}
+                      {isActive && (
+                        <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-6 rounded-r-full bg-[#0d6efd]" />
+                      )}
+                      <div className="flex items-center gap-3 pl-1">
+                        <Icon
+                          name={item.icon}
+                          className={`w-5 h-5 ${isActive ? "text-[#0d6efd]" : "text-[#64748b]"}`}
+                        />
                         <span>{item.label}</span>
                       </div>
                       {item.badge && (
                         <span
-                          className={`text-[11px] font-mono px-2 py-0.5 rounded-full ${
+                          className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${
                             isActive
-                              ? "bg-white/20 text-white"
+                              ? "bg-[#0d6efd] text-white"
                               : item.id === "alerts"
-                              ? "bg-red-500/20 text-red-300"
-                              : "bg-slate-800 text-slate-300"
+                              ? "bg-orange-100 text-[#f97316]"
+                              : "bg-slate-100 text-[#64748b]"
                           }`}
                         >
                           {item.badge}
@@ -1285,52 +1343,79 @@
               </nav>
             </div>
 
-            {/* Bottom of Sidebar: ONLY Small Settings Gear Icon + AI Status */}
-            <div className="p-4 border-t border-slate-800 flex items-center justify-between">
-              <div className="flex items-center gap-2 text-xs text-slate-400">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span>AI Agent Active</span>
+            {/* Bottom Section: Gradient Promo & AMD Live Telemetry Card + Settings Gear */}
+            <div className="p-5 space-y-3">
+              <div className="relative pt-4">
+                {/* Floating Icon Badge */}
+                <div className="w-10 h-10 rounded-[14px] bg-white shadow-md border border-blue-100 flex items-center justify-center text-[#0d6efd] absolute -top-1 left-4 z-10">
+                  <Icon name="cpu" className="w-5 h-5" />
+                </div>
+                <div className="rounded-[24px] bg-gradient-to-br from-blue-50 via-indigo-50/80 to-purple-50 border border-blue-100/80 p-4 pt-6 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#0d6efd]">
+                      AMD ROCm 6.3 Engine
+                    </span>
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#10b981] text-white">
+                      <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                      Live
+                    </span>
+                  </div>
+                  <div className="text-xs font-extrabold text-[#1e293b]">
+                    {amdTelemetry.model_id || "Gemma-4-31B-IT"}
+                  </div>
+                  <div className="text-[11px] font-medium text-[#64748b] leading-snug">
+                    Autonomous Triage, RFQ & Shift Optimizer active.
+                  </div>
+                  <div className="pt-1 flex items-center justify-between gap-2">
+                    <button
+                      onClick={() => setShowReportsModal(true)}
+                      className="flex-1 py-2 px-3 rounded-[12px] bg-[#0d6efd] hover:bg-blue-700 text-white text-xs font-bold shadow-md shadow-[#0d6efd]/20 transition-all duration-300"
+                    >
+                      ROI Report
+                    </button>
+                    <button
+                      onClick={() => setShowSettingsModal(true)}
+                      title="System Settings"
+                      aria-label="Open Settings"
+                      className="p-2 rounded-[12px] bg-white hover:bg-slate-50 text-[#64748b] hover:text-[#1e293b] border border-blue-100 transition-all duration-300"
+                    >
+                      <Icon name="settings" className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
               </div>
-              <button
-                onClick={() => setShowSettingsModal(true)}
-                title="Settings"
-                aria-label="Open Settings"
-                className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-navy-800 transition-colors"
-              >
-                <Icon name="settings" className="w-5 h-5" />
-              </button>
             </div>
           </aside>
 
           {/* =========================================================================
-              MAIN CONTENT COLUMN
+              COLUMN 2: CENTRAL MAIN CONTENT AREA (Fluid · #f8f9fc · 32px Padding)
              ========================================================================= */}
           <div className="flex-1 flex flex-col min-w-0">
-            {/* Top Header */}
-            <header className="sticky top-0 z-30 bg-white border-b border-slate-200 px-4 sm:px-8 py-3.5">
+            {/* Top Header with 3xl Greeting & Pill-Shaped Search Bar */}
+            <header className="sticky top-0 z-30 bg-[#f8f9fc]/90 backdrop-blur-md px-4 sm:px-8 pt-6 pb-4">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => setMobileSidebarOpen(true)}
-                    className="lg:hidden p-2 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50"
+                    className="lg:hidden p-2.5 rounded-[12px] bg-white border border-[#f3f4f6] text-[#1e293b] shadow-xs"
                     aria-label="Open navigation menu"
                   >
                     <Icon name="menu" className="w-5 h-5" />
                   </button>
                   <div>
-                    <h1 className="text-base sm:text-lg font-bold text-slate-900">
+                    <h1 className="text-xl sm:text-3xl font-extrabold text-[#1e293b] tracking-tight">
                       Welcome back, Procurement Manager
                     </h1>
-                    <p className="text-xs text-slate-500 hidden sm:block">
+                    <p className="text-xs sm:text-sm font-medium text-[#64748b] mt-0.5">
                       SupplyChain AI Command Center · Autonomous Supply Chain Exception Handler
                     </p>
                   </div>
                 </div>
 
-                {/* Center: Search Bar */}
-                <div className="flex-1 max-w-md mx-auto lg:mx-4 min-w-[220px]">
-                  <div className="relative">
-                    <span className="absolute inset-y-0 left-3 flex items-center text-slate-400">
+                {/* Right: Pill-Shaped Search Bar + Simulate CTA + Notification Bell */}
+                <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto justify-end">
+                  <div className="relative flex-1 sm:w-80 xl:w-96 min-w-[220px]">
+                    <span className="absolute inset-y-0 left-4 flex items-center text-[#64748b]">
                       <Icon name="search" className="w-4 h-4" />
                     </span>
                     <input
@@ -1338,27 +1423,24 @@
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder="Search purchase orders, suppliers, materials..."
-                      className="w-full pl-9 pr-4 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:bg-white focus:border-brand-600 transition-colors"
+                      className="w-full pl-11 pr-10 py-2.5 text-xs sm:text-sm bg-white border border-[#f3f4f6] rounded-full shadow-xs text-[#1e293b] placeholder-[#64748b] focus:outline-none focus:border-[#0d6efd] transition-all duration-300"
                     />
                     {searchQuery && (
                       <button
                         onClick={() => setSearchQuery("")}
-                        className="absolute inset-y-0 right-2.5 flex items-center text-xs text-slate-400 hover:text-slate-600"
+                        className="absolute inset-y-0 right-4 flex items-center text-xs font-bold text-[#64748b] hover:text-[#1e293b]"
                       >
                         Clear
                       </button>
                     )}
                   </div>
-                </div>
 
-                {/* Right: Simulate Disruption Button + Notification Bell + User Profile */}
-                <div className="flex items-center gap-2.5">
                   <button
                     onClick={() => {
                       setSimStageIndex(-1);
                       setShowSimulateModal(true);
                     }}
-                    className="bg-brand-600 hover:bg-brand-700 text-white px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold flex items-center gap-2 shadow-sm transition-colors"
+                    className="bg-[#0d6efd] hover:bg-blue-700 text-white px-4 py-2.5 rounded-[12px] text-xs sm:text-sm font-bold flex items-center gap-2 shadow-lg shadow-[#0d6efd]/20 transition-all duration-300"
                   >
                     <Icon name="bolt" className="w-4 h-4" />
                     <span>Simulate Disruption</span>
@@ -1371,25 +1453,25 @@
                         setShowNotifications(!showNotifications);
                         setShowProfileMenu(false);
                       }}
-                      className="relative p-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50"
+                      className="relative p-2.5 rounded-[12px] bg-white border border-[#f3f4f6] text-[#64748b] hover:text-[#1e293b] shadow-xs transition-all duration-300"
                       aria-label="Notifications"
                     >
                       <Icon name="bell" className="w-5 h-5" />
-                      <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-600 text-white text-[10px] font-bold flex items-center justify-center">
+                      <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#ec4899] text-white text-[10px] font-bold flex items-center justify-center">
                         {alerts.length}
                       </span>
                     </button>
 
                     {showNotifications && (
-                      <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-slate-200 p-3 z-50 animate-in">
-                        <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100">
-                          <span className="text-xs font-bold text-slate-900">Recent Disruptions</span>
+                      <div className="absolute right-0 mt-2 w-80 bg-white rounded-[24px] shadow-xl border border-[#f3f4f6] p-4 z-50 animate-in">
+                        <div className="flex items-center justify-between pb-2.5 mb-2.5 border-b border-[#f3f4f6]">
+                          <span className="text-xs font-extrabold text-[#1e293b]">Recent Disruptions</span>
                           <button
                             onClick={() => {
                               setShowNotifications(false);
                               navigateMain("alerts");
                             }}
-                            className="text-xs text-brand-600 hover:underline font-medium"
+                            className="text-xs text-[#0d6efd] hover:underline font-bold"
                           >
                             View All
                           </button>
@@ -1402,69 +1484,22 @@
                                 setShowNotifications(false);
                                 openAlertDetails(a);
                               }}
-                              className="w-full text-left p-2.5 rounded-lg hover:bg-slate-50 border border-slate-100 transition-colors"
+                              className="w-full text-left p-3 rounded-[16px] hover:bg-[#f8f9fc] border border-[#f3f4f6] transition-all duration-300"
                             >
-                              <div className="flex items-center justify-between text-[11px] font-semibold">
+                              <div className="flex items-center justify-between text-[11px] font-bold">
                                 <span className={
-                                  a.badgeType === "CRITICAL" ? "text-red-600" :
-                                  a.badgeType === "WARNING" ? "text-amber-600" : "text-emerald-600"
+                                  a.badgeType === "CRITICAL" ? "text-[#f97316]" :
+                                  a.badgeType === "WARNING" ? "text-amber-600" : "text-[#10b981]"
                                 }>
                                   {a.badgeType}
                                 </span>
-                                <span className="text-slate-400">{a.timeAgo}</span>
+                                <span className="text-[#64748b]">{a.timeAgo}</span>
                               </div>
-                              <div className="text-xs font-semibold text-slate-900 mt-0.5">{a.title}</div>
-                              <div className="text-[11px] text-slate-500">Supplier: {a.supplier}</div>
+                              <div className="text-xs font-bold text-[#1e293b] mt-0.5">{a.title}</div>
+                              <div className="text-[11px] font-medium text-[#64748b]">Supplier: {a.supplier}</div>
                             </button>
                           ))}
                         </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* User Profile Dropdown */}
-                  <div className="relative">
-                    <button
-                      onClick={() => {
-                        setShowProfileMenu(!showProfileMenu);
-                        setShowNotifications(false);
-                      }}
-                      className="flex items-center gap-2 p-1.5 pr-2.5 rounded-lg border border-slate-200 hover:bg-slate-50"
-                    >
-                      <div className="w-7 h-7 rounded-full bg-navy-900 text-white text-xs font-bold flex items-center justify-center">
-                        PM
-                      </div>
-                      <span className="hidden md:inline text-xs font-semibold text-slate-800">
-                        Procurement Mgr
-                      </span>
-                    </button>
-
-                    {showProfileMenu && (
-                      <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-200 p-2 z-50 animate-in text-xs">
-                        <div className="px-3 py-2 border-b border-slate-100">
-                          <div className="font-bold text-slate-900">Procurement Manager</div>
-                          <div className="text-slate-500">Global Manufacturing Ops</div>
-                        </div>
-                        <button
-                          onClick={() => {
-                            setShowProfileMenu(false);
-                            setShowReportsModal(true);
-                          }}
-                          className="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 flex items-center gap-2 text-slate-700 font-medium mt-1"
-                        >
-                          <Icon name="chart" className="w-4 h-4" />
-                          <span>Executive Reports</span>
-                        </button>
-                        <button
-                          onClick={() => {
-                            setShowProfileMenu(false);
-                            setShowSettingsModal(true);
-                          }}
-                          className="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 flex items-center gap-2 text-slate-700 font-medium"
-                        >
-                          <Icon name="settings" className="w-4 h-4" />
-                          <span>System Settings</span>
-                        </button>
                       </div>
                     )}
                   </div>
@@ -1475,241 +1510,330 @@
             {/* =======================================================================
                 MAIN PAGE ROUTER (Dashboard | Alerts | Orders | Suppliers | Schedule)
                ======================================================================= */}
-            <main className="flex-1 p-4 sm:p-8 max-w-7xl w-full mx-auto space-y-6">
+            <main className="flex-1 px-4 sm:px-8 pb-8 space-y-6">
 
               {/* =====================================================================
                   1. DASHBOARD PAGE
                  ===================================================================== */}
               {activeNav === "dashboard" && (
                 <div className="space-y-6 animate-in">
-                  {/* Overall System Workflow Strip */}
-                  <div className="saas-card p-4 bg-white">
-                    <div className="flex items-center justify-between mb-2.5">
-                      <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                        Autonomous Exception Handling Workflow (Send RFQ to Reveal Stock & Price → Rank → Approve)
-                      </span>
-                      <span className="text-xs font-medium text-brand-600">
-                        {completedRecCount}/4 AI Recommendations Completed
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
-                      {[
-                        { label: "Incoming Event", nav: "alerts" },
-                        { label: "AI Detects Problem", nav: "alerts" },
-                        { label: "AI Analyzes Impact", nav: "alerts" },
-                        { label: "Check Inventory", nav: "orders" },
-                        { label: "Identify Affected Orders", nav: "orders" },
-                        { label: "Find Backup Suppliers", nav: "suppliers" },
-                        { label: "Send RFQs (Reveal Stock & Price)", nav: "suppliers" },
-                        { label: "Recommend Schedule", nav: "schedule" },
-                        { label: "Human Review & Approve", nav: "schedule" }
-                      ].map((step, idx, arr) => (
-                        <React.Fragment key={step.label}>
-                          <button
-                            onClick={() => navigateMain(step.nav)}
-                            className="px-2.5 py-1.5 rounded-lg bg-slate-50 hover:bg-brand-50 hover:text-brand-700 border border-slate-200 font-medium text-slate-700 whitespace-nowrap transition-colors"
-                          >
-                            <span className="font-mono text-[10px] text-slate-400 mr-1">{idx + 1}.</span>
-                            {step.label}
-                          </button>
-                          {idx < arr.length - 1 && (
-                            <span className="text-slate-300 shrink-0">→</span>
-                          )}
-                        </React.Fragment>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* 4 Summary KPI Cards */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 tabular">
-                    <div
-                      onClick={() => navigateMain("alerts")}
-                      className="saas-card saas-card-hover p-5 cursor-pointer border-l-4 border-l-red-600"
-                    >
-                      <div className="flex items-center justify-between text-xs font-semibold text-slate-500 uppercase">
-                        <span>Active Disruptions</span>
-                        <span className="p-2 rounded-lg bg-red-50 text-red-600">
-                          <Icon name="alerts" className="w-4 h-4" />
-                        </span>
-                      </div>
-                      <div className="text-3xl font-bold text-slate-900 mt-2">{alerts.length}</div>
-                      <div className="text-xs text-red-600 font-medium mt-1 truncate">
-                        Latest: {alerts[0]?.title}
-                      </div>
-                    </div>
-
-                    <div
-                      onClick={() => {
-                        navigateMain("orders");
-                        setOrdersTab("Purchase Orders");
-                      }}
-                      className="saas-card saas-card-hover p-5 cursor-pointer border-l-4 border-l-brand-600"
-                    >
-                      <div className="flex items-center justify-between text-xs font-semibold text-slate-500 uppercase">
-                        <span>Purchase Orders in Progress</span>
-                        <span className="p-2 rounded-lg bg-brand-50 text-brand-600">
-                          <Icon name="orders" className="w-4 h-4" />
-                        </span>
-                      </div>
-                      <div className="text-3xl font-bold text-slate-900 mt-2">12</div>
-                      <div className="text-xs text-slate-500 mt-1">
-                        9 On Time · 1 Delayed · 2 At Risk
-                      </div>
-                    </div>
-
-                    <div
-                      onClick={() => {
-                        navigateMain("orders");
-                        setOrdersTab("Inventory");
-                      }}
-                      className="saas-card saas-card-hover p-5 cursor-pointer border-l-4 border-l-emerald-600"
-                    >
-                      <div className="flex items-center justify-between text-xs font-semibold text-slate-500 uppercase">
-                        <span>Inventory Health</span>
-                        <span className="p-2 rounded-lg bg-emerald-50 text-emerald-600">
-                          <Icon name="shield" className="w-4 h-4" />
-                        </span>
-                      </div>
-                      <div className="text-3xl font-bold text-slate-900 mt-2">85%</div>
-                      <div className="text-xs text-amber-600 font-medium mt-1">
-                        Steel Coil at 7 days remaining
-                      </div>
-                    </div>
-
-                    <div
-                      onClick={() => {
-                        navigateMain("orders");
-                        setOrdersTab("Affected Orders");
-                      }}
-                      className="saas-card saas-card-hover p-5 cursor-pointer border-l-4 border-l-amber-500"
-                    >
-                      <div className="flex items-center justify-between text-xs font-semibold text-slate-500 uppercase">
-                        <span>Production Orders at Risk</span>
-                        <span className="p-2 rounded-lg bg-amber-50 text-amber-600">
-                          <Icon name="clock" className="w-4 h-4" />
-                        </span>
-                      </div>
-                      <div className="text-3xl font-bold text-slate-900 mt-2">
-                        {scheduleApproved === "APPROVED" ? 0 : productionOrders.filter(o => o.status === "AT RISK").length}
-                      </div>
-                      <div className="text-xs text-slate-500 mt-1">
-                        {scheduleApproved === "APPROVED"
-                          ? "Mitigated via schedule shift"
-                          : "PO-102 (Car Chassis) & PO-103"}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Middle Row: Recent Alerts + Supply Chain Status Donut */}
-                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                    <div className="lg:col-span-7 saas-card p-6 flex flex-col justify-between">
-                      <div>
-                        <div className="flex items-center justify-between mb-4">
-                          <div>
-                            <h2 className="text-base font-bold text-slate-900">Recent Alerts</h2>
-                            <p className="text-xs text-slate-500">
-                              Click any alert to open its full AI impact analysis & recommendations
-                            </p>
-                          </div>
-                          <button
-                            onClick={() => navigateMain("alerts")}
-                            className="text-xs font-semibold text-brand-600 hover:underline"
-                          >
-                            View All Alerts →
-                          </button>
+                  {/* TOP ROW: Icon-Left KPI Grid (7 cols) + Thematic #fff7ed Quick Trigger Card (5 cols) */}
+                  <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+                    {/* 4 Icon-Left KPI Cards (24px radius, zero aggressive left-border accents) */}
+                    <div className="xl:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4 tabular">
+                      <div
+                        onClick={() => navigateMain("alerts")}
+                        className="saas-card saas-card-hover p-5 cursor-pointer flex items-center gap-4"
+                      >
+                        <div className="w-12 h-12 rounded-[16px] bg-blue-50 text-[#0d6efd] flex items-center justify-center shrink-0">
+                          <Icon name="alerts" className="w-6 h-6" />
                         </div>
+                        <div className="min-w-0">
+                          <div className="text-xs font-medium text-[#64748b]">Active Disruptions</div>
+                          <div className="text-2xl font-extrabold text-[#1e293b] mt-0.5">{alerts.length}</div>
+                          <div className="text-[11px] font-medium text-[#f97316] truncate mt-0.5">
+                            {alerts[0]?.title}
+                          </div>
+                        </div>
+                      </div>
 
-                        <div className="space-y-3">
-                          {alerts.map((alert) => {
-                            const badgeStyle =
-                              alert.badgeType === "CRITICAL"
-                                ? "bg-red-100 text-red-700 border-red-200"
-                                : alert.badgeType === "WARNING"
-                                ? "bg-amber-100 text-amber-800 border-amber-200"
-                                : "bg-blue-100 text-blue-700 border-blue-200";
-                            return (
-                              <div
-                                key={alert.id}
-                                onClick={() => openAlertDetails(alert)}
-                                className="p-4 rounded-xl border border-slate-200 hover:border-brand-500 hover:bg-slate-50/70 cursor-pointer transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3"
-                              >
-                                <div className="space-y-1">
-                                  <div className="flex items-center gap-2">
-                                    <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${badgeStyle}`}>
-                                      {alert.badgeType}
-                                    </span>
-                                    <span className="text-xs text-slate-400">{alert.timeAgo}</span>
-                                  </div>
-                                  <div className="text-sm font-bold text-slate-900">{alert.title}</div>
-                                  <div className="text-xs text-slate-600">
-                                    Supplier: <strong className="text-slate-800">{alert.supplier}</strong> · Material: {alert.material}
-                                  </div>
+                      <div
+                        onClick={() => {
+                          navigateMain("orders");
+                          setOrdersTab("Purchase Orders");
+                        }}
+                        className="saas-card saas-card-hover p-5 cursor-pointer flex items-center gap-4"
+                      >
+                        <div className="w-12 h-12 rounded-[16px] bg-orange-50 text-[#f97316] flex items-center justify-center shrink-0">
+                          <Icon name="orders" className="w-6 h-6" />
+                        </div>
+                        <div className="min-w-0">
+                          <div className="text-xs font-medium text-[#64748b]">Purchase Orders in Progress</div>
+                          <div className="text-2xl font-extrabold text-[#1e293b] mt-0.5">12</div>
+                          <div className="text-[11px] font-medium text-[#64748b] mt-0.5">
+                            9 On Time · 1 Delayed · 2 At Risk
+                          </div>
+                        </div>
+                      </div>
+
+                      <div
+                        onClick={() => {
+                          navigateMain("orders");
+                          setOrdersTab("Inventory");
+                        }}
+                        className="saas-card saas-card-hover p-5 cursor-pointer flex items-center gap-4"
+                      >
+                        <div className="w-12 h-12 rounded-[16px] bg-emerald-50 text-[#10b981] flex items-center justify-center shrink-0">
+                          <Icon name="shield" className="w-6 h-6" />
+                        </div>
+                        <div className="min-w-0">
+                          <div className="text-xs font-medium text-[#64748b]">Inventory Health</div>
+                          <div className="text-2xl font-extrabold text-[#1e293b] mt-0.5">85%</div>
+                          <div className="text-[11px] font-medium text-[#10b981] mt-0.5">
+                            Steel Coil: 7 days buffer left
+                          </div>
+                        </div>
+                      </div>
+
+                      <div
+                        onClick={() => {
+                          navigateMain("orders");
+                          setOrdersTab("Affected Orders");
+                        }}
+                        className="saas-card saas-card-hover p-5 cursor-pointer flex items-center gap-4"
+                      >
+                        <div className="w-12 h-12 rounded-[16px] bg-purple-50 text-[#a855f7] flex items-center justify-center shrink-0">
+                          <Icon name="clock" className="w-6 h-6" />
+                        </div>
+                        <div className="min-w-0">
+                          <div className="text-xs font-medium text-[#64748b]">Production Orders at Risk</div>
+                          <div className="text-2xl font-extrabold text-[#1e293b] mt-0.5">
+                            {scheduleApproved === "APPROVED" ? 0 : productionOrders.filter(o => o.status === "AT RISK").length}
+                          </div>
+                          <div className="text-[11px] font-medium text-[#64748b] mt-0.5">
+                            {scheduleApproved === "APPROVED"
+                              ? "Mitigated via shift swap"
+                              : "PO-102 (Chassis) & PO-103"}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Special Component: Thematic Disruption Joining / Trigger Card (#fff7ed + Organic Blob SVG) */}
+                    <div className="xl:col-span-5 relative overflow-hidden rounded-[24px] bg-[#fff7ed] border border-orange-200/70 p-6 flex flex-col justify-between shadow-xs">
+                      {/* Decorative Organic Blob SVG (#f97316 at 20% opacity) */}
+                      <svg
+                        viewBox="0 0 200 200"
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="w-52 h-52 absolute -right-10 -bottom-10 text-[#f97316] opacity-20 pointer-events-none"
+                      >
+                        <path
+                          fill="currentColor"
+                          d="M44.7,-76.4C58.8,-69.2,71.8,-59.1,79.6,-45.8C87.4,-32.6,90,-16.3,88.5,-0.9C87,14.6,81.4,29.2,73.1,42.2C64.8,55.2,53.8,66.6,40.3,74.2C26.8,81.8,10.8,85.6,-4.6,83.5C-20,81.5,-34.8,73.6,-47.9,64.2C-61,54.8,-72.4,43.9,-79.1,30.3C-85.8,16.7,-87.8,0.4,-84.6,-14.6C-81.4,-29.6,-73,-43.3,-61.2,-51.5C-49.4,-59.7,-34.2,-62.4,-20.1,-69.5C-6,-76.6,7,-88.1,21.5,-88.8C36,-89.5,52,-79.4,44.7,-76.4Z"
+                          transform="translate(100 100)"
+                        />
+                      </svg>
+
+                      <div className="relative z-10 space-y-1.5">
+                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/80 text-[#f97316] text-[11px] font-bold">
+                          <Icon name="bolt" className="w-3.5 h-3.5" />
+                          <span>Autonomous Exception Simulator</span>
+                        </div>
+                        <h2 className="text-lg font-extrabold text-[#1e293b]">
+                          Simulate / Quick PO Disruption Trigger
+                        </h2>
+                        <p className="text-xs font-medium text-[#64748b] leading-relaxed">
+                          Select a supply chain disruption scenario below to watch the AI parse the B2B email, check stock buffers, and draft RFQs:
+                        </p>
+                      </div>
+
+                      {/* White Input Wrapper with Embedded #f97316 CTA Button */}
+                      <div className="relative z-10 mt-4 bg-white rounded-[16px] p-1.5 shadow-sm border border-orange-100 flex items-center gap-2">
+                        <select
+                          aria-label="Select disruption scenario"
+                          value={selectedSimScenarioId}
+                          onChange={(e) => setSelectedSimScenarioId(e.target.value)}
+                          className="flex-1 bg-transparent pl-3 pr-2 py-2 text-xs sm:text-sm font-bold text-[#1e293b] focus:outline-none cursor-pointer truncate"
+                        >
+                          {SIMULATE_SCENARIO_OPTIONS.map((sc) => (
+                            <option key={sc.id} value={sc.id}>
+                              {sc.label} ({sc.material})
+                            </option>
+                          ))}
+                        </select>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSimStageIndex(-1);
+                            setShowSimulateModal(true);
+                          }}
+                          className="bg-[#f97316] hover:bg-orange-600 text-white px-4 py-2.5 rounded-[12px] text-xs font-bold shrink-0 shadow-md shadow-orange-500/20 transition-all duration-300"
+                        >
+                          Run AI →
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* MIDDLE ROW: Custom CSS Bar Chart (8 cols) + Supply Chain Status Donut (4 cols) */}
+                  <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+                    {/* Special Component: Custom CSS Bar Chart with Floating & Hover Tooltips */}
+                    <div className="xl:col-span-8 saas-card p-6 flex flex-col justify-between">
+                      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+                        <div>
+                          <h2 className="text-lg font-extrabold text-[#1e293b]">
+                            Material Buffer & Lead-Time Analytics
+                          </h2>
+                          <p className="text-xs font-medium text-[#64748b]">
+                            Hover any bar to inspect live runway duration, lead time, and shipment status
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-4 text-xs font-semibold text-[#64748b]">
+                          <span className="flex items-center gap-1.5">
+                            <span className="w-3 h-3 rounded-[4px] bg-[#f97316] inline-block" />
+                            Delayed / Deficit
+                          </span>
+                          <span className="flex items-center gap-1.5">
+                            <span className="w-3 h-3 rounded-[4px] bg-[#0d6efd] inline-block" />
+                            Inbound POs
+                          </span>
+                          <span className="flex items-center gap-1.5">
+                            <span className="w-3 h-3 rounded-[4px] bg-[#10b981] inline-block" />
+                            Healthy Buffer
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Interactive Bar Chart Area */}
+                      <div className="relative pt-10 pb-2 px-2">
+                        <div className="grid grid-cols-7 gap-3 sm:gap-5 items-end h-48 border-b border-[#f3f4f6] pb-3">
+                          {[
+                            { label: "Steel D+1", heightPct: 55, color: "#f97316", duration: "7d 0h Buffer (-14d Delay)", nav: "alerts" },
+                            { label: "Alum 6061", heightPct: 78, color: "#0d6efd", duration: "18d 6h Stock (PO-4402)", nav: "orders" },
+                            { label: "Metro RFQ", heightPct: 68, color: "#10b981", duration: "5d 0h Lead Time (Manila)", nav: "suppliers" },
+                            { label: "Shift Swap", heightPct: 92, color: "#0d6efd", duration: "0h Idle · 85% On Track", highlighted: true, nav: "schedule" },
+                            { label: "Resin PA66", heightPct: 64, color: "#10b981", duration: "20d 0h Buffer (Healthy)", nav: "orders" },
+                            { label: "IronWorks", heightPct: 48, color: "#f97316", duration: "8d 4h RoRo Transit", nav: "suppliers" },
+                            { label: "Fastener", heightPct: 84, color: "#10b981", duration: "22d 12h Buffer (Safe)", nav: "orders" }
+                          ].map((bar, idx) => (
+                            <div
+                              key={bar.label}
+                              onMouseEnter={() => setHoveredBarIndex(idx)}
+                              onMouseLeave={() => setHoveredBarIndex(null)}
+                              onClick={() => navigateMain(bar.nav)}
+                              className="relative flex flex-col items-center justify-end h-full cursor-pointer group"
+                            >
+                              {/* Highlighted Bar Floating White Tooltip */}
+                              {bar.highlighted && hoveredBarIndex !== idx && (
+                                <div className="absolute -top-9 z-20 bg-white shadow-md border border-[#f3f4f6] rounded-xl px-2.5 py-1 text-[11px] font-extrabold text-[#1e293b] whitespace-nowrap flex items-center gap-1 animate-bounce">
+                                  <span>⚡</span>
+                                  <span>85% On Track</span>
                                 </div>
-                                <button className="self-start sm:self-center shrink-0 px-3 py-1.5 rounded-lg bg-brand-50 text-brand-700 hover:bg-brand-100 text-xs font-semibold">
-                                  AI Analysis →
-                                </button>
-                              </div>
-                            );
-                          })}
+                              )}
+
+                              {/* Dark #111827 Hover Tooltip with Duration Text */}
+                              {hoveredBarIndex === idx && (
+                                <div className="absolute -top-10 z-30 bg-[#111827] text-white shadow-lg rounded-xl px-3 py-1.5 text-[11px] font-bold whitespace-nowrap pointer-events-none">
+                                  {bar.duration}
+                                </div>
+                              )}
+
+                              {/* Bar Div with 12px radius */}
+                              <div
+                                className="w-full max-w-[42px] rounded-[12px] chart-bar-transition group-hover:scale-105 group-hover:brightness-105"
+                                style={{
+                                  height: `${bar.heightPct}%`,
+                                  backgroundColor: bar.color,
+                                  boxShadow: bar.highlighted ? "0 8px 20px -4px rgba(13, 110, 253, 0.35)" : "none"
+                                }}
+                              />
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* X-Axis Labels */}
+                        <div className="grid grid-cols-7 gap-3 sm:gap-5 pt-3 text-center">
+                          {["Steel D+1", "Alum 6061", "Metro RFQ", "Shift Swap", "Resin PA66", "IronWorks", "Fastener"].map((lbl) => (
+                            <div key={lbl} className="text-[11px] font-bold text-[#64748b] truncate">
+                              {lbl}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Overall System Workflow Strip inside Chart Footer */}
+                      <div className="mt-5 pt-4 border-t border-[#f3f4f6]">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-[11px] font-bold uppercase tracking-wider text-[#64748b]">
+                            Autonomous Exception Workflow (Click any stage)
+                          </span>
+                          <span className="text-xs font-bold text-[#0d6efd]">
+                            {completedRecCount}/4 AI Actions Completed
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
+                          {[
+                            { label: "Incoming Event", nav: "alerts" },
+                            { label: "AI Detects", nav: "alerts" },
+                            { label: "Check Inventory", nav: "orders" },
+                            { label: "Affected Orders", nav: "orders" },
+                            { label: "Backup Suppliers", nav: "suppliers" },
+                            { label: "Send RFQs (Unlock Price)", nav: "suppliers" },
+                            { label: "Schedule Swap", nav: "schedule" },
+                            { label: "Human Approve", nav: "schedule" }
+                          ].map((step, idx, arr) => (
+                            <React.Fragment key={step.label}>
+                              <button
+                                onClick={() => navigateMain(step.nav)}
+                                className="px-3 py-1.5 rounded-[10px] bg-[#f8f9fc] hover:bg-blue-50 hover:text-[#0d6efd] border border-[#f3f4f6] font-semibold text-[#1e293b] whitespace-nowrap transition-all duration-300"
+                              >
+                                <span className="font-mono text-[10px] text-[#64748b] mr-1">{idx + 1}.</span>
+                                {step.label}
+                              </button>
+                              {idx < arr.length - 1 && (
+                                <span className="text-slate-300 shrink-0">→</span>
+                              )}
+                            </React.Fragment>
+                          ))}
                         </div>
                       </div>
                     </div>
 
-                    {/* Supply Chain Status Donut Chart */}
-                    <div className="lg:col-span-5 saas-card p-6 flex flex-col justify-between">
+                    {/* Supply Chain Status Donut Card (4 cols) */}
+                    <div className="xl:col-span-4 saas-card p-6 flex flex-col justify-between">
                       <div>
                         <div className="flex items-center justify-between mb-4">
                           <div>
-                            <h2 className="text-base font-bold text-slate-900">Supply Chain Status</h2>
-                            <p className="text-xs text-slate-500">Live shipment & order health breakdown</p>
+                            <h2 className="text-lg font-extrabold text-[#1e293b]">Supply Chain Status</h2>
+                            <p className="text-xs font-medium text-[#64748b]">Order health breakdown</p>
                           </div>
-                          <span className="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold">
+                          <span className="px-3 py-1 rounded-full bg-emerald-50 text-[#10b981] text-xs font-bold">
                             85% On Track
                           </span>
                         </div>
 
-                        <div className="flex flex-col sm:flex-row items-center gap-6 my-4">
+                        <div className="flex flex-col items-center gap-5 my-3">
                           <div className="relative w-36 h-36 shrink-0">
                             <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
-                              <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#E2E8F0" strokeWidth="3.8" />
-                              <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#16A34A" strokeWidth="3.8" strokeDasharray="85 15" strokeDashoffset="0" />
-                              <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#DC2626" strokeWidth="3.8" strokeDasharray="9 91" strokeDashoffset="-85" />
-                              <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#D97706" strokeWidth="3.8" strokeDasharray="6 94" strokeDashoffset="-94" />
+                              <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#f3f4f6" strokeWidth="3.8" />
+                              <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#10b981" strokeWidth="3.8" strokeDasharray="85 15" strokeDashoffset="0" />
+                              <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#f97316" strokeWidth="3.8" strokeDasharray="9 91" strokeDashoffset="-85" />
+                              <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#0d6efd" strokeWidth="3.8" strokeDasharray="6 94" strokeDashoffset="-94" />
                             </svg>
                             <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                              <span className="text-2xl font-bold text-slate-900 tabular">85%</span>
-                              <span className="text-[11px] font-medium text-slate-500">On Track</span>
+                              <span className="text-2xl font-extrabold text-[#1e293b] tabular">85%</span>
+                              <span className="text-[11px] font-medium text-[#64748b]">On Track</span>
                             </div>
                           </div>
 
-                          <div className="flex-1 w-full grid grid-cols-2 gap-3 tabular">
-                            <div className="p-3 rounded-lg bg-emerald-50/70 border border-emerald-200">
-                              <div className="text-xs text-emerald-800 font-medium">On Time</div>
-                              <div className="text-xl font-bold text-emerald-700">12</div>
+                          <div className="w-full grid grid-cols-2 gap-2.5 tabular">
+                            <div className="p-3 rounded-[16px] bg-emerald-50/60 border border-emerald-100">
+                              <div className="text-xs text-[#64748b] font-medium">On Time</div>
+                              <div className="text-lg font-extrabold text-[#10b981]">12</div>
                             </div>
-                            <div className="p-3 rounded-lg bg-red-50/70 border border-red-200">
-                              <div className="text-xs text-red-800 font-medium">Delayed</div>
-                              <div className="text-xl font-bold text-red-700">3</div>
+                            <div className="p-3 rounded-[16px] bg-orange-50/60 border border-orange-100">
+                              <div className="text-xs text-[#64748b] font-medium">Delayed</div>
+                              <div className="text-lg font-extrabold text-[#f97316]">3</div>
                             </div>
-                            <div className="p-3 rounded-lg bg-amber-50/70 border border-amber-200">
-                              <div className="text-xs text-amber-800 font-medium">At Risk</div>
-                              <div className="text-xl font-bold text-amber-700">2</div>
+                            <div className="p-3 rounded-[16px] bg-blue-50/60 border border-blue-100">
+                              <div className="text-xs text-[#64748b] font-medium">At Risk</div>
+                              <div className="text-lg font-extrabold text-[#0d6efd]">2</div>
                             </div>
-                            <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                              <div className="text-xs text-slate-600 font-medium">Completed</div>
-                              <div className="text-xl font-bold text-slate-800">28</div>
+                            <div className="p-3 rounded-[16px] bg-[#f8f9fc] border border-[#f3f4f6]">
+                              <div className="text-xs text-[#64748b] font-medium">Completed</div>
+                              <div className="text-lg font-extrabold text-[#1e293b]">28</div>
                             </div>
                           </div>
                         </div>
                       </div>
 
-                      <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
-                        <div className="text-xs text-slate-500">
-                          Est. Savings: <strong className="text-emerald-700">{reportStats.estimatedSavings}</strong>
+                      <div className="pt-4 border-t border-[#f3f4f6] flex items-center justify-between">
+                        <div className="text-xs font-medium text-[#64748b]">
+                          Est. Savings: <strong className="text-[#10b981] font-extrabold">{reportStats.estimatedSavings}</strong>
                         </div>
                         <button
                           onClick={() => setShowReportsModal(true)}
-                          className="px-3.5 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold flex items-center gap-1.5"
+                          className="px-3.5 py-2 rounded-[12px] bg-[#0d6efd] hover:bg-blue-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-md shadow-[#0d6efd]/20 transition-all duration-300"
                         >
                           <Icon name="chart" className="w-4 h-4" />
                           <span>Open Reports</span>
@@ -1718,20 +1842,75 @@
                     </div>
                   </div>
 
-                  {/* Bottom Row: At-Risk Production Orders Table + Quick Actions */}
-                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                    <div className="lg:col-span-7 saas-card p-6">
+                  {/* 3-COLUMN RECENT ALERTS GRID */}
+                  <div className="saas-card p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <div>
+                        <h2 className="text-lg font-extrabold text-[#1e293b]">Recent Supply Chain Alerts</h2>
+                        <p className="text-xs font-medium text-[#64748b]">
+                          Click any alert card to open its detailed AI impact analysis & recommendations
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => navigateMain("alerts")}
+                        className="text-xs font-bold text-[#0d6efd] hover:underline"
+                      >
+                        View All Alerts →
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {alerts.slice(0, 3).map((alert) => {
+                        const badgeStyle =
+                          alert.badgeType === "CRITICAL"
+                            ? "bg-orange-50 text-[#f97316] border-orange-200"
+                            : alert.badgeType === "WARNING"
+                            ? "bg-purple-50 text-[#a855f7] border-purple-200"
+                            : "bg-emerald-50 text-[#10b981] border-emerald-200";
+                        return (
+                          <div
+                            key={alert.id}
+                            onClick={() => openAlertDetails(alert)}
+                            className="p-5 rounded-[20px] bg-[#f8f9fc] hover:bg-white border border-[#f3f4f6] hover:border-blue-200 cursor-pointer transition-all duration-300 flex flex-col justify-between gap-4 shadow-2xs hover:shadow-md"
+                          >
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between gap-2">
+                                <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${badgeStyle}`}>
+                                  {alert.badgeType}
+                                </span>
+                                <span className="text-[11px] font-medium text-[#64748b]">{alert.timeAgo}</span>
+                              </div>
+                              <div className="text-sm font-extrabold text-[#1e293b] leading-snug">{alert.title}</div>
+                              <div className="text-xs font-medium text-[#64748b]">
+                                Supplier: <strong className="text-[#1e293b]">{alert.supplier}</strong> · {alert.material}
+                              </div>
+                            </div>
+                            <div className="pt-2 border-t border-slate-200/60 flex items-center justify-between">
+                              <span className="text-[11px] font-medium text-[#64748b]">{alert.source}</span>
+                              <span className="text-xs font-bold text-[#0d6efd]">
+                                Inspect AI Analysis →
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* BOTTOM ROW: Full-Width At-Risk Production Orders Table + Quick Actions */}
+                  <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+                    <div className="xl:col-span-7 saas-card p-6">
                       <div className="flex items-center justify-between mb-4">
                         <div>
-                          <h2 className="text-base font-bold text-slate-900">At-Risk Production Orders</h2>
-                          <p className="text-xs text-slate-500">Orders impacted by active shipment delays or shortages</p>
+                          <h2 className="text-lg font-extrabold text-[#1e293b]">At-Risk Production Orders</h2>
+                          <p className="text-xs font-medium text-[#64748b]">Orders impacted by active shipment delays or shortages</p>
                         </div>
                         <button
                           onClick={() => {
                             navigateMain("orders");
                             setOrdersTab("Affected Orders");
                           }}
-                          className="text-xs font-semibold text-brand-600 hover:underline"
+                          className="text-xs font-bold text-[#0d6efd] hover:underline"
                         >
                           View All Orders →
                         </button>
@@ -1740,26 +1919,26 @@
                       <div className="overflow-x-auto">
                         <table className="w-full text-left text-xs sm:text-sm tabular">
                           <thead>
-                            <tr className="border-b border-slate-200 text-slate-500 text-xs uppercase">
-                              <th className="py-2.5 pr-3 font-semibold">PO Number</th>
-                              <th className="py-2.5 px-3 font-semibold">Product</th>
-                              <th className="py-2.5 px-3 font-semibold">Material</th>
-                              <th className="py-2.5 px-3 font-semibold">Required Date</th>
-                              <th className="py-2.5 pl-3 font-semibold text-right">Status</th>
+                            <tr className="border-b border-[#f3f4f6] text-[#64748b] text-xs uppercase">
+                              <th className="py-3 pr-3 font-bold">PO Number</th>
+                              <th className="py-3 px-3 font-bold">Product</th>
+                              <th className="py-3 px-3 font-bold">Material</th>
+                              <th className="py-3 px-3 font-bold">Required Date</th>
+                              <th className="py-3 pl-3 font-bold text-right">Status</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-slate-100">
+                          <tbody className="divide-y divide-[#f3f4f6]">
                             {productionOrders.filter(o => o.orderId === "PO-102" || o.orderId === "PO-103" || o.status === "AT RISK").map((ord) => (
-                              <tr key={ord.orderId} className="hover:bg-slate-50">
-                                <td className="py-3 pr-3 font-mono font-bold text-slate-900">{ord.orderId}</td>
-                                <td className="py-3 px-3 font-medium text-slate-800">{ord.product}</td>
-                                <td className="py-3 px-3 text-slate-600">{ord.material}</td>
-                                <td className="py-3 px-3 font-mono text-slate-700">{ord.currentDate}</td>
-                                <td className="py-3 pl-3 text-right">
-                                  <span className={`inline-block text-xs font-bold px-2.5 py-1 rounded-full ${
+                              <tr key={ord.orderId} className="hover:bg-[#f8f9fc] transition-colors">
+                                <td className="py-3.5 pr-3 font-mono font-bold text-[#1e293b]">{ord.orderId}</td>
+                                <td className="py-3.5 px-3 font-bold text-[#1e293b]">{ord.product}</td>
+                                <td className="py-3.5 px-3 font-medium text-[#64748b]">{ord.material}</td>
+                                <td className="py-3.5 px-3 font-mono font-semibold text-[#1e293b]">{ord.currentDate}</td>
+                                <td className="py-3.5 pl-3 text-right">
+                                  <span className={`inline-block text-xs font-bold px-3 py-1 rounded-full ${
                                     ord.status === "AT RISK"
-                                      ? "bg-red-100 text-red-700"
-                                      : "bg-emerald-100 text-emerald-700"
+                                      ? "bg-orange-50 text-[#f97316]"
+                                      : "bg-emerald-50 text-[#10b981]"
                                   }`}>
                                     {ord.status}
                                   </span>
@@ -1772,20 +1951,20 @@
                     </div>
 
                     {/* Quick Actions */}
-                    <div className="lg:col-span-5 saas-card p-6 flex flex-col justify-between">
+                    <div className="xl:col-span-5 saas-card p-6 flex flex-col justify-between">
                       <div>
-                        <h2 className="text-base font-bold text-slate-900 mb-1">Quick Actions</h2>
-                        <p className="text-xs text-slate-500 mb-4">
+                        <h2 className="text-lg font-extrabold text-[#1e293b] mb-1">Quick Actions</h2>
+                        <p className="text-xs font-medium text-[#64748b] mb-4">
                           Jump directly to key exception recovery tasks
                         </p>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           <button
                             onClick={() => navigateMain("alerts")}
-                            className="p-3 rounded-xl border border-slate-200 hover:border-brand-600 hover:bg-brand-50/50 text-left transition-all"
+                            className="p-3.5 rounded-[16px] bg-[#f8f9fc] border border-[#f3f4f6] hover:border-[#0d6efd] hover:bg-blue-50/40 text-left transition-all duration-300"
                           >
-                            <div className="text-xs font-bold text-slate-900">View Alerts</div>
-                            <div className="text-[11px] text-slate-500 mt-0.5">Inspect active disruptions</div>
+                            <div className="text-xs font-bold text-[#1e293b]">View Alerts</div>
+                            <div className="text-[11px] font-medium text-[#64748b] mt-0.5">Inspect active disruptions</div>
                           </button>
 
                           <button
@@ -1793,10 +1972,10 @@
                               navigateMain("suppliers");
                               setSuppliersTab("RFQ Drafts");
                             }}
-                            className="p-3 rounded-xl border border-slate-200 hover:border-brand-600 hover:bg-brand-50/50 text-left transition-all"
+                            className="p-3.5 rounded-[16px] bg-[#f8f9fc] border border-[#f3f4f6] hover:border-[#0d6efd] hover:bg-blue-50/40 text-left transition-all duration-300"
                           >
-                            <div className="text-xs font-bold text-slate-900">Generate Supplier RFQs</div>
-                            <div className="text-[11px] text-slate-500 mt-0.5">Send RFQ to reveal price</div>
+                            <div className="text-xs font-bold text-[#1e293b]">Generate Supplier RFQs</div>
+                            <div className="text-[11px] font-medium text-[#64748b] mt-0.5">Send RFQ to reveal price</div>
                           </button>
 
                           <button
@@ -1804,25 +1983,25 @@
                               navigateMain("orders");
                               setOrdersTab("Inventory");
                             }}
-                            className="p-3 rounded-xl border border-slate-200 hover:border-brand-600 hover:bg-brand-50/50 text-left transition-all"
+                            className="p-3.5 rounded-[16px] bg-[#f8f9fc] border border-[#f3f4f6] hover:border-[#0d6efd] hover:bg-blue-50/40 text-left transition-all duration-300"
                           >
-                            <div className="text-xs font-bold text-slate-900">Check Inventory Levels</div>
-                            <div className="text-[11px] text-slate-500 mt-0.5">Steel Coil: 7 days left</div>
+                            <div className="text-xs font-bold text-[#1e293b]">Check Inventory Levels</div>
+                            <div className="text-[11px] font-medium text-[#64748b] mt-0.5">Steel Coil: 7 days left</div>
                           </button>
 
                           <button
                             onClick={() => openAlertDetails(alerts[0], "AI Recommendations")}
-                            className="p-3 rounded-xl border border-slate-200 hover:border-brand-600 hover:bg-brand-50/50 text-left transition-all"
+                            className="p-3.5 rounded-[16px] bg-[#f8f9fc] border border-[#f3f4f6] hover:border-[#0d6efd] hover:bg-blue-50/40 text-left transition-all duration-300"
                           >
                             <div className="flex items-center justify-between">
-                              <span className="text-xs font-bold text-slate-900">Review AI Recommendations</span>
+                              <span className="text-xs font-bold text-[#1e293b]">Review AI Recommendations</span>
                               {completedRecCount > 0 && (
-                                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700">
+                                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-[#10b981]">
                                   {completedRecCount}/4 ✓
                                 </span>
                               )}
                             </div>
-                            <div className="text-[11px] text-slate-500 mt-0.5">Action checklist</div>
+                            <div className="text-[11px] font-medium text-[#64748b] mt-0.5">Action checklist</div>
                           </button>
 
                           <button
@@ -1830,18 +2009,18 @@
                               navigateMain("schedule");
                               setScheduleTab("AI Recommended Schedule");
                             }}
-                            className="p-3 rounded-xl border border-slate-200 hover:border-brand-600 hover:bg-brand-50/50 text-left transition-all"
+                            className="p-3.5 rounded-[16px] bg-[#f8f9fc] border border-[#f3f4f6] hover:border-[#0d6efd] hover:bg-blue-50/40 text-left transition-all duration-300"
                           >
-                            <div className="text-xs font-bold text-slate-900">Review Production Schedule</div>
-                            <div className="text-[11px] text-slate-500 mt-0.5">Edit any order individually</div>
+                            <div className="text-xs font-bold text-[#1e293b]">Review Production Schedule</div>
+                            <div className="text-[11px] font-medium text-[#64748b] mt-0.5">Edit any order individually</div>
                           </button>
 
                           <button
                             onClick={() => setShowReportsModal(true)}
-                            className="p-3 rounded-xl border border-slate-200 hover:border-brand-600 hover:bg-brand-50/50 text-left transition-all"
+                            className="p-3.5 rounded-[16px] bg-[#f8f9fc] border border-[#f3f4f6] hover:border-[#0d6efd] hover:bg-blue-50/40 text-left transition-all duration-300"
                           >
-                            <div className="text-xs font-bold text-slate-900">Executive Reports</div>
-                            <div className="text-[11px] text-slate-500 mt-0.5">Savings & SLA metrics</div>
+                            <div className="text-xs font-bold text-[#1e293b]">Executive Reports</div>
+                            <div className="text-[11px] font-medium text-[#64748b] mt-0.5">Savings & SLA metrics</div>
                           </button>
                         </div>
                       </div>
@@ -3025,6 +3204,219 @@
 
             </main>
           </div>
+
+          {/* =========================================================================
+              COLUMN 3: RIGHT SIDEBAR (Profile, Mini-Calendar, Upcoming & AI Todo List)
+              Width: 320px | Background: #ffffff | Border-left: 1px solid #f3f4f6
+             ========================================================================= */}
+          <aside className="hidden xl:flex xl:flex-col xl:w-80 xl:shrink-0 bg-white border-l border-[#f3f4f6] h-screen sticky top-0 overflow-y-auto p-6 space-y-6 select-none">
+            {/* 1. User Profile Section */}
+            <div className="p-5 rounded-[24px] bg-[#f8f9fc] border border-[#f3f4f6] text-center space-y-4">
+              <div className="relative mx-auto w-20 h-20 rounded-full p-1 bg-gradient-to-tr from-[#0d6efd] via-[#a855f7] to-[#ec4899] shadow-md">
+                <div className="w-full h-full rounded-full bg-white flex items-center justify-center text-[#1e293b] font-extrabold text-xl tracking-tight">
+                  PM
+                </div>
+                <span className="absolute bottom-0.5 right-0.5 w-4 h-4 rounded-full bg-[#10b981] border-2 border-white" title="Autonomous Agent Active" />
+              </div>
+              <div>
+                <h3 className="text-base font-extrabold text-[#1e293b]">Procurement Manager</h3>
+                <p className="text-xs font-medium text-[#64748b] mt-0.5">{selectedPlant}</p>
+              </div>
+              <div className="grid grid-cols-3 gap-2 pt-2 border-t border-[#e2e8f0]/60 text-center">
+                <div className="p-2 rounded-[14px] bg-white border border-[#f3f4f6]">
+                  <div className="text-sm font-extrabold text-[#0d6efd]">{activeDisruptionsCount}</div>
+                  <div className="text-[10px] font-semibold text-[#64748b]">Alerts</div>
+                </div>
+                <div className="p-2 rounded-[14px] bg-white border border-[#f3f4f6]">
+                  <div className="text-sm font-extrabold text-[#10b981]">{inventoryHealthPercent}%</div>
+                  <div className="text-[10px] font-semibold text-[#64748b]">Health</div>
+                </div>
+                <div className="p-2 rounded-[14px] bg-white border border-[#f3f4f6]">
+                  <div className="text-sm font-extrabold text-[#f97316]">₱820K</div>
+                  <div className="text-[10px] font-semibold text-[#64748b]">Saved</div>
+                </div>
+              </div>
+            </div>
+
+            {/* 2. Mini-Calendar (Horizontal Day Scroller with #ec4899 Active Day Pill) */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h4 className="text-sm font-extrabold text-[#1e293b]">Plant Schedule</h4>
+                <span className="text-[11px] font-bold text-[#64748b]">October 2026</span>
+              </div>
+              <div className="grid grid-cols-6 gap-1.5 pt-1">
+                {[
+                  { dayName: "Mon", dateNum: "19", key: "Oct 19", tag: "Audit" },
+                  { dayName: "Tue", dateNum: "20", key: "Oct 20", tag: "RFQ" },
+                  { dayName: "Wed", dateNum: "21", key: "Oct 21", tag: "Bridge ETA" },
+                  { dayName: "Thu", dateNum: "22", key: "Oct 22", tag: "Line Swap" },
+                  { dayName: "Fri", dateNum: "23", key: "Oct 23", tag: "QA Check" },
+                  { dayName: "Sat", dateNum: "24", key: "Oct 24", tag: "Buffer" },
+                ].map((d) => {
+                  const isActive = selectedCalendarDay === d.key;
+                  return (
+                    <button
+                      key={d.key}
+                      type="button"
+                      onClick={() => setSelectedCalendarDay(d.key)}
+                      className={`py-2.5 px-1 rounded-[12px] flex flex-col items-center justify-center transition-all duration-300 ${
+                        isActive
+                          ? "bg-[#ec4899] text-white -translate-y-1 shadow-lg shadow-pink-500/25 font-extrabold"
+                          : "bg-[#f8f9fc] text-[#64748b] hover:bg-[#f3f4f6] hover:text-[#1e293b] font-semibold"
+                      }`}
+                    >
+                      <span className={`text-[10px] ${isActive ? "text-pink-100" : "text-[#94a3b8]"}`}>{d.dayName}</span>
+                      <span className="text-xs mt-1">{d.dateNum}</span>
+                      <span className={`w-1.5 h-1.5 rounded-full mt-1 ${isActive ? "bg-white" : "bg-[#cbd5e1]"}`} />
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* 3. Upcoming Deliveries & Shifts Vertical List */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h4 className="text-sm font-extrabold text-[#1e293b]">Upcoming Deliveries & Shifts</h4>
+                <button
+                  type="button"
+                  onClick={() => navigateTo("Schedule")}
+                  className="text-[11px] font-bold text-[#0d6efd] hover:underline"
+                >
+                  See All
+                </button>
+              </div>
+              <div className="space-y-2.5">
+                {[
+                  {
+                    id: "up-1",
+                    title: "Steel Coil Bridge (80t)",
+                    sub: "MetroSteel Industries · 5d Lead",
+                    time: "Oct 21 · 08:00",
+                    dot: "bg-[#10b981]",
+                    badge: "bg-emerald-50 text-[#10b981]",
+                    nav: "Suppliers",
+                  },
+                  {
+                    id: "up-2",
+                    title: "PO-103 Shift Resequence",
+                    sub: "Line A · Delayed +2 Days",
+                    time: "Oct 22 · 06:00",
+                    dot: "bg-[#0d6efd]",
+                    badge: "bg-blue-50 text-[#0d6efd]",
+                    nav: "Schedule",
+                  },
+                  {
+                    id: "up-3",
+                    title: "PO-102 Chassis Expedite",
+                    sub: "Steel Buffer Allocation",
+                    time: "Oct 24 · 14:00",
+                    dot: "bg-[#f97316]",
+                    badge: "bg-[#fff7ed] text-[#f97316]",
+                    nav: "Orders",
+                  },
+                ].map((item) => (
+                  <div
+                    key={item.id}
+                    onClick={() => navigateTo(item.nav)}
+                    className="p-3.5 rounded-[18px] bg-[#f8f9fc] hover:bg-white border border-[#f3f4f6] hover:shadow-md transition-all duration-300 cursor-pointer flex items-start gap-3"
+                  >
+                    <span className={`w-2.5 h-2.5 rounded-full mt-1.5 shrink-0 ${item.dot}`} />
+                    <div className="min-w-0 flex-1">
+                      <div className="text-xs font-extrabold text-[#1e293b] truncate">{item.title}</div>
+                      <div className="text-[11px] font-medium text-[#64748b] truncate mt-0.5">{item.sub}</div>
+                      <div className="mt-1.5 flex items-center justify-between">
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${item.badge}`}>
+                          {item.time}
+                        </span>
+                        <Icon name="arrow-right" className="w-3.5 h-3.5 text-[#94a3b8]" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* 4. AI Action Checklist (Todo List with Custom Checkboxes) */}
+            <div className="space-y-3 pt-1">
+              <div className="flex items-center justify-between">
+                <h4 className="text-sm font-extrabold text-[#1e293b]">AI Action Checklist</h4>
+                <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-[#10b981]">
+                  {
+                    [
+                      completedRecs["Send RFQ to MetroSteel Industries"] || rfqSentSuppliers["SUP-METRO"],
+                      completedRecs["Order 80 tons emergency Steel Coil"],
+                      completedRecs["Delay PO-103 by 2 days"] || scheduleSaved,
+                      completedRecs["Expedite shipping for PO-102"],
+                    ].filter(Boolean).length
+                  }
+                  /4 Done
+                </span>
+              </div>
+              <div className="space-y-2">
+                {[
+                  {
+                    label: "Send RFQ to MetroSteel Industries",
+                    sub: "Unlock stock & live quote",
+                    done: Boolean(completedRecs["Send RFQ to MetroSteel Industries"] || rfqSentSuppliers["SUP-METRO"]),
+                  },
+                  {
+                    label: "Order 80 tons emergency Steel Coil",
+                    sub: "Approve emergency PO",
+                    done: Boolean(completedRecs["Order 80 tons emergency Steel Coil"]),
+                  },
+                  {
+                    label: "Delay PO-103 by 2 days",
+                    sub: "Save production schedule",
+                    done: Boolean(completedRecs["Delay PO-103 by 2 days"] || scheduleSaved),
+                  },
+                  {
+                    label: "Expedite shipping for PO-102",
+                    sub: "Protect Car Chassis SLA",
+                    done: Boolean(completedRecs["Expedite shipping for PO-102"]),
+                  },
+                ].map((todo) => (
+                  <button
+                    key={todo.label}
+                    type="button"
+                    onClick={() =>
+                      setCompletedRecs((prev) => ({
+                        ...prev,
+                        [todo.label]: !todo.done,
+                      }))
+                    }
+                    className={`w-full text-left p-3 rounded-[16px] border transition-all duration-300 flex items-start gap-3 ${
+                      todo.done
+                        ? "bg-emerald-50/50 border-emerald-200/80"
+                        : "bg-[#f8f9fc] border-[#f3f4f6] hover:bg-white hover:shadow-xs"
+                    }`}
+                  >
+                    <span
+                      className={`mt-0.5 w-5 h-5 rounded-[7px] flex items-center justify-center shrink-0 transition-colors ${
+                        todo.done
+                          ? "bg-[#10b981] text-white shadow-xs"
+                          : "bg-white border-2 border-[#cbd5e1]"
+                      }`}
+                    >
+                      {todo.done && <Icon name="check" className="w-3.5 h-3.5" />}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <div
+                        className={`text-xs font-bold leading-snug ${
+                          todo.done ? "line-through text-[#64748b]" : "text-[#1e293b]"
+                        }`}
+                      >
+                        {todo.label}
+                      </div>
+                      <div className="text-[10px] font-medium text-[#64748b] mt-0.5">
+                        {todo.sub}
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </aside>
 
           {/* =========================================================================
               ALERT DETAILS / AI ANALYSIS LARGE DRAWER
