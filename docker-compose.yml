@@ -1,0 +1,26 @@
+services:
+  command-center:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: supply_chain_command_center
+    ports:
+      - "8000:8000"
+    environment:
+      - AMD_API_BASE_URL=${AMD_API_BASE_URL:-https://notebooks.amd.com/tokenfactory/v1}
+      - AMD_API_KEY=${AMD_API_KEY:-}
+      - AMD_MODEL_NAME=${AMD_MODEL_NAME:-google/gemma-2-27b-it}
+      - AMD_GPU_DEVICE=${AMD_GPU_DEVICE:-AMD Instinct MI300X (192GB HBM3, ROCm 6.3)}
+      - LLM_MODE=${LLM_MODE:-auto}
+      - SEND_MODE=${SEND_MODE:-simulated}
+      - DATABASE_PATH=/app/backend/database/erp_sandbox.db
+      - HOST=0.0.0.0
+      - PORT=8000
+    volumes:
+      - ./backend/database:/app/backend/database
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/erp/snapshot"]
+      interval: 20s
+      timeout: 5s
+      retries: 3

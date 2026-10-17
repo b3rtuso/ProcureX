@@ -1,0 +1,86 @@
+# =============================================================================
+# 1. Sensitive Environment & Secret Files (IMPORTANT - NEVER COMMIT)
+# =============================================================================
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+secrets.*
+!.env.example
+
+# =============================================================================
+# 2. Python Bytecode, Cache & Test Artifacts ("Nonsense" Directories)
+# =============================================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+
+# =============================================================================
+# 3. Virtual Environments & Packaging
+# =============================================================================
+.venv/
+venv/
+env/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# =============================================================================
+# 4. Runtime Databases & Local State (Auto-seeded on startup)
+# =============================================================================
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+*.db-wal
+*.db-shm
+
+# =============================================================================
+# 5. IDE, Editor, AI Agent & OS Junk Directories
+# =============================================================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.gemini/
+.agents/
+.agent/
+.cursor/
+.claude/
+node_modules/
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+~$*.docx
+~$*.xlsx
+*.log
+tmp/
+temp/
+scratch/
