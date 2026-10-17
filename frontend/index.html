@@ -90,8 +90,8 @@
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col">
-  <div id="root" class="flex-1 flex flex-col"></div>
+<body class="h-screen overflow-hidden flex flex-col bg-[#f8f9fc]">
+  <div id="root" class="flex-1 flex flex-col h-screen overflow-hidden"></div>
 
   <script type="text/babel">
     const { useState, useEffect, useMemo } = React;
@@ -99,7 +99,7 @@
     // Clean SVG Icon Component
     const Icon = ({ name, className = "w-5 h-5" }) => {
       const props = {
-        className,
+        className: `${className} shrink-0`,
         fill: "none",
         viewBox: "0 0 24 24",
         stroke: "currentColor",
@@ -149,6 +149,16 @@
           return <svg {...props}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>;
         case "lock":
           return <svg {...props}><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>;
+        case "arrow-right":
+          return <svg {...props}><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>;
+        case "chevron-right":
+          return <svg {...props}><polyline points="9 18 15 12 9 6"/></svg>;
+        case "chevrons-up-down":
+          return <svg {...props}><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg>;
+        case "truck":
+          return <svg {...props}><path d="M10 17h4V5H2v12h3"/><path d="M20 17h2v-3.34a4 4 0 0 0-1.17-2.83L19 9h-5"/><path d="M14 17h1"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>;
+        case "more-vertical":
+          return <svg {...props}><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>;
         default:
           return <svg {...props}><circle cx="12" cy="12" r="10"/></svg>;
       }
@@ -1206,13 +1216,17 @@
       const navigateMain = (navId) => {
         setActiveNav(navId);
         setMobileSidebarOpen(false);
+        const scrollEl = document.getElementById("main-scroll-container");
+        if (scrollEl) {
+          scrollEl.scrollTo({ top: 0, behavior: "smooth" });
+        }
         window.scrollTo({ top: 0, behavior: "smooth" });
       };
 
       const completedRecCount = Object.values(completedRecs).filter(Boolean).length;
 
       return (
-        <div className="min-h-screen flex bg-[#f8f9fc] text-[#1e293b]">
+        <div className="h-screen w-full overflow-hidden flex bg-[#f8f9fc] text-[#1e293b]">
           {/* Toast Notification */}
           {toast && (
             <div className="fixed bottom-5 right-5 z-50 bg-[#111827] text-white px-4 py-3 rounded-[16px] shadow-xl border border-slate-700 flex items-center gap-3 text-sm max-w-md animate-in">
@@ -1224,9 +1238,8 @@
           )}
 
           {/* =========================================================================
-              COLUMN 1: LEFT NAVIGATION SIDEBAR (256px · #ffffff · 1px #f3f4f6 border)
-              Includes 2-Circle Glyph Logo, #fff7ed Org Selector, 5 Nav Links with
-              #0d6efd Active State + Rounded Vertical Pill, and Bottom Gradient Promo Card
+              COLUMN 1: LEFT NAVIGATION SIDEBAR (256px · #ffffff · Fixed Height 100vh)
+              Stays locked in place and never scrolls down with the page content.
              ========================================================================= */}
           {mobileSidebarOpen && (
             <div
@@ -1237,34 +1250,32 @@
 
           <aside
             aria-label="Main Sidebar Navigation"
-            className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-[#ffffff] border-r border-[#f3f4f6] text-[#1e293b] flex flex-col justify-between transition-transform duration-300 ease-in-out shrink-0 ${
+            className={`fixed lg:static inset-y-0 left-0 z-50 w-64 h-screen overflow-y-auto bg-[#ffffff] border-r border-[#f3f4f6] text-[#1e293b] flex flex-col justify-between transition-transform duration-300 ease-in-out shrink-0 select-none ${
               mobileSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
             }`}
           >
             <div className="p-5 space-y-5">
               {/* Brand Logo with Two Overlapping Circular Glyphs (#0d6efd & #f97316) */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="relative w-12 h-9 flex items-center shrink-0">
-                    <span className="w-7 h-7 rounded-full border-[4px] border-[#0d6efd] bg-blue-50/40 inline-block" />
-                    <span className="w-7 h-7 rounded-full border-[4px] border-[#f97316] bg-orange-50/40 inline-block -ml-3" />
+              <div className="flex items-center justify-between pt-1">
+                <div className="flex flex-col items-center w-full text-center relative">
+                  <button
+                    onClick={() => setMobileSidebarOpen(false)}
+                    className="lg:hidden absolute right-0 top-0 text-[#64748b] hover:text-[#1e293b] p-1"
+                    aria-label="Close sidebar"
+                  >
+                    <Icon name="x" className="w-5 h-5" />
+                  </button>
+                  <div className="inline-flex items-center justify-center h-12">
+                    <span className="w-9 h-9 rounded-full border-[5px] border-[#0d6efd] bg-blue-50/30 inline-block" />
+                    <span className="w-9 h-9 rounded-full border-[5px] border-[#f97316] bg-orange-50/30 inline-block -ml-3.5" />
                   </div>
-                  <div>
-                    <div className="font-extrabold text-base tracking-tight text-[#1e293b] leading-tight">
-                      SupplyChain AI
-                    </div>
-                    <div className="text-[11px] font-medium text-[#64748b] leading-tight mt-0.5">
-                      ProcureX Command
-                    </div>
+                  <div className="font-extrabold text-lg tracking-tight text-[#1e293b] mt-1">
+                    SupplyChain AI
+                  </div>
+                  <div className="text-[11px] font-medium text-[#64748b]">
+                    Autonomous Exception Handler
                   </div>
                 </div>
-                <button
-                  onClick={() => setMobileSidebarOpen(false)}
-                  className="lg:hidden text-[#64748b] hover:text-[#1e293b] p-1"
-                  aria-label="Close sidebar"
-                >
-                  <Icon name="x" className="w-5 h-5" />
-                </button>
               </div>
 
               {/* Organization / Plant Selector Button (Orange #fff7ed, 12px radius) */}
@@ -1278,64 +1289,63 @@
                   setSelectedPlant(next);
                   showToast(`Switched active plant view to: ${next}`);
                 }}
-                className="w-full bg-[#fff7ed] hover:bg-orange-100/70 border border-orange-200/60 rounded-[12px] p-3 flex items-center justify-between text-left transition-all duration-300"
+                className="w-full bg-[#fff7ed] hover:bg-orange-100/70 border border-orange-200/70 rounded-[12px] px-3.5 py-3 flex items-center justify-between text-left transition-all duration-300"
               >
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <span className="w-7 h-7 rounded-[10px] bg-[#f97316] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs">
+                  <span className="w-7 h-7 rounded-[9px] bg-[#f97316] text-white flex items-center justify-center font-extrabold text-xs shrink-0 shadow-2xs">
                     P1
                   </span>
                   <div className="truncate">
-                    <div className="text-xs font-bold text-[#c2410c] truncate">
+                    <div className="text-xs font-extrabold text-[#c2410c] truncate">
                       {selectedPlant}
                     </div>
-                    <div className="text-[10px] font-medium text-[#ea580c]/80">
+                    <div className="text-[10px] font-semibold text-[#ea580c]/80">
                       Active Plant Workspace
                     </div>
                   </div>
                 </div>
-                <span className="text-[#f97316] text-xs font-bold shrink-0">⇅</span>
+                <Icon name="chevrons-up-down" className="w-4 h-4 text-[#f97316]" />
               </button>
 
-              {/* STRICTLY 5 MAIN NAVIGATION ITEMS with #0d6efd Active State + Rounded Vertical Indicator Pill */}
+              {/* STRICTLY 5 MAIN NAVIGATION ITEMS with #0d6efd Active State + Right Vertical Indicator Pill */}
               <nav className="space-y-1.5" aria-label="Primary Sidebar Links">
-                <div className="px-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-[#64748b]">
-                  Main Navigation
-                </div>
                 {SIDEBAR_ITEMS.map((item) => {
                   const isActive = activeNav === item.id;
                   return (
                     <button
                       key={item.id}
                       onClick={() => navigateMain(item.id)}
-                      className={`relative w-full flex items-center justify-between p-3 rounded-[12px] text-sm transition-all duration-300 ${
+                      className={`relative w-full flex items-center justify-between px-3.5 py-3 rounded-[14px] text-sm transition-all duration-300 ${
                         isActive
-                          ? "bg-blue-50/80 text-[#0d6efd] font-bold"
-                          : "text-[#64748b] font-medium hover:bg-[#f8f9fc] hover:text-[#1e293b]"
+                          ? "bg-blue-50/90 text-[#0d6efd] font-extrabold"
+                          : "text-[#64748b] font-semibold hover:bg-[#f8f9fc] hover:text-[#1e293b]"
                       }`}
                     >
-                      {/* Rounded Vertical Indicator Pill */}
-                      {isActive && (
-                        <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-6 rounded-r-full bg-[#0d6efd]" />
-                      )}
-                      <div className="flex items-center gap-3 pl-1">
+                      <div className="flex items-center gap-3 min-w-0">
                         <Icon
                           name={item.icon}
                           className={`w-5 h-5 ${isActive ? "text-[#0d6efd]" : "text-[#64748b]"}`}
                         />
-                        <span>{item.label}</span>
+                        <span className="truncate">{item.label}</span>
                       </div>
-                      {item.badge && (
-                        <span
-                          className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${
-                            isActive
-                              ? "bg-[#0d6efd] text-white"
-                              : item.id === "alerts"
-                              ? "bg-orange-100 text-[#f97316]"
-                              : "bg-slate-100 text-[#64748b]"
-                          }`}
-                        >
-                          {item.badge}
-                        </span>
+                      <div className="flex items-center gap-2 shrink-0">
+                        {item.badge && (
+                          <span
+                            className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${
+                              isActive
+                                ? "bg-[#0d6efd] text-white"
+                                : item.id === "alerts"
+                                ? "bg-orange-100 text-[#f97316]"
+                                : "bg-slate-100 text-[#64748b]"
+                            }`}
+                          >
+                            {item.badge}
+                          </span>
+                        )}
+                      </div>
+                      {/* Rounded Vertical Indicator Pill on the Right Edge (matches Mockup) */}
+                      {isActive && (
+                        <span className="absolute -right-5 top-1/2 -translate-y-1/2 w-1.5 h-8 rounded-l-full bg-[#0d6efd]" />
                       )}
                     </button>
                   );
@@ -1343,30 +1353,32 @@
               </nav>
             </div>
 
-            {/* Bottom Section: Gradient Promo & AMD Live Telemetry Card + Settings Gear */}
-            <div className="p-5 space-y-3">
+            {/* Bottom Section: Gradient Promo & AMD Live Telemetry Card with Non-Overlapping Floating Badge */}
+            <div className="p-5 pt-2">
               <div className="relative pt-4">
-                {/* Floating Icon Badge */}
-                <div className="w-10 h-10 rounded-[14px] bg-white shadow-md border border-blue-100 flex items-center justify-center text-[#0d6efd] absolute -top-1 left-4 z-10">
+                {/* Floating Icon Badge placed at top-right so it never overlaps text */}
+                <div className="w-10 h-10 rounded-[14px] bg-white shadow-md border border-blue-100 flex items-center justify-center text-[#0d6efd] absolute top-0 right-4 z-10">
                   <Icon name="cpu" className="w-5 h-5" />
                 </div>
-                <div className="rounded-[24px] bg-gradient-to-br from-blue-50 via-indigo-50/80 to-purple-50 border border-blue-100/80 p-4 pt-6 space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#0d6efd]">
-                      AMD ROCm 6.3 Engine
-                    </span>
-                    <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#10b981] text-white">
-                      <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                      Live
+                <div className="rounded-[24px] bg-gradient-to-br from-blue-50 via-indigo-50/90 to-purple-50 border border-blue-100/80 p-4 pt-5 space-y-2">
+                  <div className="pr-10">
+                    <span className="inline-block text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-md bg-white/80 text-[#0d6efd]">
+                      AMD MI300X · ROCm
                     </span>
                   </div>
                   <div className="text-xs font-extrabold text-[#1e293b]">
                     {amdTelemetry.model_id || "Gemma-4-31B-IT"}
                   </div>
-                  <div className="text-[11px] font-medium text-[#64748b] leading-snug">
-                    Autonomous Triage, RFQ & Shift Optimizer active.
+                  <div className="flex items-center gap-1.5">
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#111827] text-white">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#10b981] animate-pulse" />
+                      Live
+                    </span>
+                    <span className="text-[10px] font-semibold text-[#64748b]">
+                      Triage & RFQ Engine
+                    </span>
                   </div>
-                  <div className="pt-1 flex items-center justify-between gap-2">
+                  <div className="pt-1.5 flex items-center justify-between gap-2">
                     <button
                       onClick={() => setShowReportsModal(true)}
                       className="flex-1 py-2 px-3 rounded-[12px] bg-[#0d6efd] hover:bg-blue-700 text-white text-xs font-bold shadow-md shadow-[#0d6efd]/20 transition-all duration-300"
@@ -1388,11 +1400,15 @@
           </aside>
 
           {/* =========================================================================
-              COLUMN 2: CENTRAL MAIN CONTENT AREA (Fluid · #f8f9fc · 32px Padding)
+              COLUMN 2: CENTRAL MAIN CONTENT AREA (Independent Scroll Container)
+              Header sits at the top of the content flow (does NOT scroll down over cards)
              ========================================================================= */}
-          <div className="flex-1 flex flex-col min-w-0">
+          <div
+            id="main-scroll-container"
+            className="flex-1 h-screen overflow-y-auto flex flex-col min-w-0 bg-[#f8f9fc]"
+          >
             {/* Top Header with 3xl Greeting & Pill-Shaped Search Bar */}
-            <header className="sticky top-0 z-30 bg-[#f8f9fc]/90 backdrop-blur-md px-4 sm:px-8 pt-6 pb-4">
+            <header className="px-4 sm:px-8 pt-6 pb-4 bg-[#f8f9fc]">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <button
@@ -1403,7 +1419,7 @@
                     <Icon name="menu" className="w-5 h-5" />
                   </button>
                   <div>
-                    <h1 className="text-xl sm:text-3xl font-extrabold text-[#1e293b] tracking-tight">
+                    <h1 className="text-xl sm:text-2xl xl:text-3xl font-extrabold text-[#1e293b] tracking-tight">
                       Welcome back, Procurement Manager
                     </h1>
                     <p className="text-xs sm:text-sm font-medium text-[#64748b] mt-0.5">
@@ -1414,8 +1430,8 @@
 
                 {/* Right: Pill-Shaped Search Bar + Simulate CTA + Notification Bell */}
                 <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto justify-end">
-                  <div className="relative flex-1 sm:w-80 xl:w-96 min-w-[220px]">
-                    <span className="absolute inset-y-0 left-4 flex items-center text-[#64748b]">
+                  <div className="relative flex-1 sm:w-72 xl:w-80 min-w-[210px]">
+                    <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-[#64748b]">
                       <Icon name="search" className="w-4 h-4" />
                     </span>
                     <input
@@ -1440,14 +1456,14 @@
                       setSimStageIndex(-1);
                       setShowSimulateModal(true);
                     }}
-                    className="bg-[#0d6efd] hover:bg-blue-700 text-white px-4 py-2.5 rounded-[12px] text-xs sm:text-sm font-bold flex items-center gap-2 shadow-lg shadow-[#0d6efd]/20 transition-all duration-300"
+                    className="bg-[#0d6efd] hover:bg-blue-700 text-white px-4 py-2.5 rounded-[12px] text-xs sm:text-sm font-bold flex items-center gap-2 shadow-lg shadow-[#0d6efd]/20 transition-all duration-300 shrink-0"
                   >
                     <Icon name="bolt" className="w-4 h-4" />
                     <span>Simulate Disruption</span>
                   </button>
 
                   {/* Notification Bell */}
-                  <div className="relative">
+                  <div className="relative shrink-0">
                     <button
                       onClick={() => {
                         setShowNotifications(!showNotifications);
@@ -1510,28 +1526,28 @@
             {/* =======================================================================
                 MAIN PAGE ROUTER (Dashboard | Alerts | Orders | Suppliers | Schedule)
                ======================================================================= */}
-            <main className="flex-1 px-4 sm:px-8 pb-8 space-y-6">
+            <main className="flex-1 px-4 sm:px-8 pb-10 pt-2 space-y-6">
 
               {/* =====================================================================
-                  1. DASHBOARD PAGE
+                  1. DASHBOARD PAGE (Matches Approved 3-Column Mockup Layout)
                  ===================================================================== */}
               {activeNav === "dashboard" && (
                 <div className="space-y-6 animate-in">
-                  {/* TOP ROW: Icon-Left KPI Grid (7 cols) + Thematic #fff7ed Quick Trigger Card (5 cols) */}
+                  {/* ROW 1: Unified 2x2 Icon-Left KPI Card (7 cols) + #fff7ed Quick PO Trigger Card (5 cols) */}
                   <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
-                    {/* 4 Icon-Left KPI Cards (24px radius, zero aggressive left-border accents) */}
-                    <div className="xl:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4 tabular">
+                    {/* Unified 2x2 Icon-Left KPI Card (matches top-left of Mockup) */}
+                    <div className="xl:col-span-7 saas-card p-6 grid grid-cols-1 sm:grid-cols-2 gap-5 tabular items-center">
                       <div
                         onClick={() => navigateMain("alerts")}
-                        className="saas-card saas-card-hover p-5 cursor-pointer flex items-center gap-4"
+                        className="p-3 rounded-[18px] hover:bg-[#f8f9fc] cursor-pointer flex items-center gap-4 transition-all duration-300"
                       >
-                        <div className="w-12 h-12 rounded-[16px] bg-blue-50 text-[#0d6efd] flex items-center justify-center shrink-0">
-                          <Icon name="alerts" className="w-6 h-6" />
+                        <div className="w-12 h-12 rounded-full bg-blue-50 border border-blue-100 text-[#0d6efd] flex items-center justify-center shrink-0">
+                          <Icon name="alerts" className="w-5 h-5" />
                         </div>
                         <div className="min-w-0">
                           <div className="text-xs font-medium text-[#64748b]">Active Disruptions</div>
-                          <div className="text-2xl font-extrabold text-[#1e293b] mt-0.5">{alerts.length}</div>
-                          <div className="text-[11px] font-medium text-[#f97316] truncate mt-0.5">
+                          <div className="text-2xl font-extrabold text-[#1e293b] mt-0.5">{alerts.length} Critical</div>
+                          <div className="text-[11px] font-semibold text-[#f97316] truncate mt-0.5">
                             {alerts[0]?.title}
                           </div>
                         </div>
@@ -1542,14 +1558,14 @@
                           navigateMain("orders");
                           setOrdersTab("Purchase Orders");
                         }}
-                        className="saas-card saas-card-hover p-5 cursor-pointer flex items-center gap-4"
+                        className="p-3 rounded-[18px] hover:bg-[#f8f9fc] cursor-pointer flex items-center gap-4 transition-all duration-300"
                       >
-                        <div className="w-12 h-12 rounded-[16px] bg-orange-50 text-[#f97316] flex items-center justify-center shrink-0">
-                          <Icon name="orders" className="w-6 h-6" />
+                        <div className="w-12 h-12 rounded-full bg-[#fff7ed] border border-orange-100 text-[#f97316] flex items-center justify-center shrink-0">
+                          <Icon name="orders" className="w-5 h-5" />
                         </div>
                         <div className="min-w-0">
-                          <div className="text-xs font-medium text-[#64748b]">Purchase Orders in Progress</div>
-                          <div className="text-2xl font-extrabold text-[#1e293b] mt-0.5">12</div>
+                          <div className="text-xs font-medium text-[#64748b]">Purchase Orders</div>
+                          <div className="text-2xl font-extrabold text-[#1e293b] mt-0.5">12 Active</div>
                           <div className="text-[11px] font-medium text-[#64748b] mt-0.5">
                             9 On Time · 1 Delayed · 2 At Risk
                           </div>
@@ -1561,15 +1577,15 @@
                           navigateMain("orders");
                           setOrdersTab("Inventory");
                         }}
-                        className="saas-card saas-card-hover p-5 cursor-pointer flex items-center gap-4"
+                        className="p-3 rounded-[18px] hover:bg-[#f8f9fc] cursor-pointer flex items-center gap-4 transition-all duration-300"
                       >
-                        <div className="w-12 h-12 rounded-[16px] bg-emerald-50 text-[#10b981] flex items-center justify-center shrink-0">
-                          <Icon name="shield" className="w-6 h-6" />
+                        <div className="w-12 h-12 rounded-full bg-emerald-50 border border-emerald-100 text-[#10b981] flex items-center justify-center shrink-0">
+                          <Icon name="shield" className="w-5 h-5" />
                         </div>
                         <div className="min-w-0">
                           <div className="text-xs font-medium text-[#64748b]">Inventory Health</div>
-                          <div className="text-2xl font-extrabold text-[#1e293b] mt-0.5">85%</div>
-                          <div className="text-[11px] font-medium text-[#10b981] mt-0.5">
+                          <div className="text-2xl font-extrabold text-[#1e293b] mt-0.5">85.0%</div>
+                          <div className="text-[11px] font-semibold text-[#10b981] mt-0.5">
                             Steel Coil: 7 days buffer left
                           </div>
                         </div>
@@ -1580,27 +1596,27 @@
                           navigateMain("orders");
                           setOrdersTab("Affected Orders");
                         }}
-                        className="saas-card saas-card-hover p-5 cursor-pointer flex items-center gap-4"
+                        className="p-3 rounded-[18px] hover:bg-[#f8f9fc] cursor-pointer flex items-center gap-4 transition-all duration-300"
                       >
-                        <div className="w-12 h-12 rounded-[16px] bg-purple-50 text-[#a855f7] flex items-center justify-center shrink-0">
-                          <Icon name="clock" className="w-6 h-6" />
+                        <div className="w-12 h-12 rounded-full bg-emerald-50 border border-emerald-100 text-[#10b981] flex items-center justify-center shrink-0">
+                          <Icon name="clock" className="w-5 h-5" />
                         </div>
                         <div className="min-w-0">
                           <div className="text-xs font-medium text-[#64748b]">Production Orders at Risk</div>
                           <div className="text-2xl font-extrabold text-[#1e293b] mt-0.5">
-                            {scheduleApproved === "APPROVED" ? 0 : productionOrders.filter(o => o.status === "AT RISK").length}
+                            {scheduleApproved === "APPROVED" ? "0 At Risk" : `${productionOrders.filter(o => o.status === "AT RISK").length} Orders`}
                           </div>
                           <div className="text-[11px] font-medium text-[#64748b] mt-0.5">
                             {scheduleApproved === "APPROVED"
                               ? "Mitigated via shift swap"
-                              : "PO-102 (Chassis) & PO-103"}
+                              : "Lead time: 5d 4h · PO-102 & PO-103"}
                           </div>
                         </div>
                       </div>
                     </div>
 
                     {/* Special Component: Thematic Disruption Joining / Trigger Card (#fff7ed + Organic Blob SVG) */}
-                    <div className="xl:col-span-5 relative overflow-hidden rounded-[24px] bg-[#fff7ed] border border-orange-200/70 p-6 flex flex-col justify-between shadow-xs">
+                    <div className="xl:col-span-5 relative overflow-hidden rounded-[24px] bg-[#fff7ed] border border-orange-200/80 p-6 flex flex-col justify-between shadow-xs">
                       {/* Decorative Organic Blob SVG (#f97316 at 20% opacity) */}
                       <svg
                         viewBox="0 0 200 200"
@@ -1615,414 +1631,368 @@
                       </svg>
 
                       <div className="relative z-10 space-y-1.5">
-                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/80 text-[#f97316] text-[11px] font-bold">
-                          <Icon name="bolt" className="w-3.5 h-3.5" />
-                          <span>Autonomous Exception Simulator</span>
-                        </div>
                         <h2 className="text-lg font-extrabold text-[#1e293b]">
-                          Simulate / Quick PO Disruption Trigger
+                          Simulate / Quick PO Trigger
                         </h2>
                         <p className="text-xs font-medium text-[#64748b] leading-relaxed">
-                          Select a supply chain disruption scenario below to watch the AI parse the B2B email, check stock buffers, and draft RFQs:
+                          Create a simulated supply chain exception or trigger an autonomous AI workflow across inventory, RFQs, and plant shifts:
                         </p>
                       </div>
 
                       {/* White Input Wrapper with Embedded #f97316 CTA Button */}
-                      <div className="relative z-10 mt-4 bg-white rounded-[16px] p-1.5 shadow-sm border border-orange-100 flex items-center gap-2">
-                        <select
-                          aria-label="Select disruption scenario"
-                          value={selectedSimScenarioId}
-                          onChange={(e) => setSelectedSimScenarioId(e.target.value)}
-                          className="flex-1 bg-transparent pl-3 pr-2 py-2 text-xs sm:text-sm font-bold text-[#1e293b] focus:outline-none cursor-pointer truncate"
-                        >
-                          {SIMULATE_SCENARIO_OPTIONS.map((sc) => (
-                            <option key={sc.id} value={sc.id}>
-                              {sc.label} ({sc.material})
-                            </option>
-                          ))}
-                        </select>
+                      <div className="relative z-10 mt-4 flex items-center gap-2.5">
+                        <div className="flex-1 bg-white rounded-[12px] border border-orange-200/80 px-3 py-2.5 shadow-2xs">
+                          <select
+                            aria-label="Select disruption scenario"
+                            value={selectedSimScenarioId}
+                            onChange={(e) => setSelectedSimScenarioId(e.target.value)}
+                            className="w-full bg-transparent text-xs sm:text-sm font-bold text-[#1e293b] focus:outline-none cursor-pointer truncate"
+                          >
+                            {SIMULATE_SCENARIO_OPTIONS.map((sc) => (
+                              <option key={sc.id} value={sc.id}>
+                                {sc.title} ({sc.material})
+                              </option>
+                            ))}
+                          </select>
+                        </div>
                         <button
                           type="button"
                           onClick={() => {
                             setSimStageIndex(-1);
                             setShowSimulateModal(true);
                           }}
-                          className="bg-[#f97316] hover:bg-orange-600 text-white px-4 py-2.5 rounded-[12px] text-xs font-bold shrink-0 shadow-md shadow-orange-500/20 transition-all duration-300"
+                          className="bg-[#f97316] hover:bg-orange-600 text-white px-5 py-2.5 rounded-[12px] text-xs sm:text-sm font-extrabold shrink-0 shadow-md shadow-orange-500/20 transition-all duration-300"
                         >
-                          Run AI →
+                          Run AI
                         </button>
                       </div>
                     </div>
                   </div>
 
-                  {/* MIDDLE ROW: Custom CSS Bar Chart (8 cols) + Supply Chain Status Donut (4 cols) */}
-                  <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
-                    {/* Special Component: Custom CSS Bar Chart with Floating & Hover Tooltips */}
-                    <div className="xl:col-span-8 saas-card p-6 flex flex-col justify-between">
-                      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-                        <div>
-                          <h2 className="text-lg font-extrabold text-[#1e293b]">
-                            Material Buffer & Lead-Time Analytics
-                          </h2>
-                          <p className="text-xs font-medium text-[#64748b]">
-                            Hover any bar to inspect live runway duration, lead time, and shipment status
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-4 text-xs font-semibold text-[#64748b]">
-                          <span className="flex items-center gap-1.5">
-                            <span className="w-3 h-3 rounded-[4px] bg-[#f97316] inline-block" />
-                            Delayed / Deficit
-                          </span>
-                          <span className="flex items-center gap-1.5">
-                            <span className="w-3 h-3 rounded-[4px] bg-[#0d6efd] inline-block" />
-                            Inbound POs
-                          </span>
-                          <span className="flex items-center gap-1.5">
-                            <span className="w-3 h-3 rounded-[4px] bg-[#10b981] inline-block" />
-                            Healthy Buffer
-                          </span>
-                        </div>
+                  {/* ROW 2: Full-Width Custom CSS Bar Chart (Matches Center Analytics Card in Mockup) */}
+                  <div className="saas-card p-6">
+                    <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+                      <div>
+                        <h2 className="text-lg font-extrabold text-[#1e293b]">
+                          Analytics · Material Buffer & Lead-Time
+                        </h2>
+                        <p className="text-xs font-medium text-[#64748b]">
+                          Click or hover any bar to inspect live runway duration, lead time, and shipment status
+                        </p>
                       </div>
+                      <div className="flex flex-wrap items-center gap-4 text-xs font-semibold text-[#64748b]">
+                        <span className="flex items-center gap-1.5">
+                          <span className="w-3 h-3 rounded-[4px] bg-[#f97316] inline-block" />
+                          Delayed / Deficit
+                        </span>
+                        <span className="flex items-center gap-1.5">
+                          <span className="w-3 h-3 rounded-[4px] bg-[#0d6efd] inline-block" />
+                          Inbound / Shift Swap
+                        </span>
+                        <span className="flex items-center gap-1.5">
+                          <span className="w-3 h-3 rounded-[4px] bg-[#10b981] inline-block" />
+                          Healthy Buffer
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setShowReportsModal(true)}
+                          className="px-3 py-1.5 rounded-[10px] bg-[#f8f9fc] hover:bg-blue-50 text-[#1e293b] hover:text-[#0d6efd] border border-[#e2e8f0] text-xs font-bold transition-colors"
+                        >
+                          All Analytics ▾
+                        </button>
+                      </div>
+                    </div>
 
-                      {/* Interactive Bar Chart Area */}
-                      <div className="relative pt-10 pb-2 px-2">
-                        <div className="grid grid-cols-7 gap-3 sm:gap-5 items-end h-48 border-b border-[#f3f4f6] pb-3">
+                    {/* Bar Chart Container with Y-Axis Labels & Horizontal Grid Lines */}
+                    <div className="relative pt-10 pb-2">
+                      <div className="flex items-end gap-3 sm:gap-5">
+                        {/* Y-Axis Scale */}
+                        <div className="hidden sm:flex flex-col justify-between h-44 text-[11px] font-bold text-[#94a3b8] pr-2 pb-1 select-none tabular">
+                          <span>160</span>
+                          <span>120</span>
+                          <span>80</span>
+                          <span>40</span>
+                          <span>0</span>
+                        </div>
+
+                        {/* Plot Area */}
+                        <div className="relative flex-1 h-44 flex items-end justify-around border-b border-[#e2e8f0] px-2">
+                          {/* Background Horizontal Grid Lines */}
+                          <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
+                            <div className="border-b border-dashed border-[#f1f5f9] w-full h-0" />
+                            <div className="border-b border-dashed border-[#f1f5f9] w-full h-0" />
+                            <div className="border-b border-dashed border-[#f1f5f9] w-full h-0" />
+                            <div className="border-b border-dashed border-[#f1f5f9] w-full h-0" />
+                            <div className="w-full h-0" />
+                          </div>
+
                           {[
-                            { label: "Steel D+1", heightPct: 55, color: "#f97316", duration: "7d 0h Buffer (-14d Delay)", nav: "alerts" },
-                            { label: "Alum 6061", heightPct: 78, color: "#0d6efd", duration: "18d 6h Stock (PO-4402)", nav: "orders" },
-                            { label: "Metro RFQ", heightPct: 68, color: "#10b981", duration: "5d 0h Lead Time (Manila)", nav: "suppliers" },
-                            { label: "Shift Swap", heightPct: 92, color: "#0d6efd", duration: "0h Idle · 85% On Track", highlighted: true, nav: "schedule" },
-                            { label: "Resin PA66", heightPct: 64, color: "#10b981", duration: "20d 0h Buffer (Healthy)", nav: "orders" },
-                            { label: "IronWorks", heightPct: 48, color: "#f97316", duration: "8d 4h RoRo Transit", nav: "suppliers" },
-                            { label: "Fastener", heightPct: 84, color: "#10b981", duration: "22d 12h Buffer (Safe)", nav: "orders" }
+                            { label: "Jan · Steel", pxHeight: 108, color: "#f97316", duration: "7d 0h Buffer (-14d Delay)", nav: "alerts" },
+                            { label: "Feb · Alum", pxHeight: 146, color: "#0d6efd", duration: "18d 6h Stock (PO-4402)", nav: "orders" },
+                            { label: "Mar · Split", pxHeight: 128, secondPx: 94, color: "#f97316", secondColor: "#10b981", duration: "5d 0h Manila RFQ Ready", nav: "suppliers" },
+                            { label: "Apr · Swap", pxHeight: 118, color: "#0d6efd", duration: "0h Idle · 85% On Track", highlighted: true, nav: "schedule" },
+                            { label: "May · Resin", pxHeight: 112, color: "#10b981", duration: "20d 0h Buffer (Healthy)", nav: "orders" },
+                            { label: "Jun · Lead", pxHeight: 114, color: "#10b981", duration: "Lead Time: 5d 4h", defaultDarkBadge: true, nav: "suppliers" },
+                            { label: "Jul · Port", pxHeight: 78, color: "#f97316", duration: "8d 4h RoRo Transit", nav: "alerts" },
+                            { label: "Aug · Mill", pxHeight: 138, secondPx: 88, color: "#f97316", secondColor: "#0d6efd", duration: "14d Primary + 5d Bridge", nav: "orders" },
+                            { label: "Sep · Safe", pxHeight: 110, color: "#10b981", duration: "22d 12h Buffer (Safe)", nav: "schedule" }
                           ].map((bar, idx) => (
                             <div
                               key={bar.label}
                               onMouseEnter={() => setHoveredBarIndex(idx)}
                               onMouseLeave={() => setHoveredBarIndex(null)}
                               onClick={() => navigateMain(bar.nav)}
-                              className="relative flex flex-col items-center justify-end h-full cursor-pointer group"
+                              className="relative z-10 flex flex-col items-center justify-end h-full cursor-pointer group px-1"
                             >
-                              {/* Highlighted Bar Floating White Tooltip */}
+                              {/* Highlighted Bar Floating White Tooltip (⚡ 85% On Track) */}
                               {bar.highlighted && hoveredBarIndex !== idx && (
-                                <div className="absolute -top-9 z-20 bg-white shadow-md border border-[#f3f4f6] rounded-xl px-2.5 py-1 text-[11px] font-extrabold text-[#1e293b] whitespace-nowrap flex items-center gap-1 animate-bounce">
+                                <div className="absolute -top-10 z-20 bg-white shadow-lg border border-[#e2e8f0] rounded-[12px] px-3 py-1.5 text-xs font-extrabold text-[#1e293b] whitespace-nowrap flex items-center gap-1.5">
                                   <span>⚡</span>
                                   <span>85% On Track</span>
                                 </div>
                               )}
 
-                              {/* Dark #111827 Hover Tooltip with Duration Text */}
-                              {hoveredBarIndex === idx && (
-                                <div className="absolute -top-10 z-30 bg-[#111827] text-white shadow-lg rounded-xl px-3 py-1.5 text-[11px] font-bold whitespace-nowrap pointer-events-none">
+                              {/* Default Dark Badge on Jun Bar or Hovered Bar (Lead Time: 5d 4h) */}
+                              {(hoveredBarIndex === idx || (bar.defaultDarkBadge && hoveredBarIndex === null)) && (
+                                <div className="absolute -top-10 z-30 bg-[#111827] text-white shadow-lg rounded-[12px] px-3 py-1.5 text-xs font-bold whitespace-nowrap pointer-events-none">
                                   {bar.duration}
                                 </div>
                               )}
 
-                              {/* Bar Div with 12px radius */}
-                              <div
-                                className="w-full max-w-[42px] rounded-[12px] chart-bar-transition group-hover:scale-105 group-hover:brightness-105"
-                                style={{
-                                  height: `${bar.heightPct}%`,
-                                  backgroundColor: bar.color,
-                                  boxShadow: bar.highlighted ? "0 8px 20px -4px rgba(13, 110, 253, 0.35)" : "none"
-                                }}
-                              />
+                              {/* Bars with 12px radius & explicit pixel height */}
+                              <div className="flex items-end gap-1">
+                                <div
+                                  className="w-5 sm:w-7 rounded-[10px] chart-bar-transition group-hover:brightness-105"
+                                  style={{
+                                    height: `${bar.pxHeight}px`,
+                                    backgroundColor: bar.color,
+                                    boxShadow: bar.highlighted ? "0 8px 20px -4px rgba(13, 110, 253, 0.35)" : "none"
+                                  }}
+                                />
+                                {bar.secondPx && (
+                                  <div
+                                    className="hidden md:block w-5 sm:w-6 rounded-[10px] chart-bar-transition group-hover:brightness-105"
+                                    style={{
+                                      height: `${bar.secondPx}px`,
+                                      backgroundColor: bar.secondColor
+                                    }}
+                                  />
+                                )}
+                              </div>
                             </div>
                           ))}
                         </div>
+                      </div>
 
-                        {/* X-Axis Labels */}
-                        <div className="grid grid-cols-7 gap-3 sm:gap-5 pt-3 text-center">
-                          {["Steel D+1", "Alum 6061", "Metro RFQ", "Shift Swap", "Resin PA66", "IronWorks", "Fastener"].map((lbl) => (
-                            <div key={lbl} className="text-[11px] font-bold text-[#64748b] truncate">
+                      {/* X-Axis Labels */}
+                      <div className="flex items-center gap-3 sm:gap-5 pt-3">
+                        <div className="hidden sm:block w-7 pr-2" />
+                        <div className="flex-1 flex items-center justify-around text-center px-2">
+                          {["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep"].map((lbl) => (
+                            <div key={lbl} className="text-[11px] font-semibold text-[#64748b]">
                               {lbl}
                             </div>
                           ))}
                         </div>
                       </div>
+                    </div>
+                  </div>
 
-                      {/* Overall System Workflow Strip inside Chart Footer */}
-                      <div className="mt-5 pt-4 border-t border-[#f3f4f6]">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-[11px] font-bold uppercase tracking-wider text-[#64748b]">
-                            Autonomous Exception Workflow (Click any stage)
-                          </span>
-                          <span className="text-xs font-bold text-[#0d6efd]">
-                            {completedRecCount}/4 AI Actions Completed
-                          </span>
+                  {/* ROW 3: Supplier Alerts Vertical Card List (5 cols) + Production Orders Table (7 cols) — Matches Mockup Bottom Row */}
+                  <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+                    {/* Left (5 cols): Supplier Alerts Card */}
+                    <div className="xl:col-span-5 saas-card p-6 flex flex-col justify-between">
+                      <div>
+                        <div className="flex items-center justify-between mb-4">
+                          <h2 className="text-lg font-extrabold text-[#1e293b]">Supplier Alerts</h2>
+                          <button
+                            onClick={() => navigateMain("alerts")}
+                            className="text-xs font-bold text-[#0d6efd] hover:underline"
+                          >
+                            View All →
+                          </button>
                         </div>
-                        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
-                          {[
-                            { label: "Incoming Event", nav: "alerts" },
-                            { label: "AI Detects", nav: "alerts" },
-                            { label: "Check Inventory", nav: "orders" },
-                            { label: "Affected Orders", nav: "orders" },
-                            { label: "Backup Suppliers", nav: "suppliers" },
-                            { label: "Send RFQs (Unlock Price)", nav: "suppliers" },
-                            { label: "Schedule Swap", nav: "schedule" },
-                            { label: "Human Approve", nav: "schedule" }
-                          ].map((step, idx, arr) => (
-                            <React.Fragment key={step.label}>
-                              <button
-                                onClick={() => navigateMain(step.nav)}
-                                className="px-3 py-1.5 rounded-[10px] bg-[#f8f9fc] hover:bg-blue-50 hover:text-[#0d6efd] border border-[#f3f4f6] font-semibold text-[#1e293b] whitespace-nowrap transition-all duration-300"
+
+                        <div className="space-y-3">
+                          {alerts.slice(0, 3).map((alert) => {
+                            const iconTone =
+                              alert.badgeType === "CRITICAL"
+                                ? "bg-[#fff7ed] text-[#f97316] border-orange-200/70"
+                                : alert.badgeType === "WARNING"
+                                ? "bg-amber-50 text-amber-600 border-amber-200/70"
+                                : "bg-emerald-50 text-[#10b981] border-emerald-200/70";
+                            return (
+                              <div
+                                key={alert.id}
+                                onClick={() => openAlertDetails(alert)}
+                                className="p-3.5 rounded-[18px] bg-[#f8f9fc] hover:bg-white border border-[#f3f4f6] hover:border-blue-200 cursor-pointer transition-all duration-300 flex items-center justify-between gap-3 shadow-2xs hover:shadow-md"
                               >
-                                <span className="font-mono text-[10px] text-[#64748b] mr-1">{idx + 1}.</span>
-                                {step.label}
-                              </button>
-                              {idx < arr.length - 1 && (
-                                <span className="text-slate-300 shrink-0">→</span>
-                              )}
-                            </React.Fragment>
-                          ))}
+                                <div className="flex items-center gap-3 min-w-0">
+                                  <div className={`w-10 h-10 rounded-full border flex items-center justify-center shrink-0 ${iconTone}`}>
+                                    <Icon name="bell" className="w-4 h-4" />
+                                  </div>
+                                  <div className="min-w-0">
+                                    <div className="text-xs sm:text-sm font-extrabold text-[#1e293b] truncate">
+                                      {alert.title}
+                                    </div>
+                                    <div className="text-[11px] font-medium text-[#64748b] truncate mt-0.5">
+                                      {alert.supplier} · {alert.timeAgo}
+                                    </div>
+                                  </div>
+                                </div>
+                                <Icon name="chevron-right" className="w-4 h-4 text-[#94a3b8]" />
+                              </div>
+                            );
+                          })}
                         </div>
+                      </div>
+
+                      <div className="mt-4 pt-3 border-t border-[#f3f4f6] flex items-center justify-between text-xs">
+                        <span className="font-medium text-[#64748b]">Click any alert for AI root-cause analysis</span>
+                        <span className="font-extrabold text-[#f97316]">{alerts.length} Active</span>
                       </div>
                     </div>
 
-                    {/* Supply Chain Status Donut Card (4 cols) */}
-                    <div className="xl:col-span-4 saas-card p-6 flex flex-col justify-between">
+                    {/* Right (7 cols): Production Orders Table Card */}
+                    <div className="xl:col-span-7 saas-card p-6 flex flex-col justify-between">
                       <div>
                         <div className="flex items-center justify-between mb-4">
                           <div>
-                            <h2 className="text-lg font-extrabold text-[#1e293b]">Supply Chain Status</h2>
-                            <p className="text-xs font-medium text-[#64748b]">Order health breakdown</p>
+                            <h2 className="text-lg font-extrabold text-[#1e293b]">Production Orders</h2>
+                            <p className="text-xs font-medium text-[#64748b]">At-risk and scheduled manufacturing runs</p>
                           </div>
-                          <span className="px-3 py-1 rounded-full bg-emerald-50 text-[#10b981] text-xs font-bold">
-                            85% On Track
-                          </span>
-                        </div>
-
-                        <div className="flex flex-col items-center gap-5 my-3">
-                          <div className="relative w-36 h-36 shrink-0">
-                            <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
-                              <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#f3f4f6" strokeWidth="3.8" />
-                              <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#10b981" strokeWidth="3.8" strokeDasharray="85 15" strokeDashoffset="0" />
-                              <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#f97316" strokeWidth="3.8" strokeDasharray="9 91" strokeDashoffset="-85" />
-                              <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#0d6efd" strokeWidth="3.8" strokeDasharray="6 94" strokeDashoffset="-94" />
-                            </svg>
-                            <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                              <span className="text-2xl font-extrabold text-[#1e293b] tabular">85%</span>
-                              <span className="text-[11px] font-medium text-[#64748b]">On Track</span>
-                            </div>
-                          </div>
-
-                          <div className="w-full grid grid-cols-2 gap-2.5 tabular">
-                            <div className="p-3 rounded-[16px] bg-emerald-50/60 border border-emerald-100">
-                              <div className="text-xs text-[#64748b] font-medium">On Time</div>
-                              <div className="text-lg font-extrabold text-[#10b981]">12</div>
-                            </div>
-                            <div className="p-3 rounded-[16px] bg-orange-50/60 border border-orange-100">
-                              <div className="text-xs text-[#64748b] font-medium">Delayed</div>
-                              <div className="text-lg font-extrabold text-[#f97316]">3</div>
-                            </div>
-                            <div className="p-3 rounded-[16px] bg-blue-50/60 border border-blue-100">
-                              <div className="text-xs text-[#64748b] font-medium">At Risk</div>
-                              <div className="text-lg font-extrabold text-[#0d6efd]">2</div>
-                            </div>
-                            <div className="p-3 rounded-[16px] bg-[#f8f9fc] border border-[#f3f4f6]">
-                              <div className="text-xs text-[#64748b] font-medium">Completed</div>
-                              <div className="text-lg font-extrabold text-[#1e293b]">28</div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="pt-4 border-t border-[#f3f4f6] flex items-center justify-between">
-                        <div className="text-xs font-medium text-[#64748b]">
-                          Est. Savings: <strong className="text-[#10b981] font-extrabold">{reportStats.estimatedSavings}</strong>
-                        </div>
-                        <button
-                          onClick={() => setShowReportsModal(true)}
-                          className="px-3.5 py-2 rounded-[12px] bg-[#0d6efd] hover:bg-blue-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-md shadow-[#0d6efd]/20 transition-all duration-300"
-                        >
-                          <Icon name="chart" className="w-4 h-4" />
-                          <span>Open Reports</span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 3-COLUMN RECENT ALERTS GRID */}
-                  <div className="saas-card p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <div>
-                        <h2 className="text-lg font-extrabold text-[#1e293b]">Recent Supply Chain Alerts</h2>
-                        <p className="text-xs font-medium text-[#64748b]">
-                          Click any alert card to open its detailed AI impact analysis & recommendations
-                        </p>
-                      </div>
-                      <button
-                        onClick={() => navigateMain("alerts")}
-                        className="text-xs font-bold text-[#0d6efd] hover:underline"
-                      >
-                        View All Alerts →
-                      </button>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      {alerts.slice(0, 3).map((alert) => {
-                        const badgeStyle =
-                          alert.badgeType === "CRITICAL"
-                            ? "bg-orange-50 text-[#f97316] border-orange-200"
-                            : alert.badgeType === "WARNING"
-                            ? "bg-purple-50 text-[#a855f7] border-purple-200"
-                            : "bg-emerald-50 text-[#10b981] border-emerald-200";
-                        return (
-                          <div
-                            key={alert.id}
-                            onClick={() => openAlertDetails(alert)}
-                            className="p-5 rounded-[20px] bg-[#f8f9fc] hover:bg-white border border-[#f3f4f6] hover:border-blue-200 cursor-pointer transition-all duration-300 flex flex-col justify-between gap-4 shadow-2xs hover:shadow-md"
-                          >
-                            <div className="space-y-2">
-                              <div className="flex items-center justify-between gap-2">
-                                <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${badgeStyle}`}>
-                                  {alert.badgeType}
-                                </span>
-                                <span className="text-[11px] font-medium text-[#64748b]">{alert.timeAgo}</span>
-                              </div>
-                              <div className="text-sm font-extrabold text-[#1e293b] leading-snug">{alert.title}</div>
-                              <div className="text-xs font-medium text-[#64748b]">
-                                Supplier: <strong className="text-[#1e293b]">{alert.supplier}</strong> · {alert.material}
-                              </div>
-                            </div>
-                            <div className="pt-2 border-t border-slate-200/60 flex items-center justify-between">
-                              <span className="text-[11px] font-medium text-[#64748b]">{alert.source}</span>
-                              <span className="text-xs font-bold text-[#0d6efd]">
-                                Inspect AI Analysis →
-                              </span>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* BOTTOM ROW: Full-Width At-Risk Production Orders Table + Quick Actions */}
-                  <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
-                    <div className="xl:col-span-7 saas-card p-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <div>
-                          <h2 className="text-lg font-extrabold text-[#1e293b]">At-Risk Production Orders</h2>
-                          <p className="text-xs font-medium text-[#64748b]">Orders impacted by active shipment delays or shortages</p>
-                        </div>
-                        <button
-                          onClick={() => {
-                            navigateMain("orders");
-                            setOrdersTab("Affected Orders");
-                          }}
-                          className="text-xs font-bold text-[#0d6efd] hover:underline"
-                        >
-                          View All Orders →
-                        </button>
-                      </div>
-
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-left text-xs sm:text-sm tabular">
-                          <thead>
-                            <tr className="border-b border-[#f3f4f6] text-[#64748b] text-xs uppercase">
-                              <th className="py-3 pr-3 font-bold">PO Number</th>
-                              <th className="py-3 px-3 font-bold">Product</th>
-                              <th className="py-3 px-3 font-bold">Material</th>
-                              <th className="py-3 px-3 font-bold">Required Date</th>
-                              <th className="py-3 pl-3 font-bold text-right">Status</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-[#f3f4f6]">
-                            {productionOrders.filter(o => o.orderId === "PO-102" || o.orderId === "PO-103" || o.status === "AT RISK").map((ord) => (
-                              <tr key={ord.orderId} className="hover:bg-[#f8f9fc] transition-colors">
-                                <td className="py-3.5 pr-3 font-mono font-bold text-[#1e293b]">{ord.orderId}</td>
-                                <td className="py-3.5 px-3 font-bold text-[#1e293b]">{ord.product}</td>
-                                <td className="py-3.5 px-3 font-medium text-[#64748b]">{ord.material}</td>
-                                <td className="py-3.5 px-3 font-mono font-semibold text-[#1e293b]">{ord.currentDate}</td>
-                                <td className="py-3.5 pl-3 text-right">
-                                  <span className={`inline-block text-xs font-bold px-3 py-1 rounded-full ${
-                                    ord.status === "AT RISK"
-                                      ? "bg-orange-50 text-[#f97316]"
-                                      : "bg-emerald-50 text-[#10b981]"
-                                  }`}>
-                                    {ord.status}
-                                  </span>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-
-                    {/* Quick Actions */}
-                    <div className="xl:col-span-5 saas-card p-6 flex flex-col justify-between">
-                      <div>
-                        <h2 className="text-lg font-extrabold text-[#1e293b] mb-1">Quick Actions</h2>
-                        <p className="text-xs font-medium text-[#64748b] mb-4">
-                          Jump directly to key exception recovery tasks
-                        </p>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                          <button
-                            onClick={() => navigateMain("alerts")}
-                            className="p-3.5 rounded-[16px] bg-[#f8f9fc] border border-[#f3f4f6] hover:border-[#0d6efd] hover:bg-blue-50/40 text-left transition-all duration-300"
-                          >
-                            <div className="text-xs font-bold text-[#1e293b]">View Alerts</div>
-                            <div className="text-[11px] font-medium text-[#64748b] mt-0.5">Inspect active disruptions</div>
-                          </button>
-
-                          <button
-                            onClick={() => {
-                              navigateMain("suppliers");
-                              setSuppliersTab("RFQ Drafts");
-                            }}
-                            className="p-3.5 rounded-[16px] bg-[#f8f9fc] border border-[#f3f4f6] hover:border-[#0d6efd] hover:bg-blue-50/40 text-left transition-all duration-300"
-                          >
-                            <div className="text-xs font-bold text-[#1e293b]">Generate Supplier RFQs</div>
-                            <div className="text-[11px] font-medium text-[#64748b] mt-0.5">Send RFQ to reveal price</div>
-                          </button>
-
                           <button
                             onClick={() => {
                               navigateMain("orders");
-                              setOrdersTab("Inventory");
+                              setOrdersTab("Affected Orders");
                             }}
-                            className="p-3.5 rounded-[16px] bg-[#f8f9fc] border border-[#f3f4f6] hover:border-[#0d6efd] hover:bg-blue-50/40 text-left transition-all duration-300"
+                            className="px-3 py-1.5 rounded-[10px] bg-[#f8f9fc] hover:bg-blue-50 text-[#1e293b] hover:text-[#0d6efd] border border-[#e2e8f0] text-xs font-bold transition-colors"
                           >
-                            <div className="text-xs font-bold text-[#1e293b]">Check Inventory Levels</div>
-                            <div className="text-[11px] font-medium text-[#64748b] mt-0.5">Steel Coil: 7 days left</div>
-                          </button>
-
-                          <button
-                            onClick={() => openAlertDetails(alerts[0], "AI Recommendations")}
-                            className="p-3.5 rounded-[16px] bg-[#f8f9fc] border border-[#f3f4f6] hover:border-[#0d6efd] hover:bg-blue-50/40 text-left transition-all duration-300"
-                          >
-                            <div className="flex items-center justify-between">
-                              <span className="text-xs font-bold text-[#1e293b]">Review AI Recommendations</span>
-                              {completedRecCount > 0 && (
-                                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-[#10b981]">
-                                  {completedRecCount}/4 ✓
-                                </span>
-                              )}
-                            </div>
-                            <div className="text-[11px] font-medium text-[#64748b] mt-0.5">Action checklist</div>
-                          </button>
-
-                          <button
-                            onClick={() => {
-                              navigateMain("schedule");
-                              setScheduleTab("AI Recommended Schedule");
-                            }}
-                            className="p-3.5 rounded-[16px] bg-[#f8f9fc] border border-[#f3f4f6] hover:border-[#0d6efd] hover:bg-blue-50/40 text-left transition-all duration-300"
-                          >
-                            <div className="text-xs font-bold text-[#1e293b]">Review Production Schedule</div>
-                            <div className="text-[11px] font-medium text-[#64748b] mt-0.5">Edit any order individually</div>
-                          </button>
-
-                          <button
-                            onClick={() => setShowReportsModal(true)}
-                            className="p-3.5 rounded-[16px] bg-[#f8f9fc] border border-[#f3f4f6] hover:border-[#0d6efd] hover:bg-blue-50/40 text-left transition-all duration-300"
-                          >
-                            <div className="text-xs font-bold text-[#1e293b]">Executive Reports</div>
-                            <div className="text-[11px] font-medium text-[#64748b] mt-0.5">Savings & SLA metrics</div>
+                            All Orders ▾
                           </button>
                         </div>
+
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-left text-xs sm:text-sm tabular">
+                            <thead>
+                              <tr className="bg-[#f8f9fc] border-y border-[#f3f4f6] text-[#64748b] text-xs">
+                                <th className="py-2.5 px-3 font-bold rounded-l-[10px]">Order ↑</th>
+                                <th className="py-2.5 px-3 font-bold">Product</th>
+                                <th className="py-2.5 px-3 font-bold">Material</th>
+                                <th className="py-2.5 px-3 font-bold">Required Date</th>
+                                <th className="py-2.5 px-3 font-bold text-right rounded-r-[10px]">Status</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-[#f3f4f6]">
+                              {productionOrders.map((ord) => (
+                                <tr
+                                  key={ord.orderId}
+                                  onClick={() => navigateMain("schedule")}
+                                  className="hover:bg-[#f8f9fc] transition-colors cursor-pointer"
+                                >
+                                  <td className="py-3.5 px-3 font-mono font-extrabold text-[#1e293b]">{ord.orderId}</td>
+                                  <td className="py-3.5 px-3 font-bold text-[#1e293b]">{ord.product}</td>
+                                  <td className="py-3.5 px-3 font-medium text-[#64748b]">{ord.material}</td>
+                                  <td className="py-3.5 px-3 font-mono font-semibold text-[#1e293b]">{ord.currentDate}</td>
+                                  <td className="py-3.5 px-3 text-right">
+                                    <span className={`inline-block text-xs font-bold px-3 py-1 rounded-full ${
+                                      ord.status === "AT RISK"
+                                        ? "bg-[#fff7ed] text-[#f97316]"
+                                        : "bg-emerald-50 text-[#10b981]"
+                                    }`}>
+                                      {ord.status}
+                                    </span>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* ROW 4: Supply Chain Status Breakdown (5 cols) + Quick Actions & Workflow Strip (7 cols) */}
+                  <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+                    <div className="xl:col-span-5 saas-card p-6 flex items-center justify-between gap-5">
+                      <div className="relative w-28 h-28 shrink-0">
+                        <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
+                          <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#f3f4f6" strokeWidth="3.8" />
+                          <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#10b981" strokeWidth="3.8" strokeDasharray="85 15" strokeDashoffset="0" />
+                          <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#f97316" strokeWidth="3.8" strokeDasharray="9 91" strokeDashoffset="-85" />
+                          <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#0d6efd" strokeWidth="3.8" strokeDasharray="6 94" strokeDashoffset="-94" />
+                        </svg>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                          <span className="text-xl font-extrabold text-[#1e293b] tabular">85%</span>
+                          <span className="text-[10px] font-medium text-[#64748b]">On Track</span>
+                        </div>
+                      </div>
+                      <div className="flex-1 grid grid-cols-2 gap-2.5 tabular">
+                        <div className="p-2.5 rounded-[14px] bg-emerald-50/60 border border-emerald-100">
+                          <div className="text-[11px] text-[#64748b] font-medium">On Time</div>
+                          <div className="text-base font-extrabold text-[#10b981]">12</div>
+                        </div>
+                        <div className="p-2.5 rounded-[14px] bg-orange-50/60 border border-orange-100">
+                          <div className="text-[11px] text-[#64748b] font-medium">Delayed</div>
+                          <div className="text-base font-extrabold text-[#f97316]">3</div>
+                        </div>
+                        <div className="p-2.5 rounded-[14px] bg-blue-50/60 border border-blue-100">
+                          <div className="text-[11px] text-[#64748b] font-medium">At Risk</div>
+                          <div className="text-base font-extrabold text-[#0d6efd]">2</div>
+                        </div>
+                        <div className="p-2.5 rounded-[14px] bg-[#f8f9fc] border border-[#f3f4f6]">
+                          <div className="text-[11px] text-[#64748b] font-medium">Completed</div>
+                          <div className="text-base font-extrabold text-[#1e293b]">28</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="xl:col-span-7 saas-card p-6 flex flex-col justify-between gap-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h2 className="text-base font-extrabold text-[#1e293b]">Quick Recovery Actions</h2>
+                          <p className="text-xs font-medium text-[#64748b]">Jump directly to RFQ negotiation, inventory buffers, or schedule adjustments</p>
+                        </div>
+                        <span className="text-xs font-extrabold text-[#0d6efd]">{completedRecCount}/4 Completed</span>
+                      </div>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                        <button
+                          onClick={() => {
+                            navigateMain("suppliers");
+                            setSuppliersTab("RFQ Drafts");
+                          }}
+                          className="p-3 rounded-[14px] bg-[#f8f9fc] hover:bg-blue-50 border border-[#f3f4f6] hover:border-blue-200 text-left transition-all"
+                        >
+                          <div className="text-xs font-extrabold text-[#1e293b]">Generate RFQs</div>
+                          <div className="text-[10px] font-medium text-[#64748b] mt-0.5">Unlock stock & price</div>
+                        </button>
+                        <button
+                          onClick={() => {
+                            navigateMain("orders");
+                            setOrdersTab("Inventory");
+                          }}
+                          className="p-3 rounded-[14px] bg-[#f8f9fc] hover:bg-blue-50 border border-[#f3f4f6] hover:border-blue-200 text-left transition-all"
+                        >
+                          <div className="text-xs font-extrabold text-[#1e293b]">Check Inventory</div>
+                          <div className="text-[10px] font-medium text-[#64748b] mt-0.5">7d Steel buffer</div>
+                        </button>
+                        <button
+                          onClick={() => openAlertDetails(alerts[0], "AI Recommendations")}
+                          className="p-3 rounded-[14px] bg-[#f8f9fc] hover:bg-blue-50 border border-[#f3f4f6] hover:border-blue-200 text-left transition-all"
+                        >
+                          <div className="text-xs font-extrabold text-[#1e293b]">AI Action Plan</div>
+                          <div className="text-[10px] font-medium text-[#64748b] mt-0.5">Review 4 steps</div>
+                        </button>
+                        <button
+                          onClick={() => {
+                            navigateMain("schedule");
+                            setScheduleTab("AI Recommended Schedule");
+                          }}
+                          className="p-3 rounded-[14px] bg-[#f8f9fc] hover:bg-blue-50 border border-[#f3f4f6] hover:border-blue-200 text-left transition-all"
+                        >
+                          <div className="text-xs font-extrabold text-[#1e293b]">Edit Schedule</div>
+                          <div className="text-[10px] font-medium text-[#64748b] mt-0.5">Per-card dates</div>
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -3207,51 +3177,70 @@
 
           {/* =========================================================================
               COLUMN 3: RIGHT SIDEBAR (Profile, Mini-Calendar, Upcoming & AI Todo List)
-              Width: 320px | Background: #ffffff | Border-left: 1px solid #f3f4f6
+              Width: 320px | Fixed Height 100vh | 4 Distinct 24px-Radius Cards
              ========================================================================= */}
-          <aside className="hidden xl:flex xl:flex-col xl:w-80 xl:shrink-0 bg-white border-l border-[#f3f4f6] h-screen sticky top-0 overflow-y-auto p-6 space-y-6 select-none">
-            {/* 1. User Profile Section */}
-            <div className="p-5 rounded-[24px] bg-[#f8f9fc] border border-[#f3f4f6] text-center space-y-4">
-              <div className="relative mx-auto w-20 h-20 rounded-full p-1 bg-gradient-to-tr from-[#0d6efd] via-[#a855f7] to-[#ec4899] shadow-md">
-                <div className="w-full h-full rounded-full bg-white flex items-center justify-center text-[#1e293b] font-extrabold text-xl tracking-tight">
-                  PM
+          <aside className="hidden lg:flex lg:flex-col lg:w-80 lg:shrink-0 bg-[#f8f9fc] border-l border-[#f3f4f6] h-screen overflow-y-auto p-5 space-y-5 select-none">
+            {/* 1. User Profile Card (Matches Top-Right of Mockup) */}
+            <div className="saas-card p-5 space-y-4">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="relative w-12 h-12 rounded-full p-0.5 bg-gradient-to-tr from-[#0d6efd] via-[#a855f7] to-[#ec4899] shrink-0 shadow-xs">
+                    <div className="w-full h-full rounded-full bg-white flex items-center justify-center text-[#1e293b] font-extrabold text-sm">
+                      PM
+                    </div>
+                    <span
+                      className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-[#10b981] border-2 border-white"
+                      title="Autonomous Agent Active"
+                    />
+                  </div>
+                  <div className="min-w-0">
+                    <h3 className="text-sm font-extrabold text-[#1e293b] truncate">
+                      Procurement Manager
+                    </h3>
+                    <p className="text-xs font-medium text-[#64748b] truncate mt-0.5">
+                      {selectedPlant}
+                    </p>
+                  </div>
                 </div>
-                <span className="absolute bottom-0.5 right-0.5 w-4 h-4 rounded-full bg-[#10b981] border-2 border-white" title="Autonomous Agent Active" />
+                <button
+                  type="button"
+                  onClick={() => setShowSettingsModal(true)}
+                  aria-label="Profile & System Settings"
+                  className="p-1.5 rounded-lg text-[#64748b] hover:text-[#1e293b] hover:bg-[#f8f9fc] transition-colors"
+                >
+                  <Icon name="more-vertical" className="w-4 h-4" />
+                </button>
               </div>
-              <div>
-                <h3 className="text-base font-extrabold text-[#1e293b]">Procurement Manager</h3>
-                <p className="text-xs font-medium text-[#64748b] mt-0.5">{selectedPlant}</p>
-              </div>
-              <div className="grid grid-cols-3 gap-2 pt-2 border-t border-[#e2e8f0]/60 text-center">
-                <div className="p-2 rounded-[14px] bg-white border border-[#f3f4f6]">
-                  <div className="text-sm font-extrabold text-[#0d6efd]">{alerts.length}</div>
-                  <div className="text-[10px] font-semibold text-[#64748b]">Alerts</div>
+
+              <div className="grid grid-cols-3 divide-x divide-[#f3f4f6] pt-3 border-t border-[#f3f4f6] text-center tabular">
+                <div className="px-2">
+                  <div className="text-base font-extrabold text-[#1e293b]">{alerts.length}</div>
+                  <div className="text-[11px] font-medium text-[#64748b] mt-0.5">Alerts</div>
                 </div>
-                <div className="p-2 rounded-[14px] bg-white border border-[#f3f4f6]">
-                  <div className="text-sm font-extrabold text-[#10b981]">85%</div>
-                  <div className="text-[10px] font-semibold text-[#64748b]">Health</div>
+                <div className="px-2">
+                  <div className="text-base font-extrabold text-[#1e293b]">85%</div>
+                  <div className="text-[11px] font-medium text-[#64748b] mt-0.5">Health</div>
                 </div>
-                <div className="p-2 rounded-[14px] bg-white border border-[#f3f4f6]">
-                  <div className="text-sm font-extrabold text-[#f97316]">₱820K</div>
-                  <div className="text-[10px] font-semibold text-[#64748b]">Saved</div>
+                <div className="px-2">
+                  <div className="text-base font-extrabold text-[#1e293b]">₱820K</div>
+                  <div className="text-[11px] font-medium text-[#64748b] mt-0.5">Saved</div>
                 </div>
               </div>
             </div>
 
-            {/* 2. Mini-Calendar (Horizontal Day Scroller with #ec4899 Active Day Pill) */}
-            <div className="space-y-3">
+            {/* 2. Mini-Calendar Card (Horizontal Day Scroller with #ec4899 Active Day Pill) */}
+            <div className="saas-card p-5 space-y-3.5">
               <div className="flex items-center justify-between">
                 <h4 className="text-sm font-extrabold text-[#1e293b]">Plant Schedule</h4>
-                <span className="text-[11px] font-bold text-[#64748b]">October 2026</span>
+                <span className="text-[11px] font-bold text-[#64748b]">Oct 2026</span>
               </div>
-              <div className="grid grid-cols-6 gap-1.5 pt-1">
+              <div className="grid grid-cols-5 gap-2 pt-1">
                 {[
-                  { dayName: "Mon", dateNum: "19", key: "Oct 19", tag: "Audit" },
-                  { dayName: "Tue", dateNum: "20", key: "Oct 20", tag: "RFQ" },
-                  { dayName: "Wed", dateNum: "21", key: "Oct 21", tag: "Bridge ETA" },
-                  { dayName: "Thu", dateNum: "22", key: "Oct 22", tag: "Line Swap" },
-                  { dayName: "Fri", dateNum: "23", key: "Oct 23", tag: "QA Check" },
-                  { dayName: "Sat", dateNum: "24", key: "Oct 24", tag: "Buffer" },
+                  { dayName: "Wed", dateNum: "19", key: "Oct 19" },
+                  { dayName: "Thu", dateNum: "20", key: "Oct 20" },
+                  { dayName: "Oct", dateNum: "21", key: "Oct 21" },
+                  { dayName: "Sat", dateNum: "22", key: "Oct 22" },
+                  { dayName: "Oct", dateNum: "23", key: "Oct 23" },
                 ].map((d) => {
                   const isActive = selectedCalendarDay === d.key;
                   return (
@@ -3259,23 +3248,24 @@
                       key={d.key}
                       type="button"
                       onClick={() => setSelectedCalendarDay(d.key)}
-                      className={`py-2.5 px-1 rounded-[12px] flex flex-col items-center justify-center transition-all duration-300 ${
+                      className={`py-3 px-1 rounded-[16px] flex flex-col items-center justify-center transition-all duration-300 ${
                         isActive
-                          ? "bg-[#ec4899] text-white -translate-y-1 shadow-lg shadow-pink-500/25 font-extrabold"
-                          : "bg-[#f8f9fc] text-[#64748b] hover:bg-[#f3f4f6] hover:text-[#1e293b] font-semibold"
+                          ? "bg-[#ec4899] text-white -translate-y-1 shadow-lg shadow-pink-500/30 font-extrabold"
+                          : "bg-white border border-[#f3f4f6] text-[#1e293b] hover:border-pink-200 font-bold shadow-2xs"
                       }`}
                     >
-                      <span className={`text-[10px] ${isActive ? "text-pink-100" : "text-[#94a3b8]"}`}>{d.dayName}</span>
-                      <span className="text-xs mt-1">{d.dateNum}</span>
-                      <span className={`w-1.5 h-1.5 rounded-full mt-1 ${isActive ? "bg-white" : "bg-[#cbd5e1]"}`} />
+                      <span className={`text-[10px] font-semibold ${isActive ? "text-pink-100" : "text-[#64748b]"}`}>
+                        {d.dayName}
+                      </span>
+                      <span className="text-sm font-extrabold mt-1">{d.dateNum}</span>
                     </button>
                   );
                 })}
               </div>
             </div>
 
-            {/* 3. Upcoming Deliveries & Shifts Vertical List */}
-            <div className="space-y-3">
+            {/* 3. Upcoming Deliveries & Shifts Card (Matches Mockup Activity Feed with Left Icons) */}
+            <div className="saas-card p-5 space-y-3.5">
               <div className="flex items-center justify-between">
                 <h4 className="text-sm font-extrabold text-[#1e293b]">Upcoming Deliveries & Shifts</h4>
                 <button
@@ -3286,89 +3276,71 @@
                   See All
                 </button>
               </div>
-              <div className="space-y-2.5">
+              <div className="space-y-3">
                 {[
                   {
                     id: "up-1",
+                    icon: "schedule",
+                    category: "Activity feed",
                     title: "Steel Coil Bridge (80t)",
-                    sub: "MetroSteel Industries · 5d Lead",
-                    time: "Oct 21 · 08:00",
-                    dot: "bg-[#10b981]",
-                    badge: "bg-emerald-50 text-[#10b981]",
+                    time: "Oct 21 · 08:00 (MetroSteel)",
                     nav: "suppliers",
                   },
                   {
                     id: "up-2",
-                    title: "PO-103 Shift Resequence",
-                    sub: "Line A · Delayed +2 Days",
-                    time: "Oct 22 · 06:00",
-                    dot: "bg-[#0d6efd]",
-                    badge: "bg-blue-50 text-[#0d6efd]",
+                    icon: "truck",
+                    category: "Shift resequence",
+                    title: "PO-103 Line A (+2d Swap)",
+                    time: "Oct 22 · 06:00 (Laguna Plant)",
                     nav: "schedule",
-                  },
-                  {
-                    id: "up-3",
-                    title: "PO-102 Chassis Expedite",
-                    sub: "Steel Buffer Allocation",
-                    time: "Oct 24 · 14:00",
-                    dot: "bg-[#f97316]",
-                    badge: "bg-[#fff7ed] text-[#f97316]",
-                    nav: "orders",
                   },
                 ].map((item) => (
                   <div
                     key={item.id}
                     onClick={() => navigateMain(item.nav)}
-                    className="p-3.5 rounded-[18px] bg-[#f8f9fc] hover:bg-white border border-[#f3f4f6] hover:shadow-md transition-all duration-300 cursor-pointer flex items-start gap-3"
+                    className="p-2.5 rounded-[16px] hover:bg-[#f8f9fc] transition-all duration-300 cursor-pointer flex items-start gap-3"
                   >
-                    <span className={`w-2.5 h-2.5 rounded-full mt-1.5 shrink-0 ${item.dot}`} />
+                    <div className="w-10 h-10 rounded-full bg-[#f8f9fc] border border-[#e2e8f0] flex items-center justify-center text-[#334155] shrink-0 mt-0.5">
+                      <Icon name={item.icon} className="w-4 h-4" />
+                    </div>
                     <div className="min-w-0 flex-1">
-                      <div className="text-xs font-extrabold text-[#1e293b] truncate">{item.title}</div>
-                      <div className="text-[11px] font-medium text-[#64748b] truncate mt-0.5">{item.sub}</div>
-                      <div className="mt-1.5 flex items-center justify-between">
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${item.badge}`}>
-                          {item.time}
-                        </span>
-                        <Icon name="arrow-right" className="w-3.5 h-3.5 text-[#94a3b8]" />
-                      </div>
+                      <div className="text-[11px] font-medium text-[#64748b]">{item.category}</div>
+                      <div className="text-xs font-extrabold text-[#1e293b] truncate mt-0.5">{item.title}</div>
+                      <div className="text-[11px] font-medium text-[#94a3b8] mt-0.5">{item.time}</div>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* 4. AI Action Checklist (Todo List with Custom Checkboxes) */}
-            <div className="space-y-3 pt-1">
+            {/* 4. AI Action Checklist Card (Matches Bottom-Right Round Checklist in Mockup) */}
+            <div className="saas-card p-5 space-y-3.5">
               <div className="flex items-center justify-between">
                 <h4 className="text-sm font-extrabold text-[#1e293b]">AI Action Checklist</h4>
                 <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-[#10b981]">
                   {completedRecCount}/4 Done
                 </span>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 {[
                   {
                     key: "REC_RFQ_METRO",
                     label: "Send RFQ to MetroSteel Industries",
-                    sub: "Unlock stock & live quote",
                     done: Boolean(completedRecs.REC_RFQ_METRO),
                   },
                   {
                     key: "REC_RFQ_BACKUPS",
                     label: "Request quotes from 3 backup suppliers",
-                    sub: "Compare confirmed stock & price",
                     done: Boolean(completedRecs.REC_RFQ_BACKUPS),
                   },
                   {
                     key: "REC_SCHEDULE",
                     label: "Delay PO-103 by 2 days",
-                    sub: "Save production schedule",
                     done: Boolean(completedRecs.REC_SCHEDULE),
                   },
                   {
                     key: "REC_PRIORITIZE",
                     label: "Expedite shipping for PO-102",
-                    sub: "Protect Car Chassis SLA",
                     done: Boolean(completedRecs.REC_PRIORITIZE),
                   },
                 ].map((todo) => (
@@ -3381,33 +3353,24 @@
                         [todo.key]: !prev[todo.key],
                       }))
                     }
-                    className={`w-full text-left p-3 rounded-[16px] border transition-all duration-300 flex items-start gap-3 ${
-                      todo.done
-                        ? "bg-emerald-50/50 border-emerald-200/80"
-                        : "bg-[#f8f9fc] border-[#f3f4f6] hover:bg-white hover:shadow-xs"
-                    }`}
+                    className="w-full text-left py-1.5 px-1 rounded-[12px] hover:bg-[#f8f9fc] transition-all duration-200 flex items-center gap-3"
                   >
                     <span
-                      className={`mt-0.5 w-5 h-5 rounded-[7px] flex items-center justify-center shrink-0 transition-colors ${
+                      className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 transition-colors ${
                         todo.done
-                          ? "bg-[#10b981] text-white shadow-xs"
+                          ? "bg-[#10b981] text-white border-2 border-[#10b981]"
                           : "bg-white border-2 border-[#cbd5e1]"
                       }`}
                     >
-                      {todo.done && <Icon name="check" className="w-3.5 h-3.5" />}
+                      {todo.done && <Icon name="check" className="w-3 h-3" />}
                     </span>
-                    <div className="min-w-0 flex-1">
-                      <div
-                        className={`text-xs font-bold leading-snug ${
-                          todo.done ? "line-through text-[#64748b]" : "text-[#1e293b]"
-                        }`}
-                      >
-                        {todo.label}
-                      </div>
-                      <div className="text-[10px] font-medium text-[#64748b] mt-0.5">
-                        {todo.sub}
-                      </div>
-                    </div>
+                    <span
+                      className={`text-xs font-bold leading-snug ${
+                        todo.done ? "line-through text-[#94a3b8]" : "text-[#1e293b]"
+                      }`}
+                    >
+                      {todo.label}
+                    </span>
                   </button>
                 ))}
               </div>
