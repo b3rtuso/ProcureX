@@ -1428,9 +1428,9 @@
                   </div>
                 </div>
 
-                {/* Right: Pill-Shaped Search Bar + Simulate CTA + Notification Bell */}
-                <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto justify-end">
-                  <div className="relative flex-1 sm:w-72 xl:w-80 min-w-[210px]">
+                {/* Right: Elongated Pill-Shaped Search Bar + Simulate CTA + Notification Bell */}
+                <div className="flex items-center gap-3 w-full 2xl:w-auto 2xl:flex-1 justify-end max-w-full">
+                  <div className="relative flex-1 min-w-[260px] sm:min-w-[420px] xl:min-w-[500px]">
                     <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-[#64748b]">
                       <Icon name="search" className="w-4 h-4" />
                     </span>
@@ -1439,7 +1439,7 @@
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder="Search purchase orders, suppliers, materials..."
-                      className="w-full pl-11 pr-10 py-2.5 text-xs sm:text-sm bg-white border border-[#f3f4f6] rounded-full shadow-xs text-[#1e293b] placeholder-[#64748b] focus:outline-none focus:border-[#0d6efd] transition-all duration-300"
+                      className="w-full pl-11 pr-12 py-3 text-xs sm:text-sm bg-white border border-[#f3f4f6] rounded-full shadow-xs text-[#1e293b] placeholder-[#64748b] focus:outline-none focus:border-[#0d6efd] transition-all duration-300"
                     />
                     {searchQuery && (
                       <button
