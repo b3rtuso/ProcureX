@@ -159,6 +159,10 @@
           return <svg {...props}><path d="M10 17h4V5H2v12h3"/><path d="M20 17h2v-3.34a4 4 0 0 0-1.17-2.83L19 9h-5"/><path d="M14 17h1"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>;
         case "more-vertical":
           return <svg {...props}><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>;
+        case "calendar":
+          return <svg {...props}><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>;
+        case "plus":
+          return <svg {...props}><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>;
         default:
           return <svg {...props}><circle cx="12" cy="12" r="10"/></svg>;
       }
@@ -794,6 +798,196 @@
       const [hoveredBarIndex, setHoveredBarIndex] = useState(null);
       const [selectedPlant, setSelectedPlant] = useState("Brescia & Manila Plant");
 
+      // Interactive Calendar Pop-up & Scheduled Deliveries State
+      const [showCalendarModal, setShowCalendarModal] = useState(false);
+      const [calendarEvents, setCalendarEvents] = useState([
+        {
+          id: "up-1",
+          dateKey: "Oct 21",
+          icon: "schedule",
+          category: "Supplier Delivery",
+          title: "Steel Coil Bridge (80t)",
+          supplierName: "MetroSteel Industries",
+          time: "Oct 21 · 08:00 (MetroSteel)",
+          nav: "suppliers",
+        },
+        {
+          id: "up-2",
+          dateKey: "Oct 22",
+          icon: "truck",
+          category: "Shift Resequence",
+          title: "PO-103 Line A (+2d Swap)",
+          supplierName: "Laguna Plant",
+          time: "Oct 22 · 06:00 (Laguna Plant)",
+          nav: "schedule",
+        },
+        {
+          id: "up-3",
+          dateKey: "Oct 24",
+          icon: "orders",
+          category: "Buffer Allocation",
+          title: "PO-102 Chassis Expedite",
+          supplierName: "Global Metals Co.",
+          time: "Oct 24 · 14:00 (Dock B)",
+          nav: "orders",
+        },
+      ]);
+      const [calendarScheduleForm, setCalendarScheduleForm] = useState({
+        dateKey: "Oct 21",
+        isoDate: "2026-10-21",
+        supplierId: "SUP-METRO",
+        material: "Steel Coil",
+        quantity: "5,000 kg",
+        timeSlot: "08:00 HRS",
+      });
+
+      // Full October 2026 Days Array (Oct 1 = Thursday)
+      const allOctoberDays = useMemo(() => {
+        const dayNames = ["Thu", "Fri", "Sat", "Sun", "Mon", "Tue", "Wed"];
+        return Array.from({ length: 31 }, (_, i) => {
+          const num = i + 1;
+          return {
+            dayName: dayNames[i % 7],
+            dateNum: String(num).padStart(2, "0"),
+            rawNum: num,
+            key: `Oct ${num}`,
+          };
+        });
+      }, []);
+
+      // 5-day horizontal window centered on selectedCalendarDay
+      const visibleCalendarDays = useMemo(() => {
+        const match = /^Oct\s+(\d+)$/i.exec(selectedCalendarDay);
+        const dayNum = match ? parseInt(match[1], 10) : 21;
+        let startIdx = Math.max(0, Math.min(26, dayNum - 3));
+        return allOctoberDays.slice(startIdx, startIdx + 5);
+      }, [selectedCalendarDay, allOctoberDays]);
+
+      // Add New Supplier Modal State
+      const [showAddSupplierModal, setShowAddSupplierModal] = useState(false);
+      const [newSupplierForm, setNewSupplierForm] = useState({
+        name: "",
+        material: "Steel Coil",
+        location: "Batangas, Philippines",
+        leadTime: "2–5 days",
+        leadTimeDays: 4,
+        reliability: 94,
+        contactEmail: "",
+        phone: "+63 (02) 8555-0199",
+        notes: "",
+      });
+
+      const handleOpenCalendarPopup = (dayKey = selectedCalendarDay) => {
+        const match = /^Oct\s+(\d+)$/i.exec(dayKey);
+        const dayNum = match ? String(parseInt(match[1], 10)).padStart(2, "0") : "21";
+        setSelectedCalendarDay(dayKey);
+        setCalendarScheduleForm((prev) => ({
+          ...prev,
+          dateKey: dayKey,
+          isoDate: `2026-10-${dayNum}`,
+        }));
+        setShowCalendarModal(true);
+      };
+
+      const handleScheduleCalendarEvent = (e) => {
+        if (e) e.preventDefault();
+        const chosenSup =
+          suppliers.find((s) => s.id === calendarScheduleForm.supplierId) || suppliers[0];
+        const chosenDateKey = calendarScheduleForm.dateKey || "Oct 21";
+        setSelectedCalendarDay(chosenDateKey);
+        const newEvent = {
+          id: `up-${Date.now().toString().slice(-4)}`,
+          dateKey: chosenDateKey,
+          icon: "truck",
+          category: `Scheduled · ${chosenSup ? chosenSup.name : "Supplier"}`,
+          title: `${calendarScheduleForm.material} (${calendarScheduleForm.quantity})`,
+          supplierName: chosenSup ? chosenSup.name : "Custom Supplier",
+          time: `${chosenDateKey} · ${calendarScheduleForm.timeSlot} (${chosenSup ? chosenSup.name : "Supplier"})`,
+          nav: "suppliers",
+        };
+        setCalendarEvents((prev) => [newEvent, ...prev]);
+        setShowCalendarModal(false);
+        showToast(
+          `Scheduled ${calendarScheduleForm.quantity} ${calendarScheduleForm.material} with ${
+            chosenSup ? chosenSup.name : "Supplier"
+          } on ${chosenDateKey} (${calendarScheduleForm.timeSlot}).`
+        );
+      };
+
+      const handleAddSupplier = (e) => {
+        if (e) e.preventDefault();
+        const cleanName = newSupplierForm.name.trim();
+        if (!cleanName) {
+          showToast("Please enter a Supplier Name.");
+          return;
+        }
+        const suffix = Date.now().toString().slice(-3);
+        const supId = `SUP-CUSTOM-${suffix}`;
+        const rfqId = `RFQ-CUSTOM-${suffix}`;
+        const email =
+          newSupplierForm.contactEmail.trim() ||
+          `sales@${cleanName.toLowerCase().replace(/[^a-z0-9]/g, "")}.com.ph`;
+
+        const createdSupplier = {
+          id: supId,
+          rfqId,
+          name: cleanName,
+          material: newSupplierForm.material || "Steel Coil",
+          location: newSupplierForm.location || "Manila, Philippines",
+          leadTime: newSupplierForm.leadTime || "3–6 days",
+          leadTimeDays: Number(newSupplierForm.leadTimeDays) || 4,
+          status: "PRE-APPROVED",
+          reliability: Number(newSupplierForm.reliability) || 93,
+          quoteReceived: false,
+          quotedPricePerKg: "₱65/kg",
+          quotedTotal: "₱325,000 (for 5,000 kg)",
+          confirmedAvailableQty: "6,000 kg",
+          quoteStatus: "Not Sent — Send RFQ to Check Stock & Price",
+          recommendedAfterQuote: false,
+          postQuoteBadge: "VERIFIED CUSTOM SUPPLIER",
+          contactEmail: email,
+          phone: newSupplierForm.phone || "+63 (02) 8555-0199",
+          notes:
+            newSupplierForm.notes.trim() ||
+            `Custom pre-approved supplier in ${newSupplierForm.location}. Send an RFQ to confirm current stock and unit pricing.`,
+        };
+
+        const createdRfq = {
+          id: rfqId,
+          supplierId: supId,
+          supplierName: cleanName,
+          recipientEmail: email,
+          location: createdSupplier.location,
+          leadTime: createdSupplier.leadTime,
+          requestedQty: "5,000 kg",
+          status: "Ready for Approval",
+          supplierReply: null,
+          subject: `URGENT RFQ [Ref: EXP-2026-${suffix}] — Stock Availability & Price Inquiry: 5,000 kg ${createdSupplier.material}`,
+          message: `Dear ${cleanName} Commercial Desk,\n\nWe are requesting an immediate stock availability check and unit price quotation for our upcoming production schedule:\n\n• Material Specification: ${createdSupplier.material} (Industrial Grade)\n• Requested Quantity: 5,000 kg\n• Target Delivery Window: ${createdSupplier.leadTime} (DDP Receiving Dock)\n\nPLEASE CONFIRM BY RETURN EMAIL:\n1. Immediate Stock Availability in your ${createdSupplier.location} warehouse.\n2. Best unit price (PHP/kg) and delivery freight charges.\n3. Earliest guaranteed dock arrival date.\n\nBest regards,\nProcurement Manager\nSupplyChain AI Manufacturing Operations`,
+        };
+
+        setSuppliers((prev) => [...prev, createdSupplier]);
+        setRfqs((prev) => [...prev, createdRfq]);
+        setCalendarScheduleForm((prev) => ({
+          ...prev,
+          supplierId: supId,
+          material: createdSupplier.material,
+        }));
+        setNewSupplierForm({
+          name: "",
+          material: "Steel Coil",
+          location: "Batangas, Philippines",
+          leadTime: "2–5 days",
+          leadTimeDays: 4,
+          reliability: 94,
+          contactEmail: "",
+          phone: "+63 (02) 8555-0199",
+          notes: "",
+        });
+        setShowAddSupplierModal(false);
+        showToast(`Added supplier "${cleanName}" and generated a draft RFQ!`);
+      };
+
       const [amdTelemetry, setAmdTelemetry] = useState({
         model_id: "Gemma-4-31B-IT",
         gpu_device: "AMD Instinct MI300X (192GB HBM3, ROCm 6.3)",
@@ -937,7 +1131,12 @@
         setRfqs(prev =>
           prev.map(r => {
             if (rfqId && r.id !== rfqId) return r;
-            const rep = replyData[r.id];
+            const rep = replyData[r.id] || {
+              stockConfirmed: "6,000 kg in stock (Confirmed)",
+              quotedPrice: "₱65/kg (₱325,000 for 5,000 kg)",
+              promisedDelivery: `${r.leadTime} (Confirmed)`,
+              note: `We confirm 6,000 kg of ${r.supplierName} stock ready for immediate dispatch at ₱65/kg.`
+            };
             return {
               ...r,
               status: "Quote Received (Stock & Price Revealed)",
@@ -967,6 +1166,13 @@
                 ...s,
                 quoteReceived: true,
                 quoteStatus: "✓ Quote Received: 10,000 kg in stock @ ₱61/kg (11d)"
+              };
+            }
+            if (s.rfqId && (!rfqId || rfqId === s.rfqId)) {
+              return {
+                ...s,
+                quoteReceived: true,
+                quoteStatus: `✓ Quote Received: ${s.confirmedAvailableQty} in stock @ ${s.quotedPricePerKg}`
               };
             }
             return s;
@@ -2361,20 +2567,31 @@
                       </p>
                     </div>
 
-                    <div className="flex items-center gap-1.5 bg-white p-1 rounded-xl border border-slate-200 self-start">
-                      {["Suppliers", "Compare", "RFQ Drafts"].map((tab) => (
-                        <button
-                          key={tab}
-                          onClick={() => setSuppliersTab(tab)}
-                          className={`px-3.5 py-2 rounded-lg text-xs font-semibold transition-colors ${
-                            suppliersTab === tab
-                              ? "bg-brand-600 text-white"
-                              : "text-slate-600 hover:bg-slate-100"
-                          }`}
-                        >
-                          {tab}
-                        </button>
-                      ))}
+                    <div className="flex flex-wrap items-center gap-2.5 self-start">
+                      <button
+                        type="button"
+                        onClick={() => setShowAddSupplierModal(true)}
+                        className="px-3.5 py-2 rounded-[12px] bg-[#0d6efd] hover:bg-blue-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-md shadow-[#0d6efd]/20 transition-all duration-300"
+                      >
+                        <Icon name="plus" className="w-4 h-4" />
+                        <span>Add Supplier</span>
+                      </button>
+
+                      <div className="flex items-center gap-1.5 bg-white p-1 rounded-xl border border-slate-200">
+                        {["Suppliers", "Compare", "RFQ Drafts"].map((tab) => (
+                          <button
+                            key={tab}
+                            onClick={() => setSuppliersTab(tab)}
+                            className={`px-3.5 py-2 rounded-lg text-xs font-semibold transition-colors ${
+                              suppliersTab === tab
+                                ? "bg-brand-600 text-white"
+                                : "text-slate-600 hover:bg-slate-100"
+                            }`}
+                          >
+                            {tab}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
 
@@ -3228,26 +3445,30 @@
               </div>
             </div>
 
-            {/* 2. Mini-Calendar Card (Horizontal Day Scroller with #ec4899 Active Day Pill) */}
+            {/* 2. Mini-Calendar Card (Click to Open Calendar Pop-up, Set Date & Schedule Supplier) */}
             <div className="saas-card p-5 space-y-3.5">
               <div className="flex items-center justify-between">
                 <h4 className="text-sm font-extrabold text-[#1e293b]">Plant Schedule</h4>
-                <span className="text-[11px] font-bold text-[#64748b]">Oct 2026</span>
+                <button
+                  type="button"
+                  onClick={() => handleOpenCalendarPopup(selectedCalendarDay)}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-pink-50 hover:bg-pink-100 text-[#ec4899] text-[11px] font-extrabold transition-colors"
+                  title="Open full calendar to set date & assign supplier"
+                >
+                  <Icon name="calendar" className="w-3.5 h-3.5" />
+                  <span>{selectedCalendarDay}, 2026</span>
+                </button>
               </div>
+
               <div className="grid grid-cols-5 gap-2 pt-1">
-                {[
-                  { dayName: "Wed", dateNum: "19", key: "Oct 19" },
-                  { dayName: "Thu", dateNum: "20", key: "Oct 20" },
-                  { dayName: "Oct", dateNum: "21", key: "Oct 21" },
-                  { dayName: "Sat", dateNum: "22", key: "Oct 22" },
-                  { dayName: "Oct", dateNum: "23", key: "Oct 23" },
-                ].map((d) => {
+                {visibleCalendarDays.map((d) => {
                   const isActive = selectedCalendarDay === d.key;
+                  const hasEvent = calendarEvents.some((ev) => ev.dateKey === d.key);
                   return (
                     <button
                       key={d.key}
                       type="button"
-                      onClick={() => setSelectedCalendarDay(d.key)}
+                      onClick={() => handleOpenCalendarPopup(d.key)}
                       className={`py-3 px-1 rounded-[16px] flex flex-col items-center justify-center transition-all duration-300 ${
                         isActive
                           ? "bg-[#ec4899] text-white -translate-y-1 shadow-lg shadow-pink-500/30 font-extrabold"
@@ -3258,55 +3479,70 @@
                         {d.dayName}
                       </span>
                       <span className="text-sm font-extrabold mt-1">{d.dateNum}</span>
+                      <span
+                        className={`w-1.5 h-1.5 rounded-full mt-1 ${
+                          isActive
+                            ? "bg-white"
+                            : hasEvent
+                            ? "bg-[#ec4899]"
+                            : "bg-transparent"
+                        }`}
+                      />
                     </button>
                   );
                 })}
               </div>
+
+              {/* Quick Actions inside Calendar Card: Open Calendar Pop-up + Add Supplier */}
+              <div className="grid grid-cols-2 gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => handleOpenCalendarPopup(selectedCalendarDay)}
+                  className="py-2 px-2.5 rounded-[12px] bg-[#f8f9fc] hover:bg-pink-50 text-[#1e293b] hover:text-[#ec4899] border border-[#e2e8f0] hover:border-pink-200 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all"
+                >
+                  <Icon name="calendar" className="w-3.5 h-3.5 text-[#ec4899]" />
+                  <span>Set Date</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowAddSupplierModal(true)}
+                  className="py-2 px-2.5 rounded-[12px] bg-[#f8f9fc] hover:bg-blue-50 text-[#1e293b] hover:text-[#0d6efd] border border-[#e2e8f0] hover:border-blue-200 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all"
+                >
+                  <Icon name="plus" className="w-3.5 h-3.5 text-[#0d6efd]" />
+                  <span>Add Supplier</span>
+                </button>
+              </div>
             </div>
 
-            {/* 3. Upcoming Deliveries & Shifts Card (Matches Mockup Activity Feed with Left Icons) */}
+            {/* 3. Upcoming Deliveries & Shifts Card (Dynamic Calendar Events + Supplier Deliveries) */}
             <div className="saas-card p-5 space-y-3.5">
               <div className="flex items-center justify-between">
                 <h4 className="text-sm font-extrabold text-[#1e293b]">Upcoming Deliveries & Shifts</h4>
                 <button
                   type="button"
-                  onClick={() => navigateMain("schedule")}
+                  onClick={() => handleOpenCalendarPopup(selectedCalendarDay)}
                   className="text-[11px] font-bold text-[#0d6efd] hover:underline"
                 >
-                  See All
+                  + Schedule
                 </button>
               </div>
               <div className="space-y-3">
-                {[
-                  {
-                    id: "up-1",
-                    icon: "schedule",
-                    category: "Activity feed",
-                    title: "Steel Coil Bridge (80t)",
-                    time: "Oct 21 · 08:00 (MetroSteel)",
-                    nav: "suppliers",
-                  },
-                  {
-                    id: "up-2",
-                    icon: "truck",
-                    category: "Shift resequence",
-                    title: "PO-103 Line A (+2d Swap)",
-                    time: "Oct 22 · 06:00 (Laguna Plant)",
-                    nav: "schedule",
-                  },
-                ].map((item) => (
+                {calendarEvents.slice(0, 4).map((item) => (
                   <div
                     key={item.id}
-                    onClick={() => navigateMain(item.nav)}
+                    onClick={() => {
+                      setSelectedCalendarDay(item.dateKey || "Oct 21");
+                      navigateMain(item.nav || "schedule");
+                    }}
                     className="p-2.5 rounded-[16px] hover:bg-[#f8f9fc] transition-all duration-300 cursor-pointer flex items-start gap-3"
                   >
                     <div className="w-10 h-10 rounded-full bg-[#f8f9fc] border border-[#e2e8f0] flex items-center justify-center text-[#334155] shrink-0 mt-0.5">
-                      <Icon name={item.icon} className="w-4 h-4" />
+                      <Icon name={item.icon || "truck"} className="w-4 h-4" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="text-[11px] font-medium text-[#64748b]">{item.category}</div>
+                      <div className="text-[11px] font-medium text-[#64748b] truncate">{item.category}</div>
                       <div className="text-xs font-extrabold text-[#1e293b] truncate mt-0.5">{item.title}</div>
-                      <div className="text-[11px] font-medium text-[#94a3b8] mt-0.5">{item.time}</div>
+                      <div className="text-[11px] font-medium text-[#94a3b8] truncate mt-0.5">{item.time}</div>
                     </div>
                   </div>
                 ))}
@@ -4209,6 +4445,434 @@
                   </button>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* =========================================================================
+              INTERACTIVE CALENDAR POP-UP & SUPPLIER DELIVERY SCHEDULER MODAL
+             ========================================================================= */}
+          {showCalendarModal && (
+            <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
+              <div className="bg-white rounded-[24px] max-w-3xl w-full p-6 sm:p-7 space-y-5 shadow-2xl border border-[#f3f4f6] animate-in max-h-[92vh] overflow-y-auto">
+                <div className="flex items-start justify-between gap-4 border-b border-[#f3f4f6] pb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-11 h-11 rounded-[14px] bg-pink-50 text-[#ec4899] flex items-center justify-center shrink-0">
+                      <Icon name="calendar" className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-extrabold text-[#1e293b]">
+                        Plant Schedule Calendar & Supplier Delivery Planner
+                      </h3>
+                      <p className="text-xs font-medium text-[#64748b]">
+                        Select any date on the calendar below to set the active plant date or schedule a supplier delivery
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowCalendarModal(false)}
+                    className="p-2 rounded-[12px] text-[#64748b] hover:text-[#1e293b] hover:bg-[#f8f9fc]"
+                  >
+                    <Icon name="x" className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+                  {/* Left (7 cols): Full Interactive October 2026 Calendar Grid + Direct Date Picker */}
+                  <div className="md:col-span-7 p-4 rounded-[20px] bg-[#f8f9fc] border border-[#f3f4f6] space-y-4">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div className="text-sm font-extrabold text-[#1e293b]">October 2026</div>
+                      <div className="flex items-center gap-2">
+                        <label className="text-[11px] font-bold text-[#64748b]">Pick Date:</label>
+                        <input
+                          type="date"
+                          value={calendarScheduleForm.isoDate}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            if (!val) return;
+                            const parts = val.split("-");
+                            const dayNum = parseInt(parts[2] || "21", 10);
+                            const newKey = `Oct ${dayNum}`;
+                            setSelectedCalendarDay(newKey);
+                            setCalendarScheduleForm((prev) => ({
+                              ...prev,
+                              isoDate: val,
+                              dateKey: newKey,
+                            }));
+                          }}
+                          className="px-2.5 py-1 rounded-[10px] bg-white border border-[#e2e8f0] text-xs font-bold text-[#1e293b] focus:outline-none focus:border-[#ec4899]"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Weekday Header */}
+                    <div className="grid grid-cols-7 gap-1.5 text-center text-[11px] font-bold text-[#94a3b8]">
+                      {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((w) => (
+                        <div key={w} className="py-1">{w}</div>
+                      ))}
+                    </div>
+
+                    {/* Days Grid (Oct 1, 2026 is Thursday -> 4 leading empty slots) */}
+                    <div className="grid grid-cols-7 gap-1.5">
+                      {[0, 1, 2, 3].map((emptyIdx) => (
+                        <div key={`empty-${emptyIdx}`} className="h-10" />
+                      ))}
+                      {allOctoberDays.map((d) => {
+                        const isSelected = calendarScheduleForm.dateKey === d.key;
+                        const hasEvent = calendarEvents.some((ev) => ev.dateKey === d.key);
+                        return (
+                          <button
+                            key={d.key}
+                            type="button"
+                            onClick={() => {
+                              setSelectedCalendarDay(d.key);
+                              setCalendarScheduleForm((prev) => ({
+                                ...prev,
+                                dateKey: d.key,
+                                isoDate: `2026-10-${d.dateNum}`,
+                              }));
+                            }}
+                            className={`h-10 rounded-[12px] flex flex-col items-center justify-center text-xs transition-all ${
+                              isSelected
+                                ? "bg-[#ec4899] text-white font-extrabold shadow-md shadow-pink-500/25 scale-105"
+                                : "bg-white hover:bg-pink-50 text-[#1e293b] font-bold border border-[#f3f4f6]"
+                            }`}
+                          >
+                            <span>{d.rawNum}</span>
+                            <span
+                              className={`w-1.5 h-1.5 rounded-full mt-0.5 ${
+                                isSelected
+                                  ? "bg-white"
+                                  : hasEvent
+                                  ? "bg-[#ec4899]"
+                                  : "bg-transparent"
+                              }`}
+                            />
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Events on Selected Day */}
+                    <div className="pt-2 border-t border-[#e2e8f0]/70 space-y-2">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="font-extrabold text-[#1e293b]">
+                          Scheduled on {calendarScheduleForm.dateKey}, 2026:
+                        </span>
+                        <span className="font-bold text-[#ec4899]">
+                          {calendarEvents.filter((ev) => ev.dateKey === calendarScheduleForm.dateKey).length} Event(s)
+                        </span>
+                      </div>
+                      {calendarEvents.filter((ev) => ev.dateKey === calendarScheduleForm.dateKey).length === 0 ? (
+                        <div className="text-[11px] font-medium text-[#64748b] bg-white p-2.5 rounded-[12px] border border-[#f3f4f6]">
+                          No supplier deliveries scheduled on {calendarScheduleForm.dateKey} yet. Use the form on the right to assign a supplier delivery.
+                        </div>
+                      ) : (
+                        <div className="space-y-1.5">
+                          {calendarEvents
+                            .filter((ev) => ev.dateKey === calendarScheduleForm.dateKey)
+                            .map((ev) => (
+                              <div
+                                key={ev.id}
+                                className="p-2.5 rounded-[12px] bg-white border border-[#f3f4f6] flex items-center justify-between text-xs"
+                              >
+                                <div className="min-w-0">
+                                  <div className="font-extrabold text-[#1e293b] truncate">{ev.title}</div>
+                                  <div className="text-[11px] font-medium text-[#64748b] truncate">{ev.time}</div>
+                                </div>
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-[#10b981] shrink-0">
+                                  Scheduled
+                                </span>
+                              </div>
+                            ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Right (5 cols): Set Date & Assign Supplier Form */}
+                  <form onSubmit={handleScheduleCalendarEvent} className="md:col-span-5 flex flex-col justify-between space-y-4">
+                    <div className="space-y-3.5">
+                      <div className="p-3.5 rounded-[16px] bg-pink-50/70 border border-pink-200/70 flex items-center justify-between">
+                        <div>
+                          <div className="text-[10px] font-bold uppercase tracking-wider text-[#ec4899]">
+                            Selected Plant Date
+                          </div>
+                          <div className="text-base font-extrabold text-[#1e293b] mt-0.5">
+                            {calendarScheduleForm.dateKey}, 2026
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedCalendarDay(calendarScheduleForm.dateKey);
+                            setShowCalendarModal(false);
+                            showToast(`Active calendar date set to ${calendarScheduleForm.dateKey}, 2026.`);
+                          }}
+                          className="px-3 py-1.5 rounded-[10px] bg-white hover:bg-pink-100 text-[#ec4899] border border-pink-200 text-xs font-extrabold transition-colors"
+                        >
+                          Set Date Only
+                        </button>
+                      </div>
+
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="text-xs font-extrabold text-[#1e293b]">
+                            Select Supplier for Delivery
+                          </label>
+                          <button
+                            type="button"
+                            onClick={() => setShowAddSupplierModal(true)}
+                            className="text-[11px] font-extrabold text-[#0d6efd] hover:underline flex items-center gap-1"
+                          >
+                            <Icon name="plus" className="w-3.5 h-3.5" />
+                            <span>Add New Supplier</span>
+                          </button>
+                        </div>
+                        <select
+                          value={calendarScheduleForm.supplierId}
+                          onChange={(e) => {
+                            const sup = suppliers.find((s) => s.id === e.target.value);
+                            setCalendarScheduleForm((prev) => ({
+                              ...prev,
+                              supplierId: e.target.value,
+                              material: sup ? sup.material : prev.material,
+                            }));
+                          }}
+                          className="w-full px-3 py-2.5 rounded-[12px] bg-[#f8f9fc] border border-[#e2e8f0] text-xs font-bold text-[#1e293b] focus:outline-none focus:border-[#0d6efd]"
+                        >
+                          {suppliers.map((sup) => (
+                            <option key={sup.id} value={sup.id}>
+                              {sup.name} ({sup.location} · {sup.leadTime})
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-xs font-extrabold text-[#1e293b] mb-1">
+                            Material
+                          </label>
+                          <input
+                            type="text"
+                            value={calendarScheduleForm.material}
+                            onChange={(e) =>
+                              setCalendarScheduleForm((prev) => ({
+                                ...prev,
+                                material: e.target.value,
+                              }))
+                            }
+                            placeholder="e.g. Steel Coil"
+                            className="w-full px-3 py-2 rounded-[12px] bg-[#f8f9fc] border border-[#e2e8f0] text-xs font-bold text-[#1e293b] focus:outline-none focus:border-[#0d6efd]"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-extrabold text-[#1e293b] mb-1">
+                            Quantity
+                          </label>
+                          <input
+                            type="text"
+                            value={calendarScheduleForm.quantity}
+                            onChange={(e) =>
+                              setCalendarScheduleForm((prev) => ({
+                                ...prev,
+                                quantity: e.target.value,
+                              }))
+                            }
+                            placeholder="e.g. 5,000 kg"
+                            className="w-full px-3 py-2 rounded-[12px] bg-[#f8f9fc] border border-[#e2e8f0] text-xs font-bold text-[#1e293b] focus:outline-none focus:border-[#0d6efd]"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-extrabold text-[#1e293b] mb-1">
+                          Receiving Dock Time Slot
+                        </label>
+                        <select
+                          value={calendarScheduleForm.timeSlot}
+                          onChange={(e) =>
+                            setCalendarScheduleForm((prev) => ({
+                              ...prev,
+                              timeSlot: e.target.value,
+                            }))
+                          }
+                          className="w-full px-3 py-2 rounded-[12px] bg-[#f8f9fc] border border-[#e2e8f0] text-xs font-bold text-[#1e293b] focus:outline-none focus:border-[#0d6efd]"
+                        >
+                          <option value="08:00 HRS">08:00 HRS · Morning Dock A</option>
+                          <option value="11:30 HRS">11:30 HRS · Midday Dock B</option>
+                          <option value="14:00 HRS">14:00 HRS · Afternoon Shift</option>
+                          <option value="18:00 HRS">18:00 HRS · Express Night Slot</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="pt-3 border-t border-[#f3f4f6] flex items-center justify-end gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setShowCalendarModal(false)}
+                        className="px-4 py-2.5 rounded-[12px] border border-[#e2e8f0] text-xs font-bold text-[#64748b] hover:text-[#1e293b]"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-4 py-2.5 rounded-[12px] bg-[#ec4899] hover:bg-pink-600 text-white text-xs font-extrabold shadow-lg shadow-pink-500/25 transition-all"
+                      >
+                        Set Date & Schedule Supplier
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* =========================================================================
+              ADD NEW SUPPLIER MODAL (Accessible from Calendar & Suppliers Page)
+             ========================================================================= */}
+          {showAddSupplierModal && (
+            <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
+              <form
+                onSubmit={handleAddSupplier}
+                className="bg-white rounded-[24px] max-w-lg w-full p-6 sm:p-7 space-y-4 shadow-2xl border border-[#f3f4f6] animate-in"
+              >
+                <div className="flex items-center justify-between border-b border-[#f3f4f6] pb-3.5">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-[12px] bg-blue-50 text-[#0d6efd] flex items-center justify-center shrink-0">
+                      <Icon name="suppliers" className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-base font-extrabold text-[#1e293b]">
+                        Add Pre-Approved Backup Supplier
+                      </h3>
+                      <p className="text-xs font-medium text-[#64748b]">
+                        Register a supplier to generate RFQs and schedule deliveries on the calendar
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowAddSupplierModal(false)}
+                    className="p-1.5 rounded-lg text-[#64748b] hover:text-[#1e293b]"
+                  >
+                    <Icon name="x" className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <div className="space-y-3 text-xs">
+                  <div>
+                    <label className="block font-extrabold text-[#1e293b] mb-1">
+                      Supplier Company Name *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={newSupplierForm.name}
+                      onChange={(e) =>
+                        setNewSupplierForm((prev) => ({ ...prev, name: e.target.value }))
+                      }
+                      placeholder="e.g., Luzon Steel & Alloys Corp."
+                      className="w-full px-3.5 py-2.5 rounded-[12px] bg-[#f8f9fc] border border-[#e2e8f0] font-bold text-[#1e293b] focus:outline-none focus:border-[#0d6efd]"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block font-extrabold text-[#1e293b] mb-1">
+                        Material Supplied
+                      </label>
+                      <input
+                        type="text"
+                        value={newSupplierForm.material}
+                        onChange={(e) =>
+                          setNewSupplierForm((prev) => ({ ...prev, material: e.target.value }))
+                        }
+                        placeholder="e.g., Steel Coil, Aluminum"
+                        className="w-full px-3.5 py-2.5 rounded-[12px] bg-[#f8f9fc] border border-[#e2e8f0] font-bold text-[#1e293b] focus:outline-none focus:border-[#0d6efd]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block font-extrabold text-[#1e293b] mb-1">
+                        Warehouse Location
+                      </label>
+                      <input
+                        type="text"
+                        value={newSupplierForm.location}
+                        onChange={(e) =>
+                          setNewSupplierForm((prev) => ({ ...prev, location: e.target.value }))
+                        }
+                        placeholder="e.g., Batangas, Philippines"
+                        className="w-full px-3.5 py-2.5 rounded-[12px] bg-[#f8f9fc] border border-[#e2e8f0] font-bold text-[#1e293b] focus:outline-none focus:border-[#0d6efd]"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block font-extrabold text-[#1e293b] mb-1">
+                        Estimated Lead Time
+                      </label>
+                      <input
+                        type="text"
+                        value={newSupplierForm.leadTime}
+                        onChange={(e) =>
+                          setNewSupplierForm((prev) => ({ ...prev, leadTime: e.target.value }))
+                        }
+                        placeholder="e.g., 2–5 days"
+                        className="w-full px-3.5 py-2.5 rounded-[12px] bg-[#f8f9fc] border border-[#e2e8f0] font-bold text-[#1e293b] focus:outline-none focus:border-[#0d6efd]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block font-extrabold text-[#1e293b] mb-1">
+                        Historical Reliability (%)
+                      </label>
+                      <input
+                        type="number"
+                        min="50"
+                        max="100"
+                        value={newSupplierForm.reliability}
+                        onChange={(e) =>
+                          setNewSupplierForm((prev) => ({ ...prev, reliability: e.target.value }))
+                        }
+                        className="w-full px-3.5 py-2.5 rounded-[12px] bg-[#f8f9fc] border border-[#e2e8f0] font-bold text-[#1e293b] focus:outline-none focus:border-[#0d6efd]"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block font-extrabold text-[#1e293b] mb-1">
+                      Commercial Contact Email (for AI RFQ Dispatch)
+                    </label>
+                    <input
+                      type="email"
+                      value={newSupplierForm.contactEmail}
+                      onChange={(e) =>
+                        setNewSupplierForm((prev) => ({ ...prev, contactEmail: e.target.value }))
+                      }
+                      placeholder="e.g., sales@luzonsteel.com.ph"
+                      className="w-full px-3.5 py-2.5 rounded-[12px] bg-[#f8f9fc] border border-[#e2e8f0] font-mono font-semibold text-[#1e293b] focus:outline-none focus:border-[#0d6efd]"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#f3f4f6]">
+                  <button
+                    type="button"
+                    onClick={() => setShowAddSupplierModal(false)}
+                    className="px-4 py-2.5 rounded-[12px] border border-[#e2e8f0] text-xs font-bold text-[#64748b] hover:text-[#1e293b]"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-5 py-2.5 rounded-[12px] bg-[#0d6efd] hover:bg-blue-700 text-white text-xs font-extrabold shadow-lg shadow-[#0d6efd]/20 transition-all"
+                  >
+                    Save Supplier & Generate RFQ Draft
+                  </button>
+                </div>
+              </form>
             </div>
           )}
 
