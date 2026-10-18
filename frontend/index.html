@@ -822,6 +822,8 @@
       // Inline RFQ Editing & Mock Supplier Reply Email Viewer State
       const [editingRfqId, setEditingRfqId] = useState(null);
       const [viewingSupplierEmailRfq, setViewingSupplierEmailRfq] = useState(null);
+      const [queuedSupplierEmails, setQueuedSupplierEmails] = useState([]);
+      const [queuedEmailIndex, setQueuedEmailIndex] = useState(0);
 
       // Schedule State
       const [scheduleApproved, setScheduleApproved] = useState("PENDING");
@@ -842,9 +844,80 @@
       const [selectedSimScenarioId, setSelectedSimScenarioId] = useState("STEEL_DELAY");
       const [simStageIndex, setSimStageIndex] = useState(-1);
 
-      // Nested Reports & Settings Modals
+      // Nested Reports & Settings Modals with Year/Month Filters
       const [showReportsModal, setShowReportsModal] = useState(false);
       const [showSettingsModal, setShowSettingsModal] = useState(false);
+      const [roiPeriodType, setRoiPeriodType] = useState("monthly"); // "yearly" | "monthly"
+      const [roiSelectedPeriod, setRoiSelectedPeriod] = useState("oct-2026");
+
+      // Comprehensive Period-Aware ROI Analytics Dataset
+      const ROI_DATA_PERIODS = {
+        "2026-ytd": {
+          label: "2026 (YTD)",
+          totalDisruptions: 14,
+          disruptionsResolved: 12,
+          productionOrdersSaved: 28,
+          avgResponseTime: "1.4 mins",
+          emergencyPurchaseCosts: "₱412,000",
+          lineStoppagesAvoided: "8 incidents (16 shifts)",
+          estimatedSavings: "₱820,000",
+          slaAvoided: "₱560,000",
+          idleAverted: "₱260,000",
+          periodBadge: "Annual Cumulative"
+        },
+        "2025-fy": {
+          label: "2025 (Full Year)",
+          totalDisruptions: 34,
+          disruptionsResolved: 32,
+          productionOrdersSaved: 76,
+          avgResponseTime: "2.6 mins",
+          emergencyPurchaseCosts: "₱1,120,000",
+          lineStoppagesAvoided: "21 incidents",
+          estimatedSavings: "₱2,450,000",
+          slaAvoided: "₱1,680,000",
+          idleAverted: "₱770,000",
+          periodBadge: "Audited FY2025"
+        },
+        "oct-2026": {
+          label: "October 2026 (Current Active)",
+          totalDisruptions: 3,
+          disruptionsResolved: 2,
+          productionOrdersSaved: 4,
+          avgResponseTime: "1.8 mins",
+          emergencyPurchaseCosts: "₱140,000",
+          lineStoppagesAvoided: "2 incidents (4 shifts)",
+          estimatedSavings: "₱221,080",
+          slaAvoided: "₱66,000",
+          idleAverted: "₱169,000",
+          periodBadge: "Active Month"
+        },
+        "sep-2026": {
+          label: "September 2026",
+          totalDisruptions: 4,
+          disruptionsResolved: 4,
+          productionOrdersSaved: 9,
+          avgResponseTime: "1.2 mins",
+          emergencyPurchaseCosts: "₱115,000",
+          lineStoppagesAvoided: "3 incidents (6 shifts)",
+          estimatedSavings: "₱245,000",
+          slaAvoided: "₱155,000",
+          idleAverted: "₱90,000",
+          periodBadge: "Closed"
+        },
+        "aug-2026": {
+          label: "August 2026",
+          totalDisruptions: 3,
+          disruptionsResolved: 3,
+          productionOrdersSaved: 7,
+          avgResponseTime: "1.5 mins",
+          emergencyPurchaseCosts: "₱88,000",
+          lineStoppagesAvoided: "2 incidents (4 shifts)",
+          estimatedSavings: "₱184,000",
+          slaAvoided: "₱120,000",
+          idleAverted: "₱64,000",
+          periodBadge: "Closed"
+        }
+      };
 
       // Reports Metrics State
       const [reportStats, setReportStats] = useState({
@@ -1442,7 +1515,7 @@ Tel: +63 (82) 298-4410 | Web: www.fastmetals.com.ph`
 
         setRfqs(prev =>
           prev.map(r => {
-            if (rfqId && r.id !== rfqId) return r;
+            if (rfqId && rfqId !== "ALL_BACKUPS" && r.id !== rfqId) return r;
             const rep = replyData[r.id] || {
               stockConfirmed: "6,000 kg in stock (Confirmed)",
               quotedPrice: "₱65/kg (₱325,000 for 5,000 kg)",
@@ -1466,28 +1539,28 @@ Tel: +63 (82) 298-4410 | Web: www.fastmetals.com.ph`
 
         setSuppliers(prev =>
           prev.map(s => {
-            if (s.id === "SUP-METRO" && (!rfqId || rfqId === "RFQ-METRO")) {
+            if (s.id === "SUP-METRO" && (!rfqId || rfqId === "RFQ-METRO" || rfqId === "ALL_BACKUPS")) {
               return {
                 ...s,
                 quoteReceived: true,
                 quoteStatus: "✓ Quote Received: 5,000 kg in stock @ ₱68/kg (5d)"
               };
             }
-            if (s.id === "SUP-IRON" && (!rfqId || rfqId === "RFQ-IRON")) {
+            if (s.id === "SUP-IRON" && (!rfqId || rfqId === "RFQ-IRON" || rfqId === "ALL_BACKUPS")) {
               return {
                 ...s,
                 quoteReceived: true,
                 quoteStatus: "✓ Quote Received: 8,000 kg in stock @ ₱64/kg (8d)"
               };
             }
-            if (s.id === "SUP-FAST" && (!rfqId || rfqId === "RFQ-FAST")) {
+            if (s.id === "SUP-FAST" && (!rfqId || rfqId === "RFQ-FAST" || rfqId === "ALL_BACKUPS")) {
               return {
                 ...s,
                 quoteReceived: true,
                 quoteStatus: "✓ Quote Received: 10,000 kg in stock @ ₱61/kg (11d)"
               };
             }
-            if (s.rfqId && (!rfqId || rfqId === s.rfqId)) {
+            if (s.rfqId && (!rfqId || rfqId === s.rfqId || rfqId === "ALL_BACKUPS")) {
               return {
                 ...s,
                 quoteReceived: true,
@@ -1498,11 +1571,27 @@ Tel: +63 (82) 298-4410 | Web: www.fastmetals.com.ph`
           })
         );
 
-        if (rfqId && rfqId !== "ALL_BACKUPS") {
+        if (rfqId === "ALL_BACKUPS" || !rfqId) {
+          setTimeout(() => {
+            setRfqs(curr => {
+              const allReplied = curr.filter(x => x.supplierReply);
+              if (allReplied.length > 0) {
+                setQueuedSupplierEmails(allReplied);
+                setQueuedEmailIndex(0);
+                setViewingSupplierEmailRfq(allReplied[0]);
+              }
+              return curr;
+            });
+          }, 80);
+        } else {
           setTimeout(() => {
             setRfqs(curr => {
               const updated = curr.find(x => x.id === rfqId);
               if (updated && updated.supplierReply) {
+                const allReplied = curr.filter(x => x.supplierReply);
+                const idx = allReplied.findIndex(x => x.id === rfqId);
+                setQueuedSupplierEmails(allReplied.length > 0 ? allReplied : [updated]);
+                setQueuedEmailIndex(idx >= 0 ? idx : 0);
                 setViewingSupplierEmailRfq(updated);
               }
               return curr;
@@ -1511,23 +1600,33 @@ Tel: +63 (82) 298-4410 | Web: www.fastmetals.com.ph`
         }
       };
 
-      // Open incoming supplier quote email modal
+      // Open incoming supplier quote email modal with queue support
       const openSupplierQuoteEmail = (targetKey) => {
         let rfq = rfqs.find(r => r.id === targetKey || r.supplierId === targetKey);
         if (!rfq) {
           rfq = rfqs.find(r => r.supplierId === targetKey || r.id.toLowerCase().includes(String(targetKey).toLowerCase()));
         }
         if (rfq && rfq.supplierReply) {
+          const allReplied = rfqs.filter(x => x.supplierReply);
+          const foundIdx = allReplied.findIndex(x => x.id === rfq.id);
+          setQueuedSupplierEmails(allReplied.length > 0 ? allReplied : [rfq]);
+          setQueuedEmailIndex(foundIdx >= 0 ? foundIdx : 0);
           setViewingSupplierEmailRfq(rfq);
         } else if (rfq) {
           applySupplierQuoteReply(rfq.id);
           setTimeout(() => {
             setRfqs(curr => {
               const updated = curr.find(x => x.id === rfq.id);
-              if (updated) setViewingSupplierEmailRfq(updated);
+              if (updated) {
+                const allReplied = curr.filter(x => x.supplierReply);
+                const foundIdx = allReplied.findIndex(x => x.id === rfq.id);
+                setQueuedSupplierEmails(allReplied.length > 0 ? allReplied : [updated]);
+                setQueuedEmailIndex(foundIdx >= 0 ? foundIdx : 0);
+                setViewingSupplierEmailRfq(updated);
+              }
               return curr;
             });
-          }, 40);
+          }, 60);
         } else {
           const defaultMap = {
             "SUP-METRO": "RFQ-METRO",
@@ -1969,6 +2068,39 @@ Tel: +63 (82) 298-4410 | Web: www.fastmetals.com.ph`
                 </div>
               </div>
             </div>
+
+            {/* User Profile Card placed cleanly below AMD MI300X */}
+            <div className="px-5 pb-5 pt-0">
+              <div className="p-3.5 rounded-[20px] bg-white border border-[#e2e8f0] shadow-xs flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="relative w-10 h-10 rounded-full p-0.5 bg-gradient-to-tr from-[#0d6efd] via-[#3b82f6] to-[#0d6efd] shrink-0 shadow-xs">
+                    <div className="w-full h-full rounded-full bg-white flex items-center justify-center text-[#1e293b] font-extrabold text-xs">
+                      PM
+                    </div>
+                    <span
+                      className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-[#10b981] border-2 border-white"
+                      title="Procurement Manager Active"
+                    />
+                  </div>
+                  <div className="min-w-0">
+                    <h3 className="text-xs font-extrabold text-[#1e293b] truncate">
+                      Procurement Manager
+                    </h3>
+                    <p className="text-[11px] font-medium text-[#64748b] truncate mt-0.5">
+                      {selectedPlant}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowSettingsModal(true)}
+                  aria-label="Profile Settings"
+                  className="p-1 rounded-lg text-[#64748b] hover:text-[#1e293b] hover:bg-[#f8f9fc] transition-colors shrink-0"
+                >
+                  <Icon name="more-vertical" className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
           </aside>
 
           {/* =========================================================================
@@ -2248,13 +2380,6 @@ Tel: +63 (82) 298-4410 | Web: www.fastmetals.com.ph`
                           <span className="w-3 h-3 rounded-[4px] bg-[#10b981] inline-block shrink-0" />
                           Optimal Stock Coverage
                         </span>
-                        <button
-                          type="button"
-                          onClick={() => setShowReportsModal(true)}
-                          className="px-3 py-1.5 rounded-[10px] bg-[#f8f9fc] hover:bg-blue-50 text-[#1e293b] hover:text-[#0d6efd] border border-[#e2e8f0] text-xs font-bold transition-colors whitespace-nowrap shrink-0"
-                        >
-                          All Analytics ▾
-                        </button>
                       </div>
                     </div>
 
@@ -2299,13 +2424,6 @@ Tel: +63 (82) 298-4410 | Web: www.fastmetals.com.ph`
                               onClick={() => navigateMain(bar.nav)}
                               className="relative z-10 flex flex-col items-center justify-end h-full cursor-pointer group px-1"
                             >
-                              {/* Highlighted Bar Floating White Tooltip (⚡ 85% On Track) */}
-                              {bar.highlighted && hoveredBarIndex !== idx && (
-                                <div className="absolute -top-10 z-20 bg-white shadow-lg border border-[#e2e8f0] rounded-[12px] px-3 py-1.5 text-xs font-extrabold text-[#1e293b] whitespace-nowrap flex items-center gap-1.5">
-                                  <span>⚡</span>
-                                  <span>85% On Track</span>
-                                </div>
-                              )}
 
                               {/* Default Dark Badge on Jun Bar or Hovered Bar (Lead Time: 5d 4h) */}
                               {(hoveredBarIndex === idx || (bar.defaultDarkBadge && hoveredBarIndex === null)) && (
@@ -3472,22 +3590,17 @@ Tel: +63 (82) 298-4410 | Web: www.fastmetals.com.ph`
 
                           <div className="flex flex-wrap items-center gap-2.5 pt-2">
                             <button
-                              onClick={() =>
-                                setApprovalModal({
-                                  type: "RFQ",
-                                  subAction: "SEND",
-                                  targetId: "ALL_BACKUPS",
-                                  recKey: "REC_RFQ_BACKUPS",
-                                  stepBadge: "Step 1 of 2 · Send All 3 Stock & Price RFQs",
-                                  title: "All 3 Backup Suppliers (MetroSteel, IronWorks, FastMetals)",
-                                  summary: "Dispatch formal RFQ emails to all 3 pre-approved backup suppliers to request their current stock availability and unit pricing.",
-                                  delivery: "3–14 days (Historical window)",
-                                  reason: "Suppliers must reply with their stock quantity and price before the AI can rank the best option."
-                                })
-                              }
-                              className="px-5 py-2.5 rounded-xl bg-[#0d6efd] hover:bg-blue-600 text-white font-semibold text-sm shadow-xs transition-colors whitespace-nowrap"
+                              onClick={() => {
+                                setRfqs(prev => prev.map(r => ({ ...r, status: "Sent — Awaiting Quote" })));
+                                dispatchRfqViaBackend("ALL_BACKUPS");
+                                markRecComplete("REC_RFQ_METRO");
+                                markRecComplete("REC_RFQ_BACKUPS");
+                                showToast("All 3 RFQs dispatched! Queuing incoming quotes from MetroSteel, IronWorks, and FastMetals...");
+                              }}
+                              className="px-5 py-2.5 rounded-xl bg-[#0d6efd] hover:bg-blue-600 text-white font-bold text-sm shadow-xs transition-colors whitespace-nowrap flex items-center gap-2"
                             >
-                              Dispatch All 3 RFQs
+                              <Icon name="send" className="w-4 h-4" />
+                              <span>Dispatch All 3 RFQs</span>
                             </button>
 
                             <button
@@ -4103,63 +4216,16 @@ Tel: +63 (82) 298-4410 | Web: www.fastmetals.com.ph`
           </div>
 
           {/* =========================================================================
-              COLUMN 3: RIGHT SIDEBAR (Profile, Mini-Calendar, Upcoming & AI Todo List)
-              Width: lg:w-64 xl:w-72 2xl:w-80 | Fixed Height 100vh | 4 Distinct Cards
+              COLUMN 3: RIGHT SIDEBAR (Plant Schedule Mini-Calendar & Upcoming Deliveries)
+              Rendered strictly on DASHBOARD page only (100% width on other pages)
              ========================================================================= */}
-          <aside
-            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-            className="hidden lg:flex lg:flex-col lg:w-64 xl:w-72 2xl:w-80 shrink-0 bg-[#f8f9fc] border-l border-[#f3f4f6] h-screen overflow-y-auto no-scrollbar p-4 2xl:p-6 space-y-5 select-none"
-          >
-            {/* 1. User Profile Card (Matches Top-Right of Mockup) */}
-            <div className="saas-card p-4 2xl:p-5 space-y-4">
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="relative w-12 h-12 rounded-full p-0.5 bg-gradient-to-tr from-[#0d6efd] via-[#3b82f6] to-[#0d6efd] shrink-0 shadow-xs">
-                    <div className="w-full h-full rounded-full bg-white flex items-center justify-center text-[#1e293b] font-extrabold text-sm">
-                      PM
-                    </div>
-                    <span
-                      className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-[#10b981] border-2 border-white"
-                      title="Autonomous Agent Active"
-                    />
-                  </div>
-                  <div className="min-w-0">
-                    <h3 className="text-sm font-extrabold text-[#1e293b] truncate">
-                      Procurement Manager
-                    </h3>
-                    <p className="text-xs font-medium text-[#64748b] truncate mt-0.5">
-                      {selectedPlant}
-                    </p>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setShowSettingsModal(true)}
-                  aria-label="Profile & System Settings"
-                  className="p-1.5 rounded-lg text-[#64748b] hover:text-[#1e293b] hover:bg-[#f8f9fc] transition-colors"
-                >
-                  <Icon name="more-vertical" className="w-4 h-4" />
-                </button>
-              </div>
-
-              <div className="grid grid-cols-3 divide-x divide-[#f3f4f6] pt-3 border-t border-[#f3f4f6] text-center tabular">
-                <div className="px-2">
-                  <div className="text-base font-extrabold text-[#1e293b]">{alerts.length}</div>
-                  <div className="text-[11px] font-medium text-[#64748b] mt-0.5">Alerts</div>
-                </div>
-                <div className="px-2">
-                  <div className="text-base font-extrabold text-[#1e293b]">85%</div>
-                  <div className="text-[11px] font-medium text-[#64748b] mt-0.5">Resilience</div>
-                </div>
-                <div className="px-2">
-                  <div className="text-base font-extrabold text-[#1e293b]">₱820K</div>
-                  <div className="text-[11px] font-medium text-[#64748b] mt-0.5">Saved</div>
-                </div>
-              </div>
-            </div>
-
-            {/* 2. Mini-Calendar Card (Click to Open Calendar Pop-up, Set Date & Schedule Supplier) */}
-            <div className="saas-card p-4 2xl:p-5 space-y-3.5">
+          {activeNav === "dashboard" && (
+            <aside
+              style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+              className="hidden lg:flex lg:flex-col lg:w-64 xl:w-72 2xl:w-80 shrink-0 bg-[#f8f9fc] border-l border-[#f3f4f6] h-screen overflow-y-auto no-scrollbar p-4 2xl:p-6 space-y-5 select-none"
+            >
+              {/* 1. Mini-Calendar Card (Click to Open Calendar Pop-up, Set Date & Schedule Supplier) */}
+              <div className="saas-card p-4 2xl:p-5 space-y-3.5">
               <div className="flex items-center justify-between">
                 <h4 className="text-sm font-extrabold text-[#1e293b]">Plant Schedule</h4>
                 <button
@@ -4262,6 +4328,7 @@ Tel: +63 (82) 298-4410 | Web: www.fastmetals.com.ph`
               </div>
             </div>
           </aside>
+        )}
 
           {/* =========================================================================
               ALERT DETAILS / AI ANALYSIS LARGE DRAWER
@@ -4820,68 +4887,213 @@ Tel: +63 (82) 298-4410 | Web: www.fastmetals.com.ph`
           {/* =========================================================================
               REPORTS MODAL
              ========================================================================= */}
-          {showReportsModal && (
-            <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
-              <div className="bg-white rounded-2xl max-w-3xl w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-slate-200 animate-in max-h-[90vh] overflow-y-auto no-scrollbar">
-                <div className="flex items-center justify-between border-b border-slate-200 pb-4">
-                  <div>
-                    <h3 className="text-xl font-bold text-slate-900">SupplyChain AI — Executive Impact Reports</h3>
-                    <p className="text-xs text-slate-500">
-                      Cumulative exception recovery metrics and cost avoidance summary
-                    </p>
-                  </div>
-                  <button onClick={() => setShowReportsModal(false)} className="text-slate-400 hover:text-slate-700 shrink-0" aria-label="Close modal">
-                    <Icon name="x" className="w-5 h-5" />
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 tabular">
-                  <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
-                    <div className="text-xs text-slate-500">Total disruptions</div>
-                    <div className="text-2xl font-bold text-slate-900 mt-1">{reportStats.totalDisruptions}</div>
-                  </div>
-                  <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200">
-                    <div className="text-xs text-emerald-800">Disruptions resolved</div>
-                    <div className="text-2xl font-bold text-emerald-700 mt-1">{reportStats.disruptionsResolved}</div>
-                  </div>
-                  <div className="p-4 rounded-xl bg-brand-50 border border-brand-200">
-                    <div className="text-xs text-brand-800">Production orders saved</div>
-                    <div className="text-2xl font-bold text-brand-700 mt-1">{reportStats.productionOrdersSaved}</div>
-                  </div>
-                  <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
-                    <div className="text-xs text-slate-500">Average response time</div>
-                    <div className="text-2xl font-bold text-slate-900 mt-1">{reportStats.avgResponseTime}</div>
-                  </div>
-                  <div className="p-4 rounded-xl bg-amber-50 border border-amber-200">
-                    <div className="text-xs text-amber-800">Emergency purchase costs</div>
-                    <div className="text-2xl font-bold text-amber-700 mt-1">{reportStats.emergencyPurchaseCosts}</div>
-                  </div>
-                  <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
-                    <div className="text-xs text-slate-500">Potential line stoppages avoided</div>
-                    <div className="text-2xl font-bold text-slate-900 mt-1">{reportStats.lineStoppagesAvoided}</div>
-                  </div>
-                </div>
-
-                <div className="p-5 rounded-xl bg-emerald-900 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div>
-                    <div className="text-xs uppercase tracking-wider text-emerald-300 font-semibold">
-                      Estimated Net Savings
+          {showReportsModal && (() => {
+            const activeRoiData = ROI_DATA_PERIODS[roiSelectedPeriod] || ROI_DATA_PERIODS["oct-2026"];
+            return (
+              <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5">
+                <div className="bg-white rounded-[24px] max-w-3xl w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-slate-200 animate-in max-h-[92vh] overflow-y-auto no-scrollbar">
+                  {/* Header */}
+                  <div className="flex items-start justify-between border-b border-slate-100 pb-4 gap-4">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="badge-pill px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-blue-50 text-[#0d6efd] border border-blue-200">
+                          Executive Sourcing & Operations Intelligence
+                        </span>
+                        <span className="badge-pill px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-50 text-[#10b981] border border-emerald-200">
+                          {activeRoiData.periodBadge}
+                        </span>
+                      </div>
+                      <h3 className="text-xl sm:text-2xl font-black text-[#1e293b] tracking-tight mt-1">
+                        SupplyChain AI · Executive ROI & Value Realization
+                      </h3>
+                      <p className="text-xs font-medium text-[#64748b] mt-0.5">
+                        Real-time audit of avoided factory downtime, mitigated SLA penalties, and emergency procurement efficiency
+                      </p>
                     </div>
-                    <div className="text-3xl font-bold mt-1 tabular">{reportStats.estimatedSavings}</div>
-                    <div className="text-xs text-emerald-200 mt-0.5">
-                      Prevented SLA penalties and unscheduled factory downtime across PO-102 and PO-103
+                    <button
+                      onClick={() => setShowReportsModal(false)}
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-slate-800 hover:bg-slate-100 transition-colors shrink-0"
+                      aria-label="Close modal"
+                    >
+                      <Icon name="x" className="w-5 h-5" />
+                    </button>
+                  </div>
+
+                  {/* Filter Toolbar: Yearly vs Monthly Toggle + Period Selector */}
+                  <div className="p-4 rounded-2xl bg-[#f8f9fc] border border-[#e2e8f0] flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-[#64748b]">View Mode:</span>
+                      <div className="inline-flex rounded-xl bg-white p-1 border border-[#e2e8f0] shadow-2xs">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setRoiPeriodType("monthly");
+                            if (!["oct-2026", "sep-2026", "aug-2026"].includes(roiSelectedPeriod)) {
+                              setRoiSelectedPeriod("oct-2026");
+                            }
+                          }}
+                          className={`px-3 py-1 rounded-lg text-xs font-bold transition-all whitespace-nowrap shrink-0 ${
+                            roiPeriodType === "monthly"
+                              ? "bg-[#0d6efd] text-white shadow-xs"
+                              : "text-[#64748b] hover:text-[#1e293b]"
+                          }`}
+                        >
+                          Monthly Breakdown
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setRoiPeriodType("yearly");
+                            if (!["2026-ytd", "2025-fy"].includes(roiSelectedPeriod)) {
+                              setRoiSelectedPeriod("2026-ytd");
+                            }
+                          }}
+                          className={`px-3 py-1 rounded-lg text-xs font-bold transition-all whitespace-nowrap shrink-0 ${
+                            roiPeriodType === "yearly"
+                              ? "bg-[#0d6efd] text-white shadow-xs"
+                              : "text-[#64748b] hover:text-[#1e293b]"
+                          }`}
+                        >
+                          Annual / Year Filter
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-[#64748b]">Select Period:</span>
+                      {roiPeriodType === "monthly" ? (
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          {[
+                            { key: "oct-2026", label: "October 2026 (Active)" },
+                            { key: "sep-2026", label: "September 2026" },
+                            { key: "aug-2026", label: "August 2026" }
+                          ].map(item => (
+                            <button
+                              key={item.key}
+                              type="button"
+                              onClick={() => setRoiSelectedPeriod(item.key)}
+                              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all whitespace-nowrap shrink-0 border ${
+                                roiSelectedPeriod === item.key
+                                  ? "bg-[#1e293b] text-white border-[#1e293b]"
+                                  : "bg-white text-[#64748b] border-[#e2e8f0] hover:border-slate-400"
+                              }`}
+                            >
+                              {item.label}
+                            </button>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          {[
+                            { key: "2026-ytd", label: "2026 (Year-to-Date)" },
+                            { key: "2025-fy", label: "2025 (Full Year)" }
+                          ].map(item => (
+                            <button
+                              key={item.key}
+                              type="button"
+                              onClick={() => setRoiSelectedPeriod(item.key)}
+                              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all whitespace-nowrap shrink-0 border ${
+                                roiSelectedPeriod === item.key
+                                  ? "bg-[#1e293b] text-white border-[#1e293b]"
+                                  : "bg-white text-[#64748b] border-[#e2e8f0] hover:border-slate-400"
+                              }`}
+                            >
+                              {item.label}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
-                  <button
-                    onClick={() => setShowReportsModal(false)}
-                    className="px-4 py-2 rounded-lg bg-white text-emerald-950 text-xs font-bold self-start sm:self-center whitespace-nowrap shrink-0"
-                  >
-                    Done
-                  </button>
+
+                  {/* 6 Key Performance Metric Cards */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 tabular">
+                    <div className="p-4 rounded-2xl bg-white border border-[#e2e8f0] shadow-xs hover:border-blue-200 transition-colors">
+                      <div className="text-[11px] font-bold uppercase tracking-wider text-[#64748b]">Total Disruptions Flagged</div>
+                      <div className="text-2xl font-black text-[#1e293b] mt-1">{activeRoiData.totalDisruptions}</div>
+                      <div className="text-[11px] text-[#64748b] mt-0.5">Supplier delays & logistics signals</div>
+                    </div>
+                    <div className="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-200 shadow-xs">
+                      <div className="text-[11px] font-bold uppercase tracking-wider text-[#065f46]">Disruptions Mitigated</div>
+                      <div className="text-2xl font-black text-[#047857] mt-1">{activeRoiData.disruptionsResolved}</div>
+                      <div className="text-[11px] text-[#065f46] mt-0.5">100% human-in-the-loop approved</div>
+                    </div>
+                    <div className="p-4 rounded-2xl bg-blue-50/60 border border-blue-200 shadow-xs">
+                      <div className="text-[11px] font-bold uppercase tracking-wider text-[#1e40af]">Factory Orders Protected</div>
+                      <div className="text-2xl font-black text-[#1d4ed8] mt-1">{activeRoiData.productionOrdersSaved}</div>
+                      <div className="text-[11px] text-[#1e40af] mt-0.5">Zero customer SLA cancellations</div>
+                    </div>
+                    <div className="p-4 rounded-2xl bg-white border border-[#e2e8f0] shadow-xs">
+                      <div className="text-[11px] font-bold uppercase tracking-wider text-[#64748b]">Avg Autonomous Response Time</div>
+                      <div className="text-2xl font-black text-[#1e293b] mt-1">{activeRoiData.avgResponseTime}</div>
+                      <div className="text-[11px] text-[#64748b] mt-0.5">From incoming signal to RFQ queue</div>
+                    </div>
+                    <div className="p-4 rounded-2xl bg-amber-50/60 border border-amber-200 shadow-xs">
+                      <div className="text-[11px] font-bold uppercase tracking-wider text-[#92400e]">Emergency Procurement Spend</div>
+                      <div className="text-2xl font-black text-[#b45309] mt-1">{activeRoiData.emergencyPurchaseCosts}</div>
+                      <div className="text-[11px] text-[#92400e] mt-0.5">Spot bridge and freight expedite</div>
+                    </div>
+                    <div className="p-4 rounded-2xl bg-white border border-[#e2e8f0] shadow-xs">
+                      <div className="text-[11px] font-bold uppercase tracking-wider text-[#64748b]">Unscheduled Stoppages Averted</div>
+                      <div className="text-2xl font-black text-[#1e293b] mt-1">{activeRoiData.lineStoppagesAvoided}</div>
+                      <div className="text-[11px] text-[#64748b] mt-0.5">Zero stamping line starvation</div>
+                    </div>
+                  </div>
+
+                  {/* High-Impact Executive Net Savings Card */}
+                  <div className="p-5 rounded-2xl bg-gradient-to-br from-[#064e3b] via-[#047857] to-[#0f172a] text-white shadow-lg space-y-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <div>
+                        <div className="text-xs uppercase tracking-wider text-emerald-300 font-extrabold flex items-center gap-2">
+                          <Icon name="shield" className="w-4 h-4 text-emerald-300" />
+                          <span>Estimated Net Financial Value Preserved ({activeRoiData.label})</span>
+                        </div>
+                        <div className="text-3xl sm:text-4xl font-black mt-1 font-mono tracking-tight text-white">
+                          {activeRoiData.estimatedSavings}
+                        </div>
+                        <p className="text-xs text-emerald-100/90 mt-1 max-w-xl">
+                          Calculated from contract penalty clauses avoided plus plant overhead saved via proactive aluminum shift swapping and fast-track bridge procurement.
+                        </p>
+                      </div>
+                      <div className="flex flex-col gap-1.5 shrink-0 sm:text-right">
+                        <div className="badge-pill bg-white/10 border border-white/20 text-white font-mono font-bold text-xs px-3 py-1.5 rounded-xl">
+                          SLA Penalties Averted: {activeRoiData.slaAvoided}
+                        </div>
+                        <div className="badge-pill bg-white/10 border border-white/20 text-white font-mono font-bold text-xs px-3 py-1.5 rounded-xl">
+                          Idle Shift Costs Saved: {activeRoiData.idleAverted}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Footer Actions */}
+                  <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100">
+                    <div className="text-xs font-semibold text-[#64748b] flex items-center gap-1.5">
+                      <Icon name="cpu" className="w-4 h-4 text-[#0d6efd]" />
+                      <span>Audited by AMD ROCm Gemma Agent Engine · Brescia & Laguna Plants</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          showToast(`Exported ROI Report for ${activeRoiData.label} as CSV/PDF.`);
+                        }}
+                        className="px-4 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold transition-colors whitespace-nowrap shrink-0"
+                      >
+                        Export Audit Log
+                      </button>
+                      <button
+                        onClick={() => setShowReportsModal(false)}
+                        className="px-5 py-2 rounded-xl bg-[#1e293b] hover:bg-slate-800 text-white text-xs font-bold transition-colors whitespace-nowrap shrink-0"
+                      >
+                        Close Report
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            );
+          })()}
 
           {/* =========================================================================
               SETTINGS MODAL
@@ -5607,6 +5819,66 @@ Tel: +63 (82) 298-4410 | Web: www.fastmetals.com.ph`
                   </button>
                 </div>
 
+                {/* Supplier Quote Queue Bar (When multiple quotes are available) */}
+                {queuedSupplierEmails && queuedSupplierEmails.length > 1 && (
+                  <div className="bg-[#0f172a] px-6 py-2.5 border-b border-slate-700/60 flex flex-wrap items-center justify-between gap-2 text-xs">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">
+                        Quote Queue ({queuedEmailIndex + 1} of {queuedSupplierEmails.length})
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      {queuedSupplierEmails.map((item, qIdx) => {
+                        const isCurrent = viewingSupplierEmailRfq.id === item.id;
+                        return (
+                          <button
+                            key={item.id}
+                            type="button"
+                            onClick={() => {
+                              setQueuedEmailIndex(qIdx);
+                              setViewingSupplierEmailRfq(item);
+                            }}
+                            className={`px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                              isCurrent
+                                ? "bg-emerald-500 text-white shadow-xs"
+                                : "bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white"
+                            }`}
+                          >
+                            <span>{qIdx + 1}. {item.supplierName}</span>
+                            <span className="text-[10px] opacity-80">({item.leadTime})</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        disabled={queuedEmailIndex === 0}
+                        onClick={() => {
+                          const prevIdx = Math.max(0, queuedEmailIndex - 1);
+                          setQueuedEmailIndex(prevIdx);
+                          setViewingSupplierEmailRfq(queuedSupplierEmails[prevIdx]);
+                        }}
+                        className="px-2.5 py-1 rounded-md bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-semibold transition-colors"
+                      >
+                        ← Prev
+                      </button>
+                      <button
+                        type="button"
+                        disabled={queuedEmailIndex >= queuedSupplierEmails.length - 1}
+                        onClick={() => {
+                          const nextIdx = Math.min(queuedSupplierEmails.length - 1, queuedEmailIndex + 1);
+                          setQueuedEmailIndex(nextIdx);
+                          setViewingSupplierEmailRfq(queuedSupplierEmails[nextIdx]);
+                        }}
+                        className="px-2.5 py-1 rounded-md bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-semibold transition-colors"
+                      >
+                        Next →
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 {/* Email Metadata Envelope */}
                 <div className="px-6 py-3.5 bg-slate-50 border-b border-slate-200 text-xs text-slate-700 space-y-1.5 shrink-0">
                   <div className="flex flex-wrap items-center justify-between gap-2">
@@ -5680,12 +5952,42 @@ Tel: +63 (82) 298-4410 | Web: www.fastmetals.com.ph`
 
                 {/* Modal Footer */}
                 <div className="p-4 sm:px-6 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3 shrink-0">
-                  <button
-                    onClick={() => setViewingSupplierEmailRfq(null)}
-                    className="px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-50 transition-all whitespace-nowrap shrink-0"
-                  >
-                    Close Window
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setViewingSupplierEmailRfq(null)}
+                      className="px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-50 transition-all whitespace-nowrap shrink-0"
+                    >
+                      Close Window
+                    </button>
+                    {queuedSupplierEmails && queuedSupplierEmails.length > 1 && (
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          disabled={queuedEmailIndex === 0}
+                          onClick={() => {
+                            const prevIdx = Math.max(0, queuedEmailIndex - 1);
+                            setQueuedEmailIndex(prevIdx);
+                            setViewingSupplierEmailRfq(queuedSupplierEmails[prevIdx]);
+                          }}
+                          className="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-bold text-slate-700 transition-colors whitespace-nowrap shrink-0"
+                        >
+                          ← Previous Quote
+                        </button>
+                        <button
+                          type="button"
+                          disabled={queuedEmailIndex >= queuedSupplierEmails.length - 1}
+                          onClick={() => {
+                            const nextIdx = Math.min(queuedSupplierEmails.length - 1, queuedEmailIndex + 1);
+                            setQueuedEmailIndex(nextIdx);
+                            setViewingSupplierEmailRfq(queuedSupplierEmails[nextIdx]);
+                          }}
+                          className="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-bold text-slate-700 transition-colors whitespace-nowrap shrink-0"
+                        >
+                          Next Quote →
+                        </button>
+                      </div>
+                    )}
+                  </div>
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => {
