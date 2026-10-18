@@ -12,7 +12,6 @@ from typing import Any
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, StreamingResponse
-from fastapi.staticfiles import StaticFiles
 
 from backend.agents.rfq_agent import simulate_vendor_replies
 from backend.agents.workflow import (
@@ -99,32 +98,23 @@ app.add_middleware(
 )
 
 
-# Mount compiled Vite static assets if present
-frontend_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend")
-dist_assets_dir = os.path.join(frontend_dir, "dist", "assets")
-os.makedirs(dist_assets_dir, exist_ok=True)
-app.mount("/assets", StaticFiles(directory=dist_assets_dir), name="assets")
-
-
 @app.get("/", response_class=HTMLResponse)
 async def serve_command_center():
-    """Serve the single-page React Supply Chain Command Center UI (Vite dist bundle with fallback)."""
-    dist_index = os.path.join(frontend_dir, "dist", "index.html")
-    if os.path.exists(dist_index):
-        return FileResponse(dist_index, media_type="text/html")
-    standalone_path = os.path.join(frontend_dir, "index.standalone.html")
-    if os.path.exists(standalone_path):
-        return FileResponse(standalone_path, media_type="text/html")
-    index_path = os.path.join(frontend_dir, "index.html")
-    if os.path.exists(index_path):
-        return FileResponse(index_path, media_type="text/html")
+    """Serve the single-page React Supply Chain Command Center UI."""
+    frontend_path = os.path.join(
+        os.path.dirname(os.path.dirname(__file__)), "frontend", "index.html"
+    )
+    if os.path.exists(frontend_path):
+        return FileResponse(frontend_path, media_type="text/html")
     return HTMLResponse("<h1>Frontend index.html not found</h1>", status_code=404)
 
 
 @app.get("/styles.css")
 async def serve_styles_css():
     """Serve the dedicated design system stylesheet."""
-    css_path = os.path.join(frontend_dir, "styles.css")
+    css_path = os.path.join(
+        os.path.dirname(os.path.dirname(__file__)), "frontend", "styles.css"
+    )
     if os.path.exists(css_path):
         return FileResponse(css_path, media_type="text/css")
     raise HTTPException(status_code=404, detail="styles.css not found")
@@ -434,40 +424,111 @@ async def dispatch_rfq_and_generate_replies(payload: dict[str, Any]) -> dict[str
         )
         conn.commit()
 
-        # Build supplier replies
+        # Build supplier replies with authentic mock email headers and text
         standard_replies = {
             "RFQ-METRO": {
                 "supplierId": "SUP-METRO",
                 "supplierName": "MetroSteel Industries",
+                "senderName": "Marcus Vance",
+                "senderTitle": "Commercial Sales Director",
+                "senderEmail": "sales@metrosteel.com.ph",
                 "location": "Manila, Philippines",
                 "stockConfirmed": "5,000 kg in stock (Manila warehouse)",
                 "quotedPrice": "₱68/kg (₱340,000 total)",
                 "promisedDelivery": "5 days (Guaranteed Oct 26)",
-                "replySubject": "RE: URGENT RFQ — MetroSteel Stock Confirmed (5,000 kg @ ₱68/kg)",
+                "replySubject": "RE: URGENT RFQ [Ref: EXP-2026-102] — Official Quotation & Stock Confirmation (5,000 kg Cold-Rolled Steel Coil)",
+                "timestamp": "Today · Just now",
                 "note": "We confirm 5,000 kg of ASTM A1008 2.0mm Steel Coil in our Manila warehouse ready for immediate slitting at ₱68/kg (DDP Laguna Stamping). Dedicated direct trucking ready.",
                 "aiNote": ai_note,
+                "emailBody": (
+                    "FROM: Marcus Vance <sales@metrosteel.com.ph>\n"
+                    "TO: Procurement Operations Desk <procurement@supplychain-ai.com>\n"
+                    "DATE: October 21, 2026, 14:32 (Just now)\n"
+                    "SUBJECT: RE: URGENT RFQ [Ref: EXP-2026-102] — Official Quotation & Stock Confirmation: 5,000 kg Cold-Rolled Steel Coil\n\n"
+                    "Dear Procurement Operations Team,\n\n"
+                    "Thank you for transmitting your formal Request for Quotation. Under our Pre-Approved Master Supply Agreement (MSA-2025-044), our Manila Service Center has verified physical warehouse coils and locked the following allocation for your Laguna stamping facility:\n\n"
+                    "COMMERCIAL & STOCK SPECIFICATIONS:\n"
+                    "• Material Specification: Cold-Rolled Steel Coil, 2.0mm Gauge, Grade ASTM A1008 / JIS G3141 SPCC-SD\n"
+                    "• Verified Available Stock: 5,000 kg (Physically verified in Bay C-2, ready for immediate slitting)\n"
+                    "• Binding Unit Price: ₱68.00 / kg (Net Total: ₱340,000.00 DDP Laguna Receiving Bay)\n"
+                    "• Guaranteed Delivery Arrival: 5 Calendar Days (October 26, 2026 · 08:00 AM GMT-8 Dock A)\n"
+                    "• Quality & Compliance: EN 10204 Type 3.1 Mill Test Certificate attached; ultrasonic testing verified zero defects.\n"
+                    "• Logistics & Transport: Dedicated flatbed trucking included. Driver assigned upon PO receipt.\n\n"
+                    "We can hold this inventory allocation for 48 hours. Please reply with your approved Purchase Order number to authorize coil slitting and truck dispatch immediately.\n\n"
+                    "Sincerely,\n"
+                    "Marcus Vance\n"
+                    "Commercial Sales Director · MetroSteel Industries Inc.\n"
+                    "Manila Service Center | Tel: +63 (02) 8882-9400"
+                ),
             },
             "RFQ-IRON": {
                 "supplierId": "SUP-IRON",
                 "supplierName": "IronWorks Supply",
+                "senderName": "Elena Rostova",
+                "senderTitle": "Commercial Director",
+                "senderEmail": "quotes@ironworkssupply.ph",
                 "location": "Cebu, Philippines",
                 "stockConfirmed": "8,000 kg in stock (Cebu depot)",
                 "quotedPrice": "₱64/kg (₱512,000 total)",
                 "promisedDelivery": "8 days (Oct 29)",
-                "replySubject": "RE: RFQ Inquiry — IronWorks Supply Stock Quotation (8,000 kg)",
+                "replySubject": "RE: URGENT RFQ [Ref: EXP-2026-103] — Stock Quotation & RoRo Dispatch: 8,000 kg Steel Coil",
+                "timestamp": "Today · Just now",
                 "note": "We confirm 8,000 kg available in our Cebu depot at ₱64/kg; earliest RoRo vessel arrival to Luzon dock is 8 calendar days.",
                 "aiNote": ai_note,
+                "emailBody": (
+                    "FROM: Elena Rostova <quotes@ironworkssupply.ph>\n"
+                    "TO: Materials Planning Desk <procurement@supplychain-ai.com>\n"
+                    "DATE: October 21, 2026, 14:33 (Just now)\n"
+                    "SUBJECT: RE: URGENT RFQ [Ref: EXP-2026-103] — Stock Quotation & RoRo Dispatch: 8,000 kg Steel Coil\n\n"
+                    "Dear Materials Planning Desk,\n\n"
+                    "We confirm receipt of your emergency RFQ. We have 8,000 kg of commercial steel coil in stock at our Cebu regional terminal ready for dispatch:\n\n"
+                    "COMMERCIAL & STOCK SPECIFICATIONS:\n"
+                    "• Material Specification: Cold-Rolled Steel Coil, 2.0mm Gauge, Grade ASTM A1008 / SPCC-SD\n"
+                    "• Confirmed In-Stock Quantity: 8,000 kg (Cebu Terminal Bay 4)\n"
+                    "• Binding Spot Price: ₱64.00 / kg (Net Total: ₱512,000.00 for full 8,000 kg lot)\n"
+                    "• Earliest Delivery Arrival: 8 Calendar Days (October 29, 2026 via inter-island RoRo vessel)\n"
+                    "• Logistics: Inter-island vessel transit + regional haulage to Laguna dock.\n"
+                    "• Quality Compliance: Standard mill inspection certified.\n\n"
+                    "Split delivery options are available upon request. Net 30 payment terms accepted upon QA receiving dock check.\n\n"
+                    "Best regards,\n"
+                    "Elena Rostova\n"
+                    "Commercial Director · IronWorks Supply Corp. (Cebu Depot)\n"
+                    "Tel: +63 (32) 412-8820 | Web: www.ironworkssupply.ph"
+                ),
             },
             "RFQ-FAST": {
                 "supplierId": "SUP-FAST",
                 "supplierName": "FastMetals Co.",
+                "senderName": "Arthur Pendelton",
+                "senderTitle": "VP of Coastal Distribution",
+                "senderEmail": "rfq@fastmetals.com.ph",
                 "location": "Davao, Philippines",
                 "stockConfirmed": "10,000 kg in stock (Davao warehouse)",
                 "quotedPrice": "₱61/kg (₱305,000 for 5,000 kg)",
                 "promisedDelivery": "11 days (Nov 1)",
-                "replySubject": "RE: Commercial Quotation — FastMetals Davao Depot Stock",
+                "replySubject": "RE: RFQ INQUIRY [Ref: EXP-2026-104] — Bulk Spot Quotation: 10,000 kg Steel Coil",
+                "timestamp": "Today · Just now",
                 "note": "We hold 10,000 kg in Davao at ₱61/kg; container coastal sea freight lead time to Laguna dock is 11 calendar days.",
                 "aiNote": ai_note,
+                "emailBody": (
+                    "FROM: Arthur Pendelton <rfq@fastmetals.com.ph>\n"
+                    "TO: Procurement Manager <procurement@supplychain-ai.com>\n"
+                    "DATE: October 21, 2026, 14:34 (Just now)\n"
+                    "SUBJECT: RE: RFQ INQUIRY [Ref: EXP-2026-104] — Bulk Spot Quotation: 10,000 kg Steel Coil\n\n"
+                    "Dear Procurement Manager,\n\n"
+                    "In response to your emergency material inquiry, FastMetals confirms high-volume coil stock at our Davao regional facility:\n\n"
+                    "COMMERCIAL & STOCK SPECIFICATIONS:\n"
+                    "• Material Specification: Cold-Rolled Steel Coil, 2.0mm Gauge, Grade ASTM A1008\n"
+                    "• Confirmed In-Stock Quantity: 10,000 kg (Davao Distribution Center)\n"
+                    "• Binding Spot Price: ₱61.00 / kg (Lowest unit rate; ₱305,000.00 for 5,000 kg partial lot)\n"
+                    "• Transit Duration: 11 Calendar Days (Sea container freight arriving November 1, 2026)\n"
+                    "• Logistics: Containerized coastal liner transit.\n\n"
+                    "Volume discount is locked. Requires 11 calendar days sea transit window.\n\n"
+                    "Sincerely,\n"
+                    "Arthur Pendelton\n"
+                    "VP of Coastal Distribution · FastMetals Co. (Davao Terminal)\n"
+                    "Tel: +63 (82) 298-4410 | Web: www.fastmetals.com.ph"
+                ),
             },
         }
 
