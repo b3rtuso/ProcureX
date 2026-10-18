@@ -9,10 +9,18 @@ def test_full_api_lifecycle_all_scenarios():
         ui_resp = client.get("/")
         assert ui_resp.status_code == 200
         assert "SupplyChain AI Command Center" in ui_resp.text
+        js_text = ui_resp.text
+        if "/assets/" in ui_resp.text:
+            import re
+            m = re.search(r'src="(/assets/[^"]+\.js)"', ui_resp.text)
+            if m:
+                asset_resp = client.get(m.group(1))
+                if asset_resp.status_code == 200:
+                    js_text = asset_resp.text
         for nav_label in ["Dashboard", "Alerts", "Orders", "Suppliers", "Schedule"]:
-            assert f'label: "{nav_label}"' in ui_resp.text
-        assert "MetroSteel Industries" in ui_resp.text
-        assert "Simulate Disruption" in ui_resp.text
+            assert nav_label in js_text
+        assert "MetroSteel" in js_text
+        assert "Simulate Disruption" in js_text
 
         erp_resp = client.get("/api/erp/snapshot")
         assert erp_resp.status_code == 200

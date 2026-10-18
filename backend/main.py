@@ -12,6 +12,7 @@ from typing import Any
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
 
 from backend.agents.rfq_agent import simulate_vendor_replies
 from backend.agents.workflow import (
@@ -98,23 +99,32 @@ app.add_middleware(
 )
 
 
+# Mount compiled Vite static assets if present
+frontend_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend")
+dist_assets_dir = os.path.join(frontend_dir, "dist", "assets")
+os.makedirs(dist_assets_dir, exist_ok=True)
+app.mount("/assets", StaticFiles(directory=dist_assets_dir), name="assets")
+
+
 @app.get("/", response_class=HTMLResponse)
 async def serve_command_center():
-    """Serve the single-page React Supply Chain Command Center UI."""
-    frontend_path = os.path.join(
-        os.path.dirname(os.path.dirname(__file__)), "frontend", "index.html"
-    )
-    if os.path.exists(frontend_path):
-        return FileResponse(frontend_path, media_type="text/html")
+    """Serve the single-page React Supply Chain Command Center UI (Vite dist bundle with fallback)."""
+    dist_index = os.path.join(frontend_dir, "dist", "index.html")
+    if os.path.exists(dist_index):
+        return FileResponse(dist_index, media_type="text/html")
+    standalone_path = os.path.join(frontend_dir, "index.standalone.html")
+    if os.path.exists(standalone_path):
+        return FileResponse(standalone_path, media_type="text/html")
+    index_path = os.path.join(frontend_dir, "index.html")
+    if os.path.exists(index_path):
+        return FileResponse(index_path, media_type="text/html")
     return HTMLResponse("<h1>Frontend index.html not found</h1>", status_code=404)
 
 
 @app.get("/styles.css")
 async def serve_styles_css():
     """Serve the dedicated design system stylesheet."""
-    css_path = os.path.join(
-        os.path.dirname(os.path.dirname(__file__)), "frontend", "styles.css"
-    )
+    css_path = os.path.join(frontend_dir, "styles.css")
     if os.path.exists(css_path):
         return FileResponse(css_path, media_type="text/css")
     raise HTTPException(status_code=404, detail="styles.css not found")

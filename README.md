@@ -77,9 +77,9 @@ The **Autonomous Supply Chain Exception Handler** is a production-grade multi-ag
   * `AMD_LIVE`: Connects directly to AMD Token Factory / vLLM OpenAI-compatible endpoint.
   * `DETERMINISTIC_REPLAY`: Built-in mathematical and heuristic replay fallback ensuring 100% uptime during live hackathon judge demonstrations.
 
-### 2. Zero-Build Industrial Command Center SPA
-* **Palantir Foundry / Linear Dark Aesthetic**: Built with dark-mode styling (`#090D16` canvas, `#111827` cards, crisp borders, AMD crimson `#ED1C24` and emerald/cyan telemetry accents).
-* **Zero npm / Webpack Delay**: Served directly by FastAPI at `/` using React 18 CDN, Tailwind CSS CDN, and Babel Standalone.
+### 2. Modern React 18 + Vite Industrial Command Center SPA
+* **Clean Industrial SaaS Aesthetic**: Built with modern enterprise styling (`#f8f9fc` canvas, `#ffffff` cards, crisp borders, AMD crimson `#ED1C24`, and emerald/cyan telemetry accents).
+* **React 18 + Vite Pipeline**: Lightning-fast Hot Module Replacement (HMR) during development (`npm run dev`) and optimized Rollup production builds (`npm run build`) with Tailwind CSS and PostCSS.
 * **Real-Time Reactive Streaming**: Uses native HTML5 `EventSource` (SSE) streaming updates from `/api/disruptions/{id}/stream` with automatic polling fallback to `/api/disruptions/{id}`.
 
 ### 3. Complete HITL Governance & Ambiguity Clarification Gate
@@ -141,6 +141,27 @@ The **Autonomous Supply Chain Exception Handler** is a production-grade multi-ag
 
 6. **Open the Command Center**:
    Navigate to **[http://localhost:8000](http://localhost:8000)** in your web browser.
+
+---
+
+### Option B: Frontend Development with React + Vite (HMR)
+
+For active frontend UI development with instant Hot Module Replacement:
+
+1. **Install and run Vite**:
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
+   ```
+2. **Access Vite Dev Server**:
+   Navigate to **[http://localhost:5173](http://localhost:5173)** (all `/api` requests automatically proxy to FastAPI at port 8000).
+
+3. **Build Production Bundle**:
+   ```bash
+   npm run build
+   ```
+   Outputs the optimized, minified production assets into `frontend/dist/`. FastAPI automatically detects and serves this bundle.
 
 ---
 
