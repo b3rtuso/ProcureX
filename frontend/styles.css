@@ -228,26 +228,57 @@ main::-webkit-scrollbar-track {
   display: none !important;
 }
 
+/* Standardized High-Clarity Lined Tables with Generous Breathing Space */
 .responsive-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  border: 1px solid #cbd5e1 !important; /* Visible outer border */
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  background-color: #ffffff !important;
   table-layout: auto;
 }
 
-.responsive-table th,
-.responsive-table td {
-  padding-left: clamp(0.375rem, 0.55vw, 0.75rem);
-  padding-right: clamp(0.375rem, 0.55vw, 0.75rem);
-  padding-top: clamp(0.55rem, 0.55vw, 0.8rem);
-  padding-bottom: clamp(0.55rem, 0.55vw, 0.8rem);
-  vertical-align: middle;
-}
-
 .responsive-table th {
-  white-space: nowrap;
+  background-color: #f8fafc !important;
+  color: #334155 !important;
+  font-weight: 700 !important;
+  font-size: 0.75rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.04em !important;
+  border-bottom: 2px solid #cbd5e1 !important; /* Prominent header separator line */
+  border-right: 1px solid #e2e8f0 !important; /* Vertical column divider */
+  padding: 0.85rem 1.15rem !important; /* Generous breathing room */
+  white-space: nowrap !important;
+  vertical-align: middle !important;
 }
 
-/* Keep status badges and action buttons on a single line while allowing descriptive text cells to wrap cleanly */
+.responsive-table th:last-child {
+  border-right: none !important;
+}
+
+.responsive-table td {
+  border-bottom: 1px solid #e2e8f0 !important; /* Clear horizontal row line */
+  border-right: 1px solid #e2e8f0 !important; /* Clear vertical column line */
+  padding: 0.85rem 1.15rem !important; /* Generous breathing room */
+  vertical-align: middle !important;
+  color: #1e293b !important;
+}
+
+.responsive-table td:last-child {
+  border-right: none !important;
+}
+
+.responsive-table tbody tr:last-child td {
+  border-bottom: none !important;
+}
+
+.responsive-table tbody tr:hover td {
+  background-color: #f8fafc !important;
+}
+
+/* Keep status badges and action buttons on a single line while allowing stacked text to breathe */
 @supports selector(:has(*)) {
   .responsive-table td:has(.badge-pill),
   .responsive-table td:has(button) {

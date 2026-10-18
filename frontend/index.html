@@ -131,6 +131,50 @@
       background: transparent !important;
       display: none !important;
     }
+
+    /* Standardized High-Clarity Lined Tables with Generous Breathing Space */
+    .responsive-table {
+      width: 100%;
+      border-collapse: separate !important;
+      border-spacing: 0 !important;
+      border: 1px solid #cbd5e1 !important;
+      border-radius: 12px !important;
+      overflow: hidden !important;
+      background-color: #ffffff !important;
+      table-layout: auto;
+    }
+    .responsive-table th {
+      background-color: #f8fafc !important;
+      color: #334155 !important;
+      font-weight: 700 !important;
+      font-size: 0.75rem !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.04em !important;
+      border-bottom: 2px solid #cbd5e1 !important;
+      border-right: 1px solid #e2e8f0 !important;
+      padding: 0.85rem 1.15rem !important;
+      white-space: nowrap !important;
+      vertical-align: middle !important;
+    }
+    .responsive-table th:last-child {
+      border-right: none !important;
+    }
+    .responsive-table td {
+      border-bottom: 1px solid #e2e8f0 !important;
+      border-right: 1px solid #e2e8f0 !important;
+      padding: 0.85rem 1.15rem !important;
+      vertical-align: middle !important;
+      color: #1e293b !important;
+    }
+    .responsive-table td:last-child {
+      border-right: none !important;
+    }
+    .responsive-table tbody tr:last-child td {
+      border-bottom: none !important;
+    }
+    .responsive-table tbody tr:hover td {
+      background-color: #f8fafc !important;
+    }
   </style>
 </head>
 <body class="h-screen overflow-hidden flex flex-col bg-[#f8f9fc]">
@@ -2065,36 +2109,53 @@
                       </button>
                     </div>
 
-                    <div className="w-full overflow-x-auto no-scrollbar" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
+                    <div className="w-full overflow-x-auto no-scrollbar rounded-xl border border-slate-200 shadow-2xs" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
                       <table className="w-full text-left text-xs sm:text-sm tabular responsive-table">
                         <thead>
-                          <tr className="bg-[#f8f9fc] border-y border-[#f3f4f6] text-[#64748b] text-xs">
-                            <th className="py-2.5 px-3 xl:px-4 xl:py-3 font-bold rounded-l-[10px] whitespace-nowrap">Order ↑</th>
-                            <th className="py-2.5 px-3 xl:px-4 xl:py-3 font-bold">Product</th>
-                            <th className="py-2.5 px-3 xl:px-4 xl:py-3 font-bold">Material</th>
-                            <th className="py-2.5 px-3 xl:px-4 xl:py-3 font-bold whitespace-nowrap">Required Date</th>
-                            <th className="py-2.5 px-3 xl:px-4 xl:py-3 font-bold text-right rounded-r-[10px] whitespace-nowrap">Status</th>
+                          <tr>
+                            <th>Order</th>
+                            <th>Product</th>
+                            <th>Material</th>
+                            <th>Required Date</th>
+                            <th className="text-right">Status</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-[#f3f4f6]">
+                        <tbody>
                           {productionOrders.map((ord) => (
                             <tr
                               key={ord.orderId}
                               onClick={() => navigateMain("schedule")}
-                              className="hover:bg-[#f8f9fc] transition-colors cursor-pointer"
+                              className="hover:bg-slate-50 transition-colors cursor-pointer"
                             >
-                              <td className="py-3 px-3 xl:px-4 xl:py-3.5 font-mono font-extrabold text-[#1e293b] whitespace-nowrap" title={ord.orderId}>{ord.orderId}</td>
-                              <td className="py-3 px-3 xl:px-4 xl:py-3.5 font-bold text-[#1e293b]" title={ord.product}>{ord.product}</td>
-                              <td className="py-3 px-3 xl:px-4 xl:py-3.5 font-medium text-[#64748b]" title={ord.material}>{ord.material}</td>
-                              <td className="py-3 px-3 xl:px-4 xl:py-3.5 font-mono font-semibold text-[#1e293b] whitespace-nowrap" title={ord.currentDate}>{ord.currentDate}</td>
-                              <td className="py-3 px-3 xl:px-4 xl:py-3.5 text-right whitespace-nowrap">
-                                <span role="status" aria-label={`Order Status: ${ord.status}`} className={`badge-pill whitespace-nowrap inline-flex items-center justify-center shrink-0 leading-none text-xs font-bold px-3 py-1.5 rounded-full ${
-                                  ord.status === "AT RISK"
-                                    ? "bg-[#fff7ed] text-[#f97316]"
-                                    : "bg-emerald-50 text-[#10b981]"
-                                }`}>
-                                  {ord.status}
-                                </span>
+                              <td className="whitespace-nowrap">
+                                <div className="font-mono font-extrabold text-[#1e293b]">{ord.orderId}</div>
+                                <div className="text-[11px] text-[#64748b] font-sans font-medium mt-0.5">LINE-A</div>
+                              </td>
+                              <td>
+                                <div className="font-bold text-[#1e293b]">{ord.product}</div>
+                                <div className="text-[11px] text-[#64748b] mt-0.5">{ord.orderId === "PO-102" || ord.orderId === "PO-103" ? "EV Component" : "Standard Stamping"}</div>
+                              </td>
+                              <td>
+                                <div className="font-semibold text-slate-800">{ord.material}</div>
+                                <div className="text-[11px] font-mono text-[#64748b] mt-0.5">Qty: {ord.requiredQty}</div>
+                              </td>
+                              <td className="whitespace-nowrap">
+                                <div className="font-mono font-semibold text-[#1e293b]">{ord.currentDate}</div>
+                                <div className="text-[11px] text-[#64748b] mt-0.5">Scheduled Date</div>
+                              </td>
+                              <td className="text-right whitespace-nowrap">
+                                <div className="flex flex-col items-end gap-1">
+                                  <span role="status" aria-label={`Order Status: ${ord.status}`} className={`badge-pill whitespace-nowrap inline-flex items-center justify-center shrink-0 leading-none text-xs font-bold px-3 py-1.5 rounded-full ${
+                                    ord.status === "AT RISK"
+                                      ? "bg-[#fff7ed] text-[#f97316]"
+                                      : "bg-emerald-50 text-[#10b981]"
+                                  }`}>
+                                    {ord.status}
+                                  </span>
+                                  <span className="text-[10px] text-[#64748b] font-medium">
+                                    {ord.status === "AT RISK" ? "Requires shift swap" : "On schedule"}
+                                  </span>
+                                </div>
                               </td>
                             </tr>
                           ))}
@@ -2286,21 +2347,21 @@
                         <h3 className="text-base font-bold text-slate-900">Purchase Orders</h3>
                         <span className="text-xs text-slate-500">Click any order row to inspect full PO details</span>
                       </div>
-                      <div className="w-full overflow-x-auto no-scrollbar" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
+                      <div className="w-full overflow-x-auto no-scrollbar rounded-xl border border-slate-200 shadow-2xs" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
                         <table className="w-full text-left text-xs sm:text-sm tabular responsive-table">
                           <thead>
-                            <tr className="border-b border-slate-200 text-slate-500 text-xs uppercase">
-                              <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold whitespace-nowrap">PO Number</th>
-                              <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold">Supplier</th>
-                              <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold">Material</th>
-                              <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold whitespace-nowrap">Quantity</th>
-                              <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold whitespace-nowrap">Expected Delivery</th>
-                              <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold whitespace-nowrap">Status</th>
-                              <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold whitespace-nowrap">Risk Level</th>
-                              <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold text-right whitespace-nowrap">Actions</th>
+                            <tr>
+                              <th>PO Number</th>
+                              <th>Supplier</th>
+                              <th>Material</th>
+                              <th>Quantity</th>
+                              <th>Expected Delivery</th>
+                              <th>Status</th>
+                              <th>Risk Level</th>
+                              <th className="text-right">Actions</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-slate-100">
+                          <tbody>
                             {filteredPurchaseOrders.map((po) => {
                               const statusBadge =
                                 po.status === "Delayed"
@@ -2314,36 +2375,63 @@
                                 <tr
                                   key={po.poNumber}
                                   onClick={() => setSelectedPoDetail(po)}
-                                  className="hover:bg-slate-50 cursor-pointer"
+                                  className="hover:bg-slate-50 cursor-pointer transition-colors"
                                 >
-                                  <td className="py-3 px-3 xl:px-4 xl:py-3.5 font-mono font-bold text-brand-700 whitespace-nowrap" title={po.poNumber}>{po.poNumber}</td>
-                                  <td className="py-3 px-3 xl:px-4 xl:py-3.5 font-medium text-slate-900" title={po.supplier}>{po.supplier}</td>
-                                  <td className="py-3 px-3 xl:px-4 xl:py-3.5 text-slate-600" title={po.material}>{po.material}</td>
-                                  <td className="py-3 px-3 xl:px-4 xl:py-3.5 font-mono text-slate-700 whitespace-nowrap" title={po.quantity}>{po.quantity}</td>
-                                  <td className="py-3 px-3 xl:px-4 xl:py-3.5 font-mono text-slate-700 whitespace-nowrap" title={po.expectedDelivery}>{po.expectedDelivery}</td>
-                                  <td className="py-3 px-3 xl:px-4 xl:py-3.5 whitespace-nowrap">
-                                    <span role="status" aria-label={`PO Status: ${po.status}`} className={`badge-pill whitespace-nowrap inline-flex items-center justify-center shrink-0 leading-none text-xs font-bold px-2.5 py-1 rounded-full ${statusBadge}`}>
-                                      {po.status}
-                                    </span>
+                                  <td className="whitespace-nowrap">
+                                    <div className="font-mono font-bold text-brand-700">{po.poNumber}</div>
+                                    <div className="text-[11px] text-slate-500 font-sans mt-0.5">PO Ref #{po.poNumber.replace("PO-", "INV-")}</div>
                                   </td>
-                                  <td className="py-3 px-3 xl:px-4 xl:py-3.5 whitespace-nowrap">
-                                    <span role="status" aria-label={`Risk Level: ${po.riskLevel}`} className={`badge-pill whitespace-nowrap inline-flex items-center justify-center shrink-0 leading-none text-xs font-semibold ${
-                                      po.riskLevel === "HIGH" ? "text-red-600" :
-                                      po.riskLevel === "MEDIUM" ? "text-amber-600" : "text-emerald-600"
-                                    }`}>
-                                      {po.riskLevel}
-                                    </span>
+                                  <td>
+                                    <div className="font-semibold text-slate-900">{po.supplier}</div>
+                                    <div className="text-[11px] text-slate-500 mt-0.5">Primary Supplier</div>
                                   </td>
-                                  <td className="py-3 px-3 xl:px-4 xl:py-3.5 text-right whitespace-nowrap">
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        setSelectedPoDetail(po);
-                                      }}
-                                      className="text-xs font-semibold text-brand-600 hover:underline whitespace-nowrap shrink-0"
-                                    >
-                                      View Order
-                                    </button>
+                                  <td>
+                                    <div className="font-medium text-slate-900">{po.material}</div>
+                                    <div className="text-[11px] text-slate-500 font-mono mt-0.5">Industrial Spec</div>
+                                  </td>
+                                  <td className="whitespace-nowrap">
+                                    <div className="font-mono font-bold text-slate-800">{po.quantity}</div>
+                                    <div className="text-[11px] text-slate-500 mt-0.5">Total Batch</div>
+                                  </td>
+                                  <td className="whitespace-nowrap">
+                                    <div className="font-mono font-semibold text-slate-800">{po.expectedDelivery}</div>
+                                    <div className="text-[11px] text-slate-500 mt-0.5">Receiving Bay</div>
+                                  </td>
+                                  <td className="whitespace-nowrap">
+                                    <div className="flex flex-col items-start gap-1">
+                                      <span role="status" aria-label={`PO Status: ${po.status}`} className={`badge-pill whitespace-nowrap inline-flex items-center justify-center shrink-0 leading-none text-xs font-bold px-2.5 py-1 rounded-full ${statusBadge}`}>
+                                        {po.status}
+                                      </span>
+                                      <span className="text-[10px] text-slate-500 font-medium">
+                                        {po.status === "Delayed" ? "+14d ETA slip" : po.status === "At Risk" ? "Buffer breach" : "On schedule"}
+                                      </span>
+                                    </div>
+                                  </td>
+                                  <td className="whitespace-nowrap">
+                                    <div className="flex flex-col items-start gap-1">
+                                      <span role="status" aria-label={`Risk Level: ${po.riskLevel}`} className={`badge-pill whitespace-nowrap inline-flex items-center justify-center shrink-0 leading-none text-xs font-bold px-2.5 py-0.5 rounded-md ${
+                                        po.riskLevel === "HIGH" ? "bg-red-50 text-red-700 border border-red-200" :
+                                        po.riskLevel === "MEDIUM" ? "bg-amber-50 text-amber-700 border border-amber-200" : "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                                      }`}>
+                                        {po.riskLevel}
+                                      </span>
+                                      <span className="text-[10px] text-slate-500">
+                                        {po.riskLevel === "HIGH" ? "Critical Path" : po.riskLevel === "MEDIUM" ? "Monitored" : "Nominal"}
+                                      </span>
+                                    </div>
+                                  </td>
+                                  <td className="text-right whitespace-nowrap">
+                                    <div className="flex flex-col items-end gap-1">
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setSelectedPoDetail(po);
+                                        }}
+                                        className="px-3 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-brand-600 font-semibold text-xs whitespace-nowrap transition-colors"
+                                      >
+                                        View Details
+                                      </button>
+                                    </div>
                                   </td>
                                 </tr>
                               );
@@ -2397,36 +2485,56 @@
 
                       <div className="saas-card p-6">
                         <h3 className="text-base font-bold text-slate-900 mb-4">Raw Material Inventory Table</h3>
-                        <div className="w-full overflow-x-auto no-scrollbar" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
+                        <div className="w-full overflow-x-auto no-scrollbar rounded-xl border border-slate-200 shadow-2xs" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
                           <table className="w-full text-left text-xs sm:text-sm tabular responsive-table">
                             <thead>
-                              <tr className="border-b border-slate-200 text-slate-500 text-xs uppercase">
-                                <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold">Material</th>
-                                <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold whitespace-nowrap">Current Stock</th>
-                                <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold whitespace-nowrap">Daily Usage</th>
-                                <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold whitespace-nowrap">Days Remaining</th>
-                                <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold whitespace-nowrap">Minimum Required</th>
-                                <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold text-right whitespace-nowrap">Status</th>
+                              <tr>
+                                <th>Material</th>
+                                <th>Current Stock</th>
+                                <th>Daily Usage</th>
+                                <th>Days Remaining</th>
+                                <th>Minimum Required</th>
+                                <th className="text-right">Status</th>
                               </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-100">
+                            <tbody>
                               {inventory.map((item) => (
-                                <tr key={item.material} className="hover:bg-slate-50">
-                                  <td className="py-3 px-3 xl:px-4 xl:py-3.5 font-bold text-slate-900" title={item.material}>{item.material}</td>
-                                  <td className="py-3 px-3 xl:px-4 xl:py-3.5 font-mono whitespace-nowrap">{item.currentStock}</td>
-                                  <td className="py-3 px-3 xl:px-4 xl:py-3.5 font-mono text-slate-600 whitespace-nowrap">{item.dailyUsage}</td>
-                                  <td className="py-3 px-3 xl:px-4 xl:py-3.5 font-mono font-semibold whitespace-nowrap">
-                                    {item.daysRemaining} days remaining
+                                <tr key={item.material} className="hover:bg-slate-50 transition-colors">
+                                  <td>
+                                    <div className="font-bold text-slate-900">{item.material}</div>
+                                    <div className="text-[11px] text-slate-500 mt-0.5">Warehouse Silo A</div>
                                   </td>
-                                  <td className="py-3 px-3 xl:px-4 xl:py-3.5 text-slate-600 whitespace-nowrap">Minimum {item.minRequiredDays} days</td>
-                                  <td className="py-3 px-3 xl:px-4 xl:py-3.5 text-right whitespace-nowrap">
-                                    <span role="status" aria-label={`Inventory Status: ${item.status}`} className={`badge-pill whitespace-nowrap inline-flex items-center justify-center shrink-0 leading-none text-xs font-bold px-2.5 py-1 rounded-full ${
-                                      item.status === "CRITICAL"
-                                        ? "bg-red-100 text-red-700"
-                                        : "bg-emerald-100 text-emerald-700"
-                                    }`}>
-                                      {item.status}
-                                    </span>
+                                  <td className="whitespace-nowrap">
+                                    <div className="font-mono font-bold text-slate-900">{item.currentStock}</div>
+                                    <div className="text-[11px] text-slate-500 mt-0.5">Verified on-hand</div>
+                                  </td>
+                                  <td className="whitespace-nowrap">
+                                    <div className="font-mono font-medium text-slate-700">{item.dailyUsage}</div>
+                                    <div className="text-[11px] text-slate-500 mt-0.5">2-shift burn rate</div>
+                                  </td>
+                                  <td className="whitespace-nowrap">
+                                    <div className="font-mono font-bold text-slate-900">{item.daysRemaining} days remaining</div>
+                                    <div className="text-[11px] font-medium text-slate-500 mt-0.5">
+                                      {item.status === "CRITICAL" ? "Stockout in 6 days" : "Buffer adequate"}
+                                    </div>
+                                  </td>
+                                  <td className="whitespace-nowrap">
+                                    <div className="font-medium text-slate-800">Minimum {item.minRequiredDays} days</div>
+                                    <div className="text-[11px] text-slate-500 mt-0.5">Safety stock threshold</div>
+                                  </td>
+                                  <td className="text-right whitespace-nowrap">
+                                    <div className="flex flex-col items-end gap-1">
+                                      <span role="status" aria-label={`Inventory Status: ${item.status}`} className={`badge-pill whitespace-nowrap inline-flex items-center justify-center shrink-0 leading-none text-xs font-bold px-2.5 py-1 rounded-full ${
+                                        item.status === "CRITICAL"
+                                          ? "bg-red-100 text-red-700"
+                                          : "bg-emerald-100 text-emerald-700"
+                                      }`}>
+                                        {item.status}
+                                      </span>
+                                      <span className="text-[10px] text-slate-500">
+                                        {item.status === "CRITICAL" ? "Replenish immediately" : "Normal inventory"}
+                                      </span>
+                                    </div>
                                   </td>
                                 </tr>
                               ))}
@@ -2458,39 +2566,60 @@
                         </button>
                       </div>
 
-                      <div className="w-full overflow-x-auto no-scrollbar" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
+                      <div className="w-full overflow-x-auto no-scrollbar rounded-xl border border-slate-200 shadow-2xs" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
                         <table className="w-full text-left text-xs sm:text-sm tabular responsive-table">
                           <thead>
-                            <tr className="border-b border-slate-200 text-slate-500 text-xs uppercase">
-                              <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold whitespace-nowrap">Order</th>
-                              <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold">Product</th>
-                              <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold">Material</th>
-                              <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold whitespace-nowrap">Required Quantity</th>
-                              <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold whitespace-nowrap">Scheduled Date</th>
-                              <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold whitespace-nowrap">Risk</th>
-                              <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold text-right whitespace-nowrap">Related Alert</th>
+                            <tr>
+                              <th>Order</th>
+                              <th>Product</th>
+                              <th>Material</th>
+                              <th>Required Quantity</th>
+                              <th>Scheduled Date</th>
+                              <th>Risk</th>
+                              <th className="text-right">Related Alert</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-slate-100">
+                          <tbody>
                             {productionOrders.filter(o => o.orderId === "PO-102" || o.orderId === "PO-103" || o.status === "AT RISK").map((ord) => (
-                              <tr key={ord.orderId} className="hover:bg-slate-50">
-                                <td className="py-3 px-3 xl:px-4 xl:py-3.5 font-mono font-bold text-slate-900 whitespace-nowrap" title={ord.orderId}>{ord.orderId}</td>
-                                <td className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold text-slate-800" title={ord.product}>{ord.product}</td>
-                                <td className="py-3 px-3 xl:px-4 xl:py-3.5 text-slate-600" title={ord.material}>{ord.material}</td>
-                                <td className="py-3 px-3 xl:px-4 xl:py-3.5 font-mono whitespace-nowrap">{ord.requiredQty}</td>
-                                <td className="py-3 px-3 xl:px-4 xl:py-3.5 font-mono whitespace-nowrap">{ord.currentDate}</td>
-                                <td className="py-3 px-3 xl:px-4 xl:py-3.5 whitespace-nowrap">
-                                  <span role="status" aria-label={`Impacted Order Status: ${ord.status}`} className="badge-pill whitespace-nowrap inline-flex items-center justify-center shrink-0 leading-none text-xs font-bold px-2.5 py-1 rounded-full bg-red-100 text-red-700">
-                                    {ord.status}
-                                  </span>
+                              <tr key={ord.orderId} className="hover:bg-slate-50 transition-colors">
+                                <td className="whitespace-nowrap">
+                                  <div className="font-mono font-bold text-slate-900">{ord.orderId}</div>
+                                  <div className="text-[11px] text-slate-500 font-sans mt-0.5">LINE-A</div>
                                 </td>
-                                <td className="py-3 px-3 xl:px-4 xl:py-3.5 text-right whitespace-nowrap">
-                                  <button
-                                    onClick={() => openAlertDetails(alerts[0])}
-                                    className="text-xs text-brand-600 hover:underline font-medium whitespace-nowrap shrink-0"
-                                  >
-                                    {ord.relatedAlert}
-                                  </button>
+                                <td>
+                                  <div className="font-semibold text-slate-900">{ord.product}</div>
+                                  <div className="text-[11px] text-slate-500 mt-0.5">{ord.orderId === "PO-102" ? "Apex EV Motors" : "Boreal Commercial"}</div>
+                                </td>
+                                <td>
+                                  <div className="font-semibold text-slate-800">{ord.material}</div>
+                                  <div className="text-[11px] text-slate-500 mt-0.5">Impacted raw input</div>
+                                </td>
+                                <td className="whitespace-nowrap">
+                                  <div className="font-mono font-bold text-slate-900">{ord.requiredQty}</div>
+                                  <div className="text-[11px] text-slate-500 mt-0.5">Batch requirement</div>
+                                </td>
+                                <td className="whitespace-nowrap">
+                                  <div className="font-mono font-semibold text-slate-900">{ord.currentDate}</div>
+                                  <div className="text-[11px] text-slate-500 mt-0.5">Planned run</div>
+                                </td>
+                                <td className="whitespace-nowrap">
+                                  <div className="flex flex-col items-start gap-1">
+                                    <span role="status" aria-label={`Impacted Order Status: ${ord.status}`} className="badge-pill whitespace-nowrap inline-flex items-center justify-center shrink-0 leading-none text-xs font-bold px-2.5 py-1 rounded-full bg-red-100 text-red-700">
+                                      {ord.status}
+                                    </span>
+                                    <span className="text-[10px] text-red-600 font-medium">Material starved at D+6</span>
+                                  </div>
+                                </td>
+                                <td className="text-right whitespace-nowrap">
+                                  <div className="flex flex-col items-end gap-1">
+                                    <button
+                                      onClick={() => openAlertDetails(alerts[0])}
+                                      className="text-xs text-brand-600 hover:underline font-bold whitespace-nowrap"
+                                    >
+                                      {ord.relatedAlert}
+                                    </button>
+                                    <span className="text-[10px] text-slate-500">Click to investigate</span>
+                                  </div>
                                 </td>
                               </tr>
                             ))}
@@ -2873,98 +3002,118 @@
 
                       <div className="saas-card p-6">
                         <h3 className="text-base font-bold text-slate-900 mb-4">Backup Supplier Comparison Table</h3>
-                        <div className="w-full overflow-x-auto no-scrollbar" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
+                        <div className="w-full overflow-x-auto no-scrollbar rounded-xl border border-slate-200 shadow-2xs" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
                           <table className="w-full text-left text-xs sm:text-sm tabular responsive-table">
                             <thead>
-                              <tr className="border-b border-slate-200 text-slate-500 text-xs uppercase">
-                                <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold">Supplier</th>
-                                <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold whitespace-nowrap">Quoted Price</th>
-                                <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold whitespace-nowrap">Available Quantity</th>
-                                <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold whitespace-nowrap">Lead Time</th>
-                                <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold whitespace-nowrap">Reliability</th>
-                                <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold whitespace-nowrap">AI Ranking</th>
-                                <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold text-right whitespace-nowrap">Action</th>
+                              <tr>
+                                <th>Supplier</th>
+                                <th>Quoted Price</th>
+                                <th>Available Quantity</th>
+                                <th>Lead Time</th>
+                                <th>Reliability</th>
+                                <th>AI Ranking</th>
+                                <th className="text-right">Action</th>
                               </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-100">
+                            <tbody>
                               {suppliers.map((sup) => (
                                 <tr
                                   key={sup.id}
-                                  className={sup.quoteReceived && sup.recommendedAfterQuote ? "bg-emerald-50/40" : "hover:bg-slate-50"}
+                                  className={sup.quoteReceived && sup.recommendedAfterQuote ? "bg-emerald-50/40 hover:bg-emerald-50/60 transition-colors" : "hover:bg-slate-50 transition-colors"}
                                 >
-                                  <td className="py-3 px-3 xl:px-4 xl:py-3.5" title={`${sup.name} (${sup.location})`}>
+                                  <td>
                                     <div className="font-bold text-slate-900">{sup.name}</div>
-                                    <div className="text-xs text-slate-500">{sup.location}</div>
+                                    <div className="text-xs text-slate-500 mt-0.5">{sup.location}</div>
                                   </td>
-                                  <td className="py-3 px-3 xl:px-4 xl:py-3.5 font-mono whitespace-nowrap">
+                                  <td className="whitespace-nowrap">
                                     {sup.quoteReceived ? (
                                       <div>
-                                        <span className="font-bold text-slate-900">{sup.quotedPricePerKg}</span>
-                                        <span className="block text-[11px] text-slate-500">{sup.quotedTotal}</span>
+                                        <div className="font-bold text-slate-900 font-mono">{sup.quotedPricePerKg}</div>
+                                        <div className="text-[11px] text-slate-500 mt-0.5">{sup.quotedTotal}</div>
                                       </div>
                                     ) : (
-                                      <span role="status" aria-label="Price locked: Send RFQ to reveal price" className="badge-pill whitespace-nowrap inline-flex items-center justify-center shrink-0 leading-none gap-1 text-xs px-2.5 py-1 rounded bg-slate-100 text-slate-500 font-sans">
-                                        <Icon name="lock" className="w-3.5 h-3.5" />
-                                        <span>Send RFQ to reveal price</span>
-                                      </span>
-                                    )}
-                                  </td>
-                                  <td className="py-3 px-3 xl:px-4 xl:py-3.5 font-mono whitespace-nowrap">
-                                    {sup.quoteReceived ? (
-                                      <span className="font-bold text-emerald-700">{sup.confirmedAvailableQty} (Confirmed)</span>
-                                    ) : (
-                                      <span role="status" aria-label="Stock locked: Pending Stock Check" className="badge-pill whitespace-nowrap inline-flex items-center justify-center shrink-0 leading-none gap-1 text-xs px-2.5 py-1 rounded bg-slate-100 text-slate-500 font-sans">
-                                        <Icon name="lock" className="w-3.5 h-3.5" />
-                                        <span>Pending Stock Check</span>
-                                      </span>
-                                    )}
-                                  </td>
-                                  <td className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold text-slate-800 whitespace-nowrap" title={sup.leadTime}>{sup.leadTime}</td>
-                                  <td className="py-3 px-3 xl:px-4 xl:py-3.5 font-mono font-bold text-emerald-700 whitespace-nowrap">{sup.reliability}%</td>
-                                  <td className="py-3 px-3 xl:px-4 xl:py-3.5 whitespace-nowrap">
-                                    {sup.quoteReceived ? (
-                                      sup.recommendedAfterQuote ? (
-                                        <span role="status" aria-label="AI Recommendation: BEST OPTION" className="badge-pill whitespace-nowrap inline-flex items-center justify-center shrink-0 leading-none text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800">
-                                          BEST OPTION
+                                      <div className="flex flex-col items-start gap-1">
+                                        <span role="status" aria-label="Price locked" className="badge-pill whitespace-nowrap inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 font-semibold font-sans">
+                                          <Icon name="lock" className="w-3.5 h-3.5" />
+                                          <span>Price Locked</span>
                                         </span>
+                                        <span className="text-[11px] text-slate-500">Send RFQ to reveal</span>
+                                      </div>
+                                    )}
+                                  </td>
+                                  <td className="whitespace-nowrap">
+                                    {sup.quoteReceived ? (
+                                      <div>
+                                        <div className="font-bold text-emerald-700 font-mono">{sup.confirmedAvailableQty}</div>
+                                        <div className="text-[11px] text-emerald-600 mt-0.5">Confirmed Available</div>
+                                      </div>
+                                    ) : (
+                                      <div className="flex flex-col items-start gap-1">
+                                        <span role="status" aria-label="Stock locked" className="badge-pill whitespace-nowrap inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 font-semibold font-sans">
+                                          <Icon name="lock" className="w-3.5 h-3.5" />
+                                          <span>Stock Unknown</span>
+                                        </span>
+                                        <span className="text-[11px] text-slate-500">Pending Stock Check</span>
+                                      </div>
+                                    )}
+                                  </td>
+                                  <td className="whitespace-nowrap">
+                                    <div className="font-semibold text-slate-800">{sup.leadTime}</div>
+                                    <div className="text-[11px] text-slate-500 mt-0.5">Delivery window</div>
+                                  </td>
+                                  <td className="whitespace-nowrap">
+                                    <div className="font-mono font-bold text-emerald-700">{sup.reliability}%</div>
+                                    <div className="text-[11px] text-slate-500 mt-0.5">Historical fulfillment</div>
+                                  </td>
+                                  <td className="whitespace-nowrap">
+                                    <div className="flex flex-col items-start gap-1">
+                                      <span role="status" aria-label={`Ranking: ${sup.quoteReceived ? (sup.recommendedAfterQuote ? "BEST OPTION" : sup.postQuoteBadge) : "Awaiting Quote"}`} className={`badge-pill whitespace-nowrap inline-flex items-center justify-center shrink-0 leading-none text-xs font-bold px-2.5 py-1 rounded-full ${
+                                        sup.quoteReceived
+                                          ? sup.recommendedAfterQuote
+                                            ? "bg-emerald-100 text-emerald-800"
+                                            : "bg-slate-100 text-slate-600"
+                                          : "text-amber-700 bg-amber-50 border border-amber-200"
+                                      }`}>
+                                        {sup.quoteReceived
+                                          ? (sup.recommendedAfterQuote ? "BEST OPTION" : sup.postQuoteBadge)
+                                          : "Awaiting Quote"}
+                                      </span>
+                                      <span className="text-[10px] text-slate-500">
+                                        {sup.quoteReceived
+                                          ? (sup.recommendedAfterQuote ? "Ranked #1" : "Secondary option")
+                                          : "Requires vendor quote"}
+                                      </span>
+                                    </div>
+                                  </td>
+                                  <td className="text-right whitespace-nowrap">
+                                    <div className="flex flex-col items-end gap-1">
+                                      {sup.quoteReceived ? (
+                                        <button
+                                          onClick={() =>
+                                            setApprovalModal({
+                                              type: "SUPPLIER",
+                                              targetId: sup.id,
+                                              recKey: "REC_RFQ_METRO",
+                                              stepBadge: "Step 2 · Award Emergency PO",
+                                              title: `${sup.name} (${sup.confirmedAvailableQty} @ ${sup.quotedPricePerKg})`,
+                                              summary: `Purchase ${sup.confirmedAvailableQty} Steel Coil from ${sup.name} at their confirmed quote of ${sup.quotedPricePerKg}.`,
+                                              delivery: sup.leadTime,
+                                              reason: "Quote and stock availability verified."
+                                            })
+                                          }
+                                          className="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold whitespace-nowrap shadow-xs transition-colors"
+                                        >
+                                          Award Emergency PO
+                                        </button>
                                       ) : (
-                                        <span role="status" aria-label={`Ranking: ${sup.postQuoteBadge}`} className="badge-pill whitespace-nowrap inline-flex items-center justify-center shrink-0 leading-none text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">
-                                          {sup.postQuoteBadge}
-                                        </span>
-                                      )
-                                    ) : (
-                                      <span role="status" aria-label="Ranking Status: Awaiting Quote to Rank" className="badge-pill whitespace-nowrap inline-flex items-center justify-center shrink-0 leading-none text-xs font-medium text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">
-                                        Awaiting Quote to Rank
-                                      </span>
-                                    )}
-                                  </td>
-                                  <td className="py-3 px-3 xl:px-4 xl:py-3.5 text-right whitespace-nowrap">
-                                    {sup.quoteReceived ? (
-                                      <button
-                                        onClick={() =>
-                                          setApprovalModal({
-                                            type: "SUPPLIER",
-                                            targetId: sup.id,
-                                            recKey: "REC_RFQ_METRO",
-                                            stepBadge: "Step 2 · Award Emergency PO",
-                                            title: `${sup.name} (${sup.confirmedAvailableQty} @ ${sup.quotedPricePerKg})`,
-                                            summary: `Purchase ${sup.confirmedAvailableQty} Steel Coil from ${sup.name} at their confirmed quote of ${sup.quotedPricePerKg}.`,
-                                            delivery: sup.leadTime,
-                                            reason: "Quote and stock availability verified."
-                                          })
-                                        }
-                                        className="px-3 py-1.5 rounded-lg bg-brand-600 text-white text-xs font-semibold hover:bg-brand-700 whitespace-nowrap shrink-0"
-                                      >
-                                        Award Order
-                                      </button>
-                                    ) : (
-                                      <button
-                                        onClick={() => setSuppliersTab("RFQ Drafts")}
-                                        className="text-xs font-semibold text-brand-600 hover:underline whitespace-nowrap shrink-0"
-                                      >
-                                        Send RFQ →
-                                      </button>
-                                    )}
+                                        <button
+                                          onClick={() => setSuppliersTab("RFQ Drafts")}
+                                          className="px-3.5 py-1.5 rounded-lg bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold whitespace-nowrap shadow-xs transition-colors"
+                                        >
+                                          Send RFQ First
+                                        </button>
+                                      )}
+                                    </div>
                                   </td>
                                 </tr>
                               ))}
@@ -3227,45 +3376,64 @@
                   {scheduleTab === "Current Schedule" && (
                     <div className="saas-card p-6">
                       <h3 className="text-base font-bold text-slate-900 mb-4">Current Production Schedule</h3>
-                      <div className="w-full overflow-x-auto no-scrollbar" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
+                      <div className="w-full overflow-x-auto no-scrollbar rounded-xl border border-slate-200 shadow-2xs" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
                         <table className="w-full text-left text-xs sm:text-sm tabular responsive-table">
                           <thead>
-                            <tr className="border-b border-slate-200 text-slate-500 text-xs uppercase">
-                              <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold whitespace-nowrap">Production Order</th>
-                              <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold">Product</th>
-                              <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold whitespace-nowrap">Current Date</th>
-                              <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold">Material</th>
-                              <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold whitespace-nowrap">Material Status</th>
-                              <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold text-right whitespace-nowrap">Action</th>
+                            <tr>
+                              <th>Production Order</th>
+                              <th>Product</th>
+                              <th>Current Date</th>
+                              <th>Material</th>
+                              <th>Material Status</th>
+                              <th className="text-right">Action</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-slate-100">
+                          <tbody>
                             {productionOrders.map((ord) => (
-                              <tr key={ord.orderId} className="hover:bg-slate-50">
-                                <td className="py-3 px-3 xl:px-4 xl:py-3.5 font-mono font-bold text-slate-900 whitespace-nowrap" title={ord.orderId}>{ord.orderId}</td>
-                                <td className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold text-slate-800" title={ord.product}>{ord.product}</td>
-                                <td className="py-3 px-3 xl:px-4 xl:py-3.5 font-mono text-slate-700 whitespace-nowrap" title={ord.currentDate}>{ord.currentDate}</td>
-                                <td className="py-3 px-3 xl:px-4 xl:py-3.5 text-slate-600" title={`${ord.material} (${ord.requiredQty})`}>{ord.material} ({ord.requiredQty})</td>
-                                <td className="py-3 px-3 xl:px-4 xl:py-3.5 whitespace-nowrap">
-                                  <span role="status" aria-label={`Material Status: ${ord.materialStatus}`} className={`badge-pill whitespace-nowrap inline-flex items-center justify-center shrink-0 leading-none text-xs font-bold px-2.5 py-1 rounded-full ${
-                                    ord.materialStatus.includes("SHORTAGE")
-                                      ? "bg-red-100 text-red-700"
-                                      : "bg-emerald-100 text-emerald-700"
-                                  }`}>
-                                    {ord.materialStatus}
-                                  </span>
+                              <tr key={ord.orderId} className="hover:bg-slate-50 transition-colors">
+                                <td className="whitespace-nowrap">
+                                  <div className="font-mono font-bold text-slate-900">{ord.orderId}</div>
+                                  <div className="text-[11px] text-slate-500 font-sans mt-0.5">Assembly LINE-A</div>
                                 </td>
-                                <td className="py-3 px-3 xl:px-4 xl:py-3.5 text-right whitespace-nowrap">
-                                  <button
-                                    onClick={() => {
-                                      setScheduleTab("AI Recommended Schedule");
-                                      startEditingSingleCard(ord);
-                                    }}
-                                    className="text-xs font-semibold text-brand-600 hover:underline inline-flex items-center gap-1 whitespace-nowrap shrink-0"
-                                  >
-                                    <Icon name="edit" className="w-3.5 h-3.5" />
-                                    <span>Edit Schedule</span>
-                                  </button>
+                                <td>
+                                  <div className="font-semibold text-slate-800">{ord.product}</div>
+                                  <div className="text-[11px] text-slate-500 mt-0.5">{ord.orderId === "PO-102" || ord.orderId === "PO-103" ? "EV Chassis Line" : "Standard Line"}</div>
+                                </td>
+                                <td className="whitespace-nowrap">
+                                  <div className="font-mono font-semibold text-slate-900">{ord.currentDate}</div>
+                                  <div className="text-[11px] text-slate-500 mt-0.5">Shift 1 & 2</div>
+                                </td>
+                                <td>
+                                  <div className="font-semibold text-slate-900">{ord.material}</div>
+                                  <div className="text-xs text-slate-500 font-mono mt-0.5">Required: {ord.requiredQty}</div>
+                                </td>
+                                <td className="whitespace-nowrap">
+                                  <div className="flex flex-col items-start gap-1">
+                                    <span role="status" aria-label={`Material Status: ${ord.materialStatus}`} className={`badge-pill whitespace-nowrap inline-flex items-center justify-center shrink-0 leading-none text-xs font-bold px-2.5 py-1 rounded-full ${
+                                      ord.materialStatus.includes("SHORTAGE")
+                                        ? "bg-red-100 text-red-700"
+                                        : "bg-emerald-100 text-emerald-700"
+                                    }`}>
+                                      {ord.materialStatus}
+                                    </span>
+                                    <span className="text-[10px] text-slate-500">
+                                      {ord.materialStatus.includes("SHORTAGE") ? "Stockout risk D+6" : "Available in warehouse"}
+                                    </span>
+                                  </div>
+                                </td>
+                                <td className="text-right whitespace-nowrap">
+                                  <div className="flex flex-col items-end gap-1">
+                                    <button
+                                      onClick={() => {
+                                        setScheduleTab("AI Recommended Schedule");
+                                        startEditingSingleCard(ord);
+                                      }}
+                                      className="px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-brand-600 font-semibold text-xs whitespace-nowrap inline-flex items-center gap-1.5 transition-colors"
+                                    >
+                                      <Icon name="edit" className="w-3.5 h-3.5" />
+                                      <span>Edit Schedule</span>
+                                    </button>
+                                  </div>
                                 </td>
                               </tr>
                             ))}
