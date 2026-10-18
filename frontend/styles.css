@@ -105,45 +105,95 @@ table button,
    Eliminates all visible scrollbar thumbs, tracks, and arrows across all browsers
    (Chrome, Safari, Edge, Firefox, Opera) while maintaining full scrolling functionality.
    ============================================================================ */
+
+/* 1. Standard CSS for Firefox, modern Chrome (121+), Edge (121+), Safari (18+) */
 html,
 body,
 #root,
-*,
-*::before,
-*::after {
+#main-scroll-container,
+div,
+aside,
+main,
+section,
+nav,
+article,
+table,
+tbody,
+ul,
+ol,
+* {
   scrollbar-width: none !important;
   -ms-overflow-style: none !important;
 }
 
-::-webkit-scrollbar,
-*::-webkit-scrollbar,
+/* 2. WebKit / Blink pseudo-elements (Chrome, Safari, Edge, Opera, Brave)
+   NOTE: Never group with *::-webkit-scrollbar as invalid selectors cause WebKit
+   to drop the entire rule! */
+::-webkit-scrollbar {
+  width: 0px !important;
+  height: 0px !important;
+  display: none !important;
+  background: transparent !important;
+}
+
+::-webkit-scrollbar-thumb {
+  background: transparent !important;
+  display: none !important;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent !important;
+  display: none !important;
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent !important;
+  display: none !important;
+}
+
+::-webkit-resizer {
+  background: transparent !important;
+  display: none !important;
+}
+
+/* Explicit Element WebKit Overrides */
 html::-webkit-scrollbar,
 body::-webkit-scrollbar,
+#root::-webkit-scrollbar,
+#main-scroll-container::-webkit-scrollbar,
 div::-webkit-scrollbar,
 aside::-webkit-scrollbar,
 main::-webkit-scrollbar,
 section::-webkit-scrollbar,
-ul::-webkit-scrollbar,
-ol::-webkit-scrollbar {
-  display: none !important;
-  width: 0 !important;
-  height: 0 !important;
-  background: transparent !important;
-  -webkit-appearance: none !important;
-}
-
-::-webkit-scrollbar-thumb,
-*::-webkit-scrollbar-thumb,
-::-webkit-scrollbar-track,
-*::-webkit-scrollbar-track,
-::-webkit-scrollbar-corner,
-*::-webkit-scrollbar-corner {
+table::-webkit-scrollbar,
+tbody::-webkit-scrollbar {
+  width: 0px !important;
+  height: 0px !important;
   display: none !important;
   background: transparent !important;
-  visibility: hidden !important;
 }
 
-/* Zero-Scrollbar Utility Classes */
+html::-webkit-scrollbar-thumb,
+body::-webkit-scrollbar-thumb,
+#main-scroll-container::-webkit-scrollbar-thumb,
+div::-webkit-scrollbar-thumb,
+aside::-webkit-scrollbar-thumb,
+main::-webkit-scrollbar-thumb {
+  background: transparent !important;
+  display: none !important;
+}
+
+html::-webkit-scrollbar-track,
+body::-webkit-scrollbar-track,
+#main-scroll-container::-webkit-scrollbar-track,
+div::-webkit-scrollbar-track,
+aside::-webkit-scrollbar-track,
+main::-webkit-scrollbar-track {
+  background: transparent !important;
+  display: none !important;
+}
+
+/* 3. Zero-Scrollbar Utility Classes */
 .no-scrollbar,
 .no-scrollbar-x,
 .no-scrollbar-y,
@@ -156,10 +206,26 @@ ol::-webkit-scrollbar {
 .no-scrollbar-x::-webkit-scrollbar,
 .no-scrollbar-y::-webkit-scrollbar,
 .table-container-clean::-webkit-scrollbar {
+  width: 0px !important;
+  height: 0px !important;
   display: none !important;
-  width: 0 !important;
-  height: 0 !important;
   background: transparent !important;
+}
+
+.no-scrollbar::-webkit-scrollbar-thumb,
+.no-scrollbar-x::-webkit-scrollbar-thumb,
+.no-scrollbar-y::-webkit-scrollbar-thumb,
+.table-container-clean::-webkit-scrollbar-thumb {
+  background: transparent !important;
+  display: none !important;
+}
+
+.no-scrollbar::-webkit-scrollbar-track,
+.no-scrollbar-x::-webkit-scrollbar-track,
+.no-scrollbar-y::-webkit-scrollbar-track,
+.table-container-clean::-webkit-scrollbar-track {
+  background: transparent !important;
+  display: none !important;
 }
 
 .responsive-table {
