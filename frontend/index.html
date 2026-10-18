@@ -550,7 +550,7 @@
         requiredMaterialLabel: "0 kg needed",
         deficitPct: 10,
         emailMessage: `GATE RECEIPT CONFIRMATION #GR-99201\nSupplier: ChemSolutions Inc.\nPurchase Order: PO-4398 (6,000 kg Chemical Coating Resin)\nStatus: Arrived 48 hours ahead of scheduled window. Quality assurance passed; stored in Climate Bay C-4.`,
-        aiAnalysisText: "ChemSolutions delivered PO-4398 two days ahead of schedule. Inventory health for Chemical Coating Resin increased to 24 days remaining. No corrective action required.",
+        aiAnalysisText: "ChemSolutions delivered PO-4398 two days ahead of schedule. Stock coverage for Chemical Coating Resin increased to 24 days remaining. No corrective action required.",
         affectedOrdersDetail: [],
         affectedOrderIds: [],
         workflowSteps: [
@@ -1821,14 +1821,16 @@
                   >
                     <Icon name="menu" className="w-5 h-5" />
                   </button>
-                  <div>
-                    <h1 className="text-xl sm:text-2xl xl:text-3xl font-extrabold text-[#1e293b] tracking-tight">
-                      Welcome back, Procurement Manager
-                    </h1>
-                    <p className="text-xs sm:text-sm font-medium text-[#64748b] mt-0.5">
-                      SupplyChain AI Command Center · Autonomous Supply Chain Exception Handler
-                    </p>
-                  </div>
+                  {activeNav === "dashboard" && (
+                    <div>
+                      <h1 className="text-xl sm:text-2xl xl:text-3xl font-extrabold text-[#1e293b] tracking-tight">
+                        Welcome back, Procurement Manager
+                      </h1>
+                      <p className="text-xs sm:text-sm font-medium text-[#64748b] mt-0.5">
+                        SupplyChain AI Command Center · Autonomous Supply Chain Exception Handler
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 {/* Right: Elongated Pill-Shaped Search Bar + Simulate CTA + Notification Bell */}
@@ -1976,10 +1978,10 @@
                         <Icon name="shield" className="w-5 h-5" />
                       </div>
                       <div className="min-w-0">
-                        <div className="text-xs font-medium text-[#64748b]">Inventory Health</div>
+                        <div className="text-xs font-medium text-[#64748b]">Supply Chain Resilience</div>
                         <div className="text-xl 2xl:text-2xl fluid-kpi-val font-extrabold text-[#1e293b] mt-0.5">85.0%</div>
                         <div className="text-[11px] font-semibold text-[#10b981] truncate mt-0.5">
-                          Steel Coil: 7 days buffer left
+                          Steel Coil: 7 days runway active
                         </div>
                       </div>
                     </div>
@@ -2014,7 +2016,7 @@
                     <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
                       <div>
                         <h2 className="text-lg font-extrabold text-[#1e293b]">
-                          Analytics · Material Buffer & Lead-Time
+                          Analytics · Inventory Runway & Delivery Horizon
                         </h2>
                         <p className="text-xs font-medium text-[#64748b]">
                           Click or hover any bar to inspect live runway duration, lead time, and shipment status
@@ -2023,15 +2025,15 @@
                       <div className="flex flex-wrap items-center gap-4 text-xs font-semibold text-[#64748b]">
                         <span className="flex items-center gap-1.5 whitespace-nowrap shrink-0">
                           <span className="w-3 h-3 rounded-[4px] bg-[#f97316] inline-block shrink-0" />
-                          Delayed / Deficit
+                          Critical Shortage / Delayed
                         </span>
                         <span className="flex items-center gap-1.5 whitespace-nowrap shrink-0">
                           <span className="w-3 h-3 rounded-[4px] bg-[#0d6efd] inline-block shrink-0" />
-                          Inbound / Shift Swap
+                          Scheduled Inbound / Shift Realignment
                         </span>
                         <span className="flex items-center gap-1.5 whitespace-nowrap shrink-0">
                           <span className="w-3 h-3 rounded-[4px] bg-[#10b981] inline-block shrink-0" />
-                          Healthy Buffer
+                          Optimal Stock Coverage
                         </span>
                         <button
                           type="button"
@@ -2067,15 +2069,15 @@
                           </div>
 
                           {[
-                            { label: "Jan · Steel", pxHeight: 108, color: "#f97316", duration: "7d 0h Buffer (-14d Delay)", nav: "alerts" },
+                            { label: "Jan · Steel", pxHeight: 108, color: "#f97316", duration: "7d 0h Runway (-14d Delay)", nav: "alerts" },
                             { label: "Feb · Alum", pxHeight: 146, color: "#0d6efd", duration: "18d 6h Stock (PO-4402)", nav: "orders" },
                             { label: "Mar · Split", pxHeight: 128, secondPx: 94, color: "#f97316", secondColor: "#10b981", duration: "5d 0h Manila RFQ Ready", nav: "suppliers" },
                             { label: "Apr · Swap", pxHeight: 118, color: "#0d6efd", duration: "0h Idle · 85% On Track", highlighted: true, nav: "schedule" },
-                            { label: "May · Resin", pxHeight: 112, color: "#10b981", duration: "20d 0h Buffer (Healthy)", nav: "orders" },
+                            { label: "May · Resin", pxHeight: 112, color: "#10b981", duration: "20d 0h Coverage (Optimal)", nav: "orders" },
                             { label: "Jun · Lead", pxHeight: 114, color: "#10b981", duration: "Lead Time: 5d 4h", defaultDarkBadge: true, nav: "suppliers" },
                             { label: "Jul · Port", pxHeight: 78, color: "#f97316", duration: "8d 4h RoRo Transit", nav: "alerts" },
                             { label: "Aug · Mill", pxHeight: 138, secondPx: 88, color: "#f97316", secondColor: "#0d6efd", duration: "14d Primary + 5d Bridge", nav: "orders" },
-                            { label: "Sep · Safe", pxHeight: 110, color: "#10b981", duration: "22d 12h Buffer (Safe)", nav: "schedule" }
+                            { label: "Sep · Safe", pxHeight: 110, color: "#10b981", duration: "22d 12h Coverage (Secured)", nav: "schedule" }
                           ].map((bar, idx) => (
                             <div
                               key={bar.label}
@@ -3782,7 +3784,7 @@
                 </div>
                 <div className="px-2">
                   <div className="text-base font-extrabold text-[#1e293b]">85%</div>
-                  <div className="text-[11px] font-medium text-[#64748b] mt-0.5">Health</div>
+                  <div className="text-[11px] font-medium text-[#64748b] mt-0.5">Resilience</div>
                 </div>
                 <div className="px-2">
                   <div className="text-base font-extrabold text-[#1e293b]">₱820K</div>
@@ -3894,69 +3896,6 @@
                 ))}
               </div>
             </div>
-
-            {/* 4. AI Action Checklist Card (Matches Bottom-Right Round Checklist in Mockup) */}
-            <div className="saas-card p-4 2xl:p-5 space-y-3.5">
-              <div className="flex items-center justify-between">
-                <h4 className="text-sm font-extrabold text-[#1e293b]">AI Action Checklist</h4>
-                <span role="status" aria-label={`Checklist Progress: ${completedRecCount} of 4 Done`} className="badge-pill whitespace-nowrap inline-flex items-center justify-center shrink-0 leading-none text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-[#10b981]">
-                  {completedRecCount}/4 Done
-                </span>
-              </div>
-              <div className="space-y-2.5">
-                {[
-                  {
-                    key: "REC_RFQ_METRO",
-                    label: "Send RFQ to MetroSteel Industries",
-                    done: Boolean(completedRecs.REC_RFQ_METRO),
-                  },
-                  {
-                    key: "REC_RFQ_BACKUPS",
-                    label: "Request quotes from 3 backup suppliers",
-                    done: Boolean(completedRecs.REC_RFQ_BACKUPS),
-                  },
-                  {
-                    key: "REC_SCHEDULE",
-                    label: "Delay PO-103 by 2 days",
-                    done: Boolean(completedRecs.REC_SCHEDULE),
-                  },
-                  {
-                    key: "REC_PRIORITIZE",
-                    label: "Expedite shipping for PO-102",
-                    done: Boolean(completedRecs.REC_PRIORITIZE),
-                  },
-                ].map((todo) => (
-                  <button
-                    key={todo.key}
-                    type="button"
-                    onClick={() =>
-                      setCompletedRecs((prev) => ({
-                        ...prev,
-                        [todo.key]: !prev[todo.key],
-                      }))
-                    }
-                    className="w-full text-left py-1.5 px-1 rounded-[12px] hover:bg-[#f8f9fc] transition-all duration-200 flex items-center gap-3"
-                  >
-                    <span
-                      className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 transition-colors ${
-                        todo.done
-                          ? "bg-[#10b981] text-white border-2 border-[#10b981]"
-                          : "bg-white border-2 border-[#cbd5e1]"
-                      }`}
-                    >
-                      {todo.done && <Icon name="check" className="w-3 h-3" />}
-                    </span>
-                    <span
-                      className={`text-xs font-bold leading-snug ${
-                        todo.done ? "line-through text-[#94a3b8]" : "text-[#1e293b]"
-                      }`}
-                    >
-                      {todo.label}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
           </aside>
 
           {/* =========================================================================
@@ -4000,38 +3939,12 @@
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold uppercase tracking-wider text-brand-700 flex items-center gap-1.5">
                       <Icon name="cpu" className="w-4 h-4" />
-                      <span>AI Analysis</span>
+                      <span>AI Impact Analysis</span>
                     </span>
-                    <button
-                      onClick={() => setWorkflowVisibleStep(1)}
-                      className="text-xs font-semibold text-brand-600 hover:underline whitespace-nowrap shrink-0"
-                    >
-                      Replay AI Trace
-                    </button>
                   </div>
                   <p className="text-sm font-medium text-slate-900 leading-relaxed">
                     “{selectedAlert.aiAnalysisText}”
                   </p>
-                </div>
-
-                {/* Live AI Activity / Agent Workflow Panel */}
-                <div className="saas-card p-5 bg-slate-900 text-slate-100 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">
-                      AI Activity / Autonomous Agent Workflow
-                    </span>
-                    <span className="text-xs font-mono text-slate-400">
-                      {Math.min(workflowVisibleStep, (selectedAlert.workflowSteps || []).length)}/{(selectedAlert.workflowSteps || []).length} Steps Complete
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-mono">
-                    {(selectedAlert.workflowSteps || []).slice(0, workflowVisibleStep).map((stepText, idx) => (
-                      <div key={idx} className="flex items-center gap-2 text-slate-200 bg-slate-800/80 px-3 py-1.5 rounded-lg">
-                        <span className="text-emerald-400">✓</span>
-                        <span>{stepText}</span>
-                      </div>
-                    ))}
-                  </div>
                 </div>
 
                 {/* 4 Alert Details Tabs */}
