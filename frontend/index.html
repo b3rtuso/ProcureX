@@ -132,29 +132,31 @@
       display: none !important;
     }
 
-    /* Standardized High-Clarity Lined Tables with Generous Breathing Space */
+    /* Standardized High-Clarity Fixed-Fit Tables: 100% Width, No Horizontal Scrolling */
     .responsive-table {
-      width: 100%;
+      width: 100% !important;
+      max-width: 100% !important;
+      table-layout: fixed !important;
       border-collapse: separate !important;
       border-spacing: 0 !important;
       border: 1px solid #cbd5e1 !important;
       border-radius: 12px !important;
       overflow: hidden !important;
       background-color: #ffffff !important;
-      table-layout: auto;
     }
     .responsive-table th {
       background-color: #f8fafc !important;
       color: #334155 !important;
       font-weight: 700 !important;
-      font-size: 0.75rem !important;
+      font-size: 0.68rem !important;
       text-transform: uppercase !important;
-      letter-spacing: 0.04em !important;
+      letter-spacing: 0.03em !important;
       border-bottom: 2px solid #cbd5e1 !important;
       border-right: 1px solid #e2e8f0 !important;
-      padding: 0.85rem 1.15rem !important;
-      white-space: nowrap !important;
+      padding: 0.45rem 0.5rem !important;
       vertical-align: middle !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
     }
     .responsive-table th:last-child {
       border-right: none !important;
@@ -162,9 +164,11 @@
     .responsive-table td {
       border-bottom: 1px solid #e2e8f0 !important;
       border-right: 1px solid #e2e8f0 !important;
-      padding: 0.85rem 1.15rem !important;
+      padding: 0.45rem 0.5rem !important;
       vertical-align: middle !important;
       color: #1e293b !important;
+      font-size: 0.72rem !important;
+      overflow: hidden !important;
     }
     .responsive-table td:last-child {
       border-right: none !important;
@@ -174,6 +178,12 @@
     }
     .responsive-table tbody tr:hover td {
       background-color: #f8fafc !important;
+    }
+    .table-container-fixed {
+      width: 100% !important;
+      max-width: 100% !important;
+      overflow-x: hidden !important;
+      overflow-y: hidden !important;
     }
   </style>
 </head>
@@ -766,7 +776,7 @@
       const [alertDetailTab, setAlertDetailTab] = useState("Summary");
       const [ordersTab, setOrdersTab] = useState("Purchase Orders");
       const [suppliersTab, setSuppliersTab] = useState("Suppliers");
-      const [scheduleTab, setScheduleTab] = useState("AI Recommended Schedule");
+      const [scheduleTab, setScheduleTab] = useState("Current Schedule");
 
       // Core Stateful Data
       const [alerts, setAlerts] = useState(INITIAL_ALERTS);
@@ -1780,6 +1790,17 @@ Tel: +63 (82) 298-4410 | Web: www.fastmetals.com.ph`
       const navigateMain = (navId) => {
         setActiveNav(navId);
         setMobileSidebarOpen(false);
+        // Ensure that after opening a new page or switching pages, the first column/tab is shown
+        if (navId === "schedule") {
+          setScheduleTab("Current Schedule");
+        } else if (navId === "orders") {
+          setOrdersTab("Purchase Orders");
+        } else if (navId === "suppliers") {
+          setSuppliersTab("Suppliers");
+        } else if (navId === "alerts") {
+          setAlertFilterTab("All");
+          setAlertDetailTab("Summary");
+        }
         const scrollEl = document.getElementById("main-scroll-container");
         if (scrollEl) {
           scrollEl.scrollTo({ top: 0, behavior: "smooth" });
@@ -2350,15 +2371,15 @@ Tel: +63 (82) 298-4410 | Web: www.fastmetals.com.ph`
                       </button>
                     </div>
 
-                    <div className="w-full overflow-x-auto no-scrollbar rounded-xl border border-slate-200 shadow-2xs" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
-                      <table className="w-full text-left text-xs sm:text-sm tabular responsive-table">
+                    <div className="w-full max-w-full overflow-hidden rounded-xl border border-slate-200 shadow-2xs table-container-fixed">
+                      <table className="w-full text-left text-xs tabular responsive-table">
                         <thead>
                           <tr>
-                            <th>Order</th>
-                            <th>Product</th>
-                            <th>Material</th>
-                            <th>Required Date</th>
-                            <th className="text-right">Status</th>
+                            <th style={{ width: "16%" }}>Order</th>
+                            <th style={{ width: "27%" }}>Product</th>
+                            <th style={{ width: "23%" }}>Material</th>
+                            <th style={{ width: "18%" }}>Required Date</th>
+                            <th style={{ width: "16%" }} className="text-right">Status</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -2582,18 +2603,18 @@ Tel: +63 (82) 298-4410 | Web: www.fastmetals.com.ph`
                         <h3 className="text-base font-bold text-slate-900">Purchase Orders</h3>
                         <span className="text-xs text-slate-500">Click any order row to inspect full PO details</span>
                       </div>
-                      <div className="w-full overflow-x-auto no-scrollbar rounded-xl border border-slate-200 shadow-2xs" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
-                        <table className="w-full text-left text-xs sm:text-sm tabular responsive-table">
+                      <div className="w-full max-w-full overflow-hidden rounded-xl border border-slate-200 shadow-2xs table-container-fixed">
+                        <table className="w-full text-left text-xs tabular responsive-table">
                           <thead>
                             <tr>
-                              <th>PO Number</th>
-                              <th>Supplier</th>
-                              <th>Material</th>
-                              <th>Quantity</th>
-                              <th>Expected Delivery</th>
-                              <th>Status</th>
-                              <th>Risk Level</th>
-                              <th className="text-right">Actions</th>
+                              <th style={{ width: "13%" }}>PO Number</th>
+                              <th style={{ width: "17%" }}>Supplier</th>
+                              <th style={{ width: "17%" }}>Material</th>
+                              <th style={{ width: "11%" }}>Quantity</th>
+                              <th style={{ width: "13%" }}>Expected Delivery</th>
+                              <th style={{ width: "11%" }}>Status</th>
+                              <th style={{ width: "9%" }}>Risk Level</th>
+                              <th style={{ width: "9%" }} className="text-right">Actions</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -2720,16 +2741,16 @@ Tel: +63 (82) 298-4410 | Web: www.fastmetals.com.ph`
 
                       <div className="saas-card p-6">
                         <h3 className="text-base font-bold text-slate-900 mb-4">Raw Material Inventory Table</h3>
-                        <div className="w-full overflow-x-auto no-scrollbar rounded-xl border border-slate-200 shadow-2xs" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
-                          <table className="w-full text-left text-xs sm:text-sm tabular responsive-table">
+                        <div className="w-full max-w-full overflow-hidden rounded-xl border border-slate-200 shadow-2xs table-container-fixed">
+                          <table className="w-full text-left text-xs tabular responsive-table">
                             <thead>
                               <tr>
-                                <th>Material</th>
-                                <th>Current Stock</th>
-                                <th>Daily Usage</th>
-                                <th>Days Remaining</th>
-                                <th>Minimum Required</th>
-                                <th className="text-right">Status</th>
+                                <th style={{ width: "26%" }}>Material</th>
+                                <th style={{ width: "15%" }}>Current Stock</th>
+                                <th style={{ width: "14%" }}>Daily Usage</th>
+                                <th style={{ width: "17%" }}>Days Remaining</th>
+                                <th style={{ width: "15%" }}>Minimum Required</th>
+                                <th style={{ width: "13%" }} className="text-right">Status</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -2801,17 +2822,17 @@ Tel: +63 (82) 298-4410 | Web: www.fastmetals.com.ph`
                         </button>
                       </div>
 
-                      <div className="w-full overflow-x-auto no-scrollbar rounded-xl border border-slate-200 shadow-2xs" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
-                        <table className="w-full text-left text-xs sm:text-sm tabular responsive-table">
+                      <div className="w-full max-w-full overflow-hidden rounded-xl border border-slate-200 shadow-2xs table-container-fixed">
+                        <table className="w-full text-left text-xs tabular responsive-table">
                           <thead>
                             <tr>
-                              <th>Order</th>
-                              <th>Product</th>
-                              <th>Material</th>
-                              <th>Required Quantity</th>
-                              <th>Scheduled Date</th>
-                              <th>Risk</th>
-                              <th className="text-right">Related Alert</th>
+                              <th style={{ width: "13%" }}>Order</th>
+                              <th style={{ width: "21%" }}>Product</th>
+                              <th style={{ width: "18%" }}>Material</th>
+                              <th style={{ width: "13%" }}>Required Quantity</th>
+                              <th style={{ width: "13%" }}>Scheduled Date</th>
+                              <th style={{ width: "11%" }}>Risk</th>
+                              <th style={{ width: "11%" }} className="text-right">Related Alert</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -2878,35 +2899,40 @@ Tel: +63 (82) 298-4410 | Web: www.fastmetals.com.ph`
                       Directory & Sourcing
                     </div>
 
-                    <div className="flex flex-nowrap items-center gap-2 sm:gap-2.5 shrink-0">
-                      {suppliersTab === "Suppliers" && (
+                    <div className="flex flex-nowrap items-center gap-1 sm:gap-1.5 bg-white p-1 rounded-xl border border-slate-200 shrink-0 select-none overflow-x-auto no-scrollbar">
+                      {["Suppliers", "Compare", "RFQ Drafts"].map((tab) => (
                         <button
-                          type="button"
-                          onClick={() => setShowAddSupplierModal(true)}
-                          className="px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-[12px] bg-[#0d6efd] hover:bg-blue-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-md shadow-[#0d6efd]/20 transition-all duration-300 whitespace-nowrap shrink-0"
+                          key={tab}
+                          onClick={() => setSuppliersTab(tab)}
+                          className={`px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap shrink-0 ${
+                            suppliersTab === tab
+                              ? "bg-brand-600 text-white"
+                              : "text-slate-600 hover:bg-slate-100"
+                          }`}
                         >
-                          <Icon name="plus" className="w-4 h-4" />
-                          <span>Add Supplier</span>
+                          {tab}
                         </button>
-                      )}
-
-                      <div className="flex flex-nowrap items-center gap-1 sm:gap-1.5 bg-white p-1 rounded-xl border border-slate-200 shrink-0 select-none overflow-x-auto no-scrollbar">
-                        {["Suppliers", "Compare", "RFQ Drafts"].map((tab) => (
-                          <button
-                            key={tab}
-                            onClick={() => setSuppliersTab(tab)}
-                            className={`px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap shrink-0 ${
-                              suppliersTab === tab
-                                ? "bg-brand-600 text-white"
-                                : "text-slate-600 hover:bg-slate-100"
-                            }`}
-                          >
-                            {tab}
-                          </button>
-                        ))}
-                      </div>
+                      ))}
                     </div>
                   </div>
+
+                  {/* Add Supplier banner cleanly positioned below the 3 tabs */}
+                  {suppliersTab === "Suppliers" && (
+                    <div className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-3 p-4 rounded-2xl bg-white border border-slate-200 shadow-2xs">
+                      <div>
+                        <h3 className="text-sm font-bold text-slate-900">Pre-Approved Backup Supplier Directory</h3>
+                        <p className="text-xs text-slate-500">3 pre-qualified emergency vendors with validated certifications and delivery SLAs</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setShowAddSupplierModal(true)}
+                        className="px-4 py-2 rounded-xl bg-[#0d6efd] hover:bg-blue-600 text-white text-xs font-bold flex items-center gap-2 shadow-xs transition-colors shrink-0 whitespace-nowrap"
+                      >
+                        <Icon name="plus" className="w-4 h-4" />
+                        <span>Add Supplier</span>
+                      </button>
+                    </div>
+                  )}
 
 
 
@@ -3125,7 +3151,8 @@ Tel: +63 (82) 298-4410 | Web: www.fastmetals.com.ph`
 
                   {/* TAB 1: SUPPLIERS DIRECTORY */}
                   {suppliersTab === "Suppliers" && (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    <div className="space-y-5">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                       {suppliers.map((sup) => (
                         <div key={sup.id} className="saas-card saas-card-hover p-6 flex flex-col justify-between">
                           <div>
@@ -3240,7 +3267,20 @@ Tel: +63 (82) 298-4410 | Web: www.fastmetals.com.ph`
                         </div>
                       ))}
                     </div>
-                  )}
+
+                    {/* Add Supplier action below the 3 supplier cards */}
+                    <div className="pt-2 flex justify-center">
+                      <button
+                        type="button"
+                        onClick={() => setShowAddSupplierModal(true)}
+                        className="px-5 py-2.5 rounded-xl border-2 border-dashed border-slate-300 hover:border-[#0d6efd] hover:bg-blue-50/50 text-slate-700 hover:text-[#0d6efd] text-xs font-bold flex items-center gap-2 transition-all shadow-2xs"
+                      >
+                        <Icon name="plus" className="w-4 h-4" />
+                        <span>+ Add Another Backup Supplier to Directory</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
 
                   {/* TAB 2: SUPPLIER COMPARISON (Price & Ranking locked until RFQ is sent!) */}
                   {suppliersTab === "Compare" && (
@@ -3277,17 +3317,17 @@ Tel: +63 (82) 298-4410 | Web: www.fastmetals.com.ph`
 
                       <div className="saas-card p-6">
                         <h3 className="text-base font-bold text-slate-900 mb-4">Backup Supplier Comparison Table</h3>
-                        <div className="w-full overflow-x-auto no-scrollbar rounded-xl border border-slate-200 shadow-2xs" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
-                          <table className="w-full text-left text-xs sm:text-sm tabular responsive-table">
+                        <div className="w-full max-w-full overflow-hidden rounded-xl border border-slate-200 shadow-2xs table-container-fixed">
+                          <table className="w-full text-left text-xs tabular responsive-table">
                             <thead>
                               <tr>
-                                <th>Supplier</th>
-                                <th>Quoted Price</th>
-                                <th>Available Quantity</th>
-                                <th>Lead Time</th>
-                                <th>Reliability</th>
-                                <th>AI Ranking</th>
-                                <th className="text-right">Action</th>
+                                <th style={{ width: "21%" }}>Supplier</th>
+                                <th style={{ width: "15%" }}>Quoted Price</th>
+                                <th style={{ width: "15%" }}>Available Quantity</th>
+                                <th style={{ width: "13%" }}>Lead Time</th>
+                                <th style={{ width: "11%" }}>Reliability</th>
+                                <th style={{ width: "12%" }}>AI Ranking</th>
+                                <th style={{ width: "13%" }} className="text-right">Action</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -3413,33 +3453,50 @@ Tel: +63 (82) 298-4410 | Web: www.fastmetals.com.ph`
                   {suppliersTab === "RFQ Drafts" && (
                     <div className="space-y-5">
                       {!anyQuoteReceived ? (
-                        <div className="saas-card p-4 bg-amber-50/70 border-amber-200 flex flex-col xl:flex-row xl:items-center justify-between gap-3 text-xs text-amber-900">
-                          <div className="flex flex-wrap sm:flex-nowrap items-start sm:items-center gap-2.5 min-w-0 flex-1">
-                            <span role="status" aria-label="Workflow Step: Step 1 Required" className="badge-pill whitespace-nowrap inline-flex items-center justify-center shrink-0 leading-none px-2.5 py-1 rounded-md font-bold bg-amber-600 text-white">
-                              Step 1 Required
+                        <div className="rounded-[24px] bg-[#f0f7ff] border border-[#d0e5ff] p-6 shadow-xs space-y-4">
+                          <div className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-3">
+                            <span className="px-3.5 py-1.5 rounded-full bg-[#0d6efd] text-white text-[11px] font-black uppercase tracking-wider inline-flex items-center shadow-2xs">
+                              STEP 1 · RFQ DISPATCH REQUIRED
                             </span>
-                            <span className="min-w-0">
-                              <strong>Send Formal RFQs to Reveal Stock & Pricing:</strong> Click <strong>Send Email</strong> on any supplier below (or <strong>Send All 3 RFQs</strong>) to transmit the inquiry. Once sent, the supplier replies with their confirmed warehouse stock and unit price, unlocking the AI ranking on the <strong>Compare</strong> tab!
-                            </span>
+                            <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
+                              <span>Status:</span>
+                              <span className="px-3 py-1 rounded-full bg-[#fef3c7] text-[#b45309] font-black text-xs uppercase tracking-wider inline-flex items-center">
+                                PENDING RFQ DISPATCH
+                              </span>
+                            </div>
                           </div>
-                          <button
-                            onClick={() =>
-                              setApprovalModal({
-                                type: "RFQ",
-                                subAction: "SEND",
-                                targetId: "ALL_BACKUPS",
-                                recKey: "REC_RFQ_BACKUPS",
-                                stepBadge: "Step 1 of 2 · Send All 3 Stock & Price RFQs",
-                                title: "All 3 Backup Suppliers (MetroSteel, IronWorks, FastMetals)",
-                                summary: "Dispatch formal RFQ emails to all 3 pre-approved backup suppliers to request their current stock availability and unit pricing.",
-                                delivery: "3–14 days (Historical window)",
-                                reason: "Suppliers must reply with their stock quantity and price before the AI can rank the best option."
-                              })
-                            }
-                            className="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-lg font-semibold shrink-0 whitespace-nowrap"
-                          >
-                            Send All 3 RFQs
-                          </button>
+
+                          <p className="text-[17px] sm:text-[18px] font-bold text-slate-900 leading-snug tracking-tight">
+                            “Because the steel coil shipment is delayed, the AI recommends dispatching formal RFQs to all 3 backup suppliers to uncover verified warehouse stock and lock in volume pricing.”
+                          </p>
+
+                          <div className="flex flex-wrap items-center gap-2.5 pt-2">
+                            <button
+                              onClick={() =>
+                                setApprovalModal({
+                                  type: "RFQ",
+                                  subAction: "SEND",
+                                  targetId: "ALL_BACKUPS",
+                                  recKey: "REC_RFQ_BACKUPS",
+                                  stepBadge: "Step 1 of 2 · Send All 3 Stock & Price RFQs",
+                                  title: "All 3 Backup Suppliers (MetroSteel, IronWorks, FastMetals)",
+                                  summary: "Dispatch formal RFQ emails to all 3 pre-approved backup suppliers to request their current stock availability and unit pricing.",
+                                  delivery: "3–14 days (Historical window)",
+                                  reason: "Suppliers must reply with their stock quantity and price before the AI can rank the best option."
+                                })
+                              }
+                              className="px-5 py-2.5 rounded-xl bg-[#0d6efd] hover:bg-blue-600 text-white font-semibold text-sm shadow-xs transition-colors whitespace-nowrap"
+                            >
+                              Dispatch All 3 RFQs
+                            </button>
+
+                            <button
+                              onClick={() => setSuppliersTab("Compare")}
+                              className="px-5 py-2.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-medium text-sm transition-colors whitespace-nowrap"
+                            >
+                              View Comparison Table
+                            </button>
+                          </div>
                         </div>
                       ) : (
                         <div className="saas-card p-4 bg-emerald-50/70 border-emerald-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-emerald-950 animate-in">
@@ -3728,20 +3785,103 @@ Tel: +63 (82) 298-4410 | Web: www.fastmetals.com.ph`
                     </div>
                   </div>
 
-                  {/* TAB 1: CURRENT SCHEDULE */}
+                  {/* Top-Level AI Schedule Recommendation Card (matches reference design exactly) */}
+                  <div className="rounded-[24px] bg-[#f0f7ff] border border-[#d0e5ff] p-6 shadow-xs space-y-4">
+                    <div className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-3">
+                      <span className="px-3.5 py-1.5 rounded-full bg-[#0d6efd] text-white text-[11px] font-black uppercase tracking-wider inline-flex items-center shadow-2xs">
+                        AI SCHEDULE RECOMMENDATION
+                      </span>
+                      <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
+                        <span>Status:</span>
+                        <span role="status" aria-label={`Schedule Approval Status: ${scheduleApproved}`} className={`px-3 py-1 rounded-full font-black text-xs uppercase tracking-wider inline-flex items-center ${
+                          scheduleApproved === "APPROVED" ? "bg-emerald-100 text-emerald-800" :
+                          scheduleApproved === "MODIFIED" ? "bg-blue-100 text-blue-800" :
+                          "bg-[#fef3c7] text-[#b45309]"
+                        }`}>
+                          {scheduleApproved === "PENDING_APPROVAL" ? "PENDING" : scheduleApproved}
+                        </span>
+                      </div>
+                    </div>
+
+                    <p className="text-[17px] sm:text-[18px] font-bold text-slate-900 leading-snug tracking-tight">
+                      “Because the steel coil shipment is delayed, the AI recommends prioritizing products that already have available materials and postponing steel-dependent production orders.”
+                    </p>
+
+                    <div className="flex flex-wrap items-center gap-2.5 pt-2">
+                      <button
+                        onClick={() =>
+                          setApprovalModal({
+                            type: "SCHEDULE",
+                            targetId: "SCHED-01",
+                            recKey: "REC_SCHEDULE",
+                            stepBadge: "Approve Production Schedule",
+                            title: `Reschedule PO-102 (${productionOrders[1]?.suggestedDate}) & PO-103 (${productionOrders[2]?.suggestedDate})`,
+                            summary: `Confirm schedule dates: PO-101 on ${productionOrders[0]?.suggestedDate}, PO-102 on ${productionOrders[1]?.suggestedDate}, and PO-103 on ${productionOrders[2]?.suggestedDate}.`,
+                            delivery: "Aligns with backup steel delivery window",
+                            reason: "Prioritizes products with available materials and eliminates idle factory shifts."
+                          })
+                        }
+                        className="px-5 py-2.5 rounded-xl bg-[#0d6efd] hover:bg-blue-600 text-white font-semibold text-sm shadow-xs transition-colors whitespace-nowrap"
+                      >
+                        Approve Schedule
+                      </button>
+
+                      <button
+                        onClick={() =>
+                          setApprovalModal({
+                            type: "SCHEDULE",
+                            targetId: "SCHED-01",
+                            stepBadge: "Reject Schedule Recommendation",
+                            title: "AI Production Schedule Recommendation",
+                            summary: "Confirm rejection of proposed schedule shift on PO-102 and PO-103.",
+                            delivery: "N/A",
+                            reason: "Manager opted to keep original dates."
+                          })
+                        }
+                        className="px-5 py-2.5 rounded-xl bg-white hover:bg-red-50 text-red-600 border border-red-200 font-semibold text-sm transition-colors whitespace-nowrap"
+                      >
+                        Reject Recommendation
+                      </button>
+
+                      <button
+                        onClick={() => setShowModifyScheduleModal(true)}
+                        className="px-5 py-2.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-medium text-sm transition-colors whitespace-nowrap"
+                      >
+                        Modify All Dates
+                      </button>
+
+                      <button
+                        onClick={() => setShowScheduleExplanation(!showScheduleExplanation)}
+                        className="px-5 py-2.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-medium text-sm transition-colors whitespace-nowrap"
+                      >
+                        {showScheduleExplanation ? "Hide Explanation" : "View Explanation"}
+                      </button>
+                    </div>
+
+                    {showScheduleExplanation && (
+                      <div className="p-4 rounded-xl bg-white border border-slate-200 text-xs text-slate-700 space-y-1.5 animate-in">
+                        <div className="font-bold text-slate-900">Why the AI recommends this schedule:</div>
+                        <p>• <strong>PO-101 (Product B)</strong> uses Aluminum (15,000 kg in stock = 18 days remaining), so it runs on <strong>Oct 25</strong> with zero delay.</p>
+                        <p>• <strong>PO-102 (Car Chassis)</strong> requires 5,000 kg of Steel Coil on Oct 28, right when the 7-day steel buffer runs low. Shifting PO-102 to <strong>Nov 4 (+7 days)</strong> allows backup delivery (3–7 days lead time) to arrive and be inspected before line setup.</p>
+                        <p>• <strong>PO-103 (Engine Part)</strong> shifts from Nov 2 to <strong>Nov 9 (+7 days)</strong>, preventing any mid-run line stoppage.</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* TAB 1: CURRENT SCHEDULE (Default First Tab) */}
                   {scheduleTab === "Current Schedule" && (
                     <div className="saas-card p-6">
                       <h3 className="text-base font-bold text-slate-900 mb-4">Current Production Schedule</h3>
-                      <div className="w-full overflow-x-auto no-scrollbar rounded-xl border border-slate-200 shadow-2xs" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
-                        <table className="w-full text-left text-xs sm:text-sm tabular responsive-table">
+                      <div className="w-full max-w-full overflow-hidden rounded-xl border border-slate-200 shadow-2xs table-container-fixed">
+                        <table className="w-full text-left text-xs tabular responsive-table">
                           <thead>
                             <tr>
-                              <th>Production Order</th>
-                              <th>Product</th>
-                              <th>Current Date</th>
-                              <th>Material</th>
-                              <th>Material Status</th>
-                              <th className="text-right">Action</th>
+                              <th style={{ width: "16%" }}>Production Order</th>
+                              <th style={{ width: "24%" }}>Product</th>
+                              <th style={{ width: "16%" }}>Current Date</th>
+                              <th style={{ width: "18%" }}>Material</th>
+                              <th style={{ width: "15%" }}>Material Status</th>
+                              <th style={{ width: "11%" }} className="text-right">Action</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -3784,10 +3924,10 @@ Tel: +63 (82) 298-4410 | Web: www.fastmetals.com.ph`
                                         setScheduleTab("AI Recommended Schedule");
                                         startEditingSingleCard(ord);
                                       }}
-                                      className="px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-brand-600 font-semibold text-xs whitespace-nowrap inline-flex items-center gap-1.5 transition-colors"
+                                      className="px-2.5 py-1 rounded bg-blue-50 hover:bg-blue-100 text-brand-600 font-bold text-[11px] whitespace-nowrap inline-flex items-center gap-1 transition-colors"
                                     >
-                                      <Icon name="edit" className="w-3.5 h-3.5" />
-                                      <span>Edit Schedule</span>
+                                      <Icon name="edit" className="w-3 h-3" />
+                                      <span>Edit</span>
                                     </button>
                                   </div>
                                 </td>
@@ -3802,91 +3942,11 @@ Tel: +63 (82) 298-4410 | Web: www.fastmetals.com.ph`
                   {/* TAB 2: AI RECOMMENDED SCHEDULE */}
                   {scheduleTab === "AI Recommended Schedule" && (
                     <div className="space-y-6">
-                      <div className="saas-card p-6 bg-brand-50/60 border-brand-200 space-y-4">
-                        <div className="flex flex-wrap sm:flex-nowrap items-start sm:items-center justify-between gap-2.5">
-                          <span role="status" aria-label="AI Schedule Recommendation" className="badge-pill whitespace-nowrap inline-flex items-center justify-center shrink-0 leading-none text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-brand-600 text-white">
-                            AI Schedule Recommendation
-                          </span>
-                          <span className="text-xs font-semibold text-slate-600 flex items-center gap-1.5 whitespace-nowrap shrink-0">
-                            {scheduleApproved === "APPROVED" && (
-                              <span className="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0">
-                                <Icon name="check" className="w-3 h-3" />
-                              </span>
-                            )}
-                            <span>Status:</span>
-                            <span role="status" aria-label={`Schedule Approval Status: ${scheduleApproved}`} className={`badge-pill whitespace-nowrap inline-flex items-center justify-center shrink-0 leading-none text-xs font-bold px-2.5 py-0.5 rounded-full ${
-                              scheduleApproved === "APPROVED" ? "bg-emerald-100 text-emerald-800" :
-                              scheduleApproved === "MODIFIED" ? "bg-brand-100 text-brand-800" :
-                              "bg-amber-100 text-amber-800"
-                            }`}>
-                              {scheduleApproved}
-                            </span>
-                          </span>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="text-base font-bold text-slate-900">Individual Production Schedule Cards</h3>
+                          <p className="text-xs text-slate-500">Edit dates for any individual order or confirm proposed line sequencing</p>
                         </div>
-
-                        <p className="text-sm sm:text-base font-semibold text-slate-900 leading-relaxed">
-                          “Because the steel coil shipment is delayed, the AI recommends prioritizing products that already have available materials and postponing steel-dependent production orders.”
-                        </p>
-
-                        <div className="flex flex-wrap items-center gap-2.5 pt-1">
-                          <button
-                            onClick={() =>
-                              setApprovalModal({
-                                type: "SCHEDULE",
-                                targetId: "SCHED-01",
-                                recKey: "REC_SCHEDULE",
-                                stepBadge: "Approve Production Schedule",
-                                title: `Reschedule PO-102 (${productionOrders[1]?.suggestedDate}) & PO-103 (${productionOrders[2]?.suggestedDate})`,
-                                summary: `Confirm schedule dates: PO-101 on ${productionOrders[0]?.suggestedDate}, PO-102 on ${productionOrders[1]?.suggestedDate}, and PO-103 on ${productionOrders[2]?.suggestedDate}.`,
-                                delivery: "Aligns with backup steel delivery window",
-                                reason: "Prioritizes products with available materials and eliminates idle factory shifts."
-                              })
-                            }
-                            className="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2.5 rounded-lg text-xs font-semibold shadow-sm whitespace-nowrap shrink-0"
-                          >
-                            Approve Schedule
-                          </button>
-
-                          <button
-                            onClick={() =>
-                              setApprovalModal({
-                                type: "SCHEDULE",
-                                targetId: "SCHED-01",
-                                stepBadge: "Reject Schedule Recommendation",
-                                title: "AI Production Schedule Recommendation",
-                                summary: "Confirm rejection of proposed schedule shift on PO-102 and PO-103.",
-                                delivery: "N/A",
-                                reason: "Manager opted to keep original dates."
-                              })
-                            }
-                            className="px-4 py-2.5 rounded-lg border border-red-200 bg-white hover:bg-red-50 text-red-600 text-xs font-semibold whitespace-nowrap shrink-0"
-                          >
-                            Reject Recommendation
-                          </button>
-
-                          <button
-                            onClick={() => setShowModifyScheduleModal(true)}
-                            className="px-4 py-2.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold whitespace-nowrap shrink-0"
-                          >
-                            Modify All Dates
-                          </button>
-
-                          <button
-                            onClick={() => setShowScheduleExplanation(!showScheduleExplanation)}
-                            className="px-4 py-2.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold whitespace-nowrap shrink-0"
-                          >
-                            {showScheduleExplanation ? "Hide Explanation" : "View Explanation"}
-                          </button>
-                        </div>
-
-                        {showScheduleExplanation && (
-                          <div className="p-4 rounded-xl bg-white border border-slate-200 text-xs text-slate-700 space-y-1.5 animate-in">
-                            <div className="font-bold text-slate-900">Why the AI recommends this schedule:</div>
-                            <p>• <strong>PO-101 (Product B)</strong> uses Aluminum (15,000 kg in stock = 18 days remaining), so it runs on <strong>Oct 25</strong> with zero delay.</p>
-                            <p>• <strong>PO-102 (Car Chassis)</strong> requires 5,000 kg of Steel Coil on Oct 28, right when the 7-day steel buffer runs low. Shifting PO-102 to <strong>Nov 4 (+7 days)</strong> allows backup delivery (3–7 days lead time) to arrive and be inspected before line setup.</p>
-                            <p>• <strong>PO-103 (Engine Part)</strong> shifts from Nov 2 to <strong>Nov 9 (+7 days)</strong>, preventing any mid-run line stoppage.</p>
-                          </div>
-                        )}
                       </div>
 
                       {/* INDIVIDUAL SCHEDULE CARDS — EVERY CARD HAS ITS OWN EDIT BUTTON! */}
