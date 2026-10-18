@@ -3,19 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ProcureX — 7-Slide Pitch Deck Preview</title>
+  <title>ProcureX — 7-Slide Pitch Deck Preview (Frontend Design System)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0A0A0C;
-      --surface: #121316;
-      --border: #26272B;
-      --text-pri: #F4F4F6;
-      --text-muted: #8E929F;
-      --accent-orange: #FF4F00;
-      --accent-emerald: #10B981;
+      --canvas: #F8F9FC;
+      --surface: #FFFFFF;
+      --border: #E2E8F0;
+      --border-light: #F3F4F6;
+      --text-pri: #1E293B;
+      --text-muted: #64748B;
+      --primary-blue: #0D6EFD;
+      --primary-blue-hover: #0B5ED7;
+      --secondary-orange: #F97316;
+      --success-green: #10B981;
+      --blue-pill-bg: #EFF6FF;
+      --orange-pill-bg: #FFF7ED;
+      --green-pill-bg: #ECFDF5;
     }
 
     * {
@@ -25,9 +31,9 @@
     }
 
     body {
-      background-color: #050507;
+      background-color: #EEF2F6;
       color: var(--text-pri);
-      font-family: 'Inter', -apple-system, sans-serif;
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
@@ -35,7 +41,7 @@
       padding: 24px 16px 60px;
     }
 
-    /* Top Bar */
+    /* Top Command Header */
     .top-bar {
       width: 100%;
       max-width: 1100px;
@@ -43,32 +49,63 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 20px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid var(--border);
+      padding: 12px 20px;
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: 0 1px 3px rgba(30, 41, 59, 0.04);
     }
 
-    .brand {
-      font-family: 'Space Grotesk', sans-serif;
-      font-weight: 700;
-      font-size: 18px;
-      letter-spacing: -0.02em;
+    .brand-wrap {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 12px;
     }
 
-    .brand span {
-      color: var(--accent-orange);
+    /* Frontend Dual Circular Glyphs */
+    .glyph-mark {
+      display: inline-flex;
+      align-items: center;
+      position: relative;
+    }
+
+    .glyph-c1 {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 3.5px solid var(--primary-blue);
+      background: var(--blue-pill-bg);
+    }
+
+    .glyph-c2 {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 3.5px solid var(--secondary-orange);
+      background: var(--orange-pill-bg);
+      margin-left: -10px;
+    }
+
+    .brand-title {
+      font-weight: 800;
+      font-size: 18px;
+      letter-spacing: -0.02em;
+      color: var(--text-pri);
+    }
+
+    .brand-title span {
+      color: var(--primary-blue);
     }
 
     .meta-tag {
       font-family: 'JetBrains Mono', monospace;
       font-size: 11px;
-      color: var(--text-muted);
-      background: var(--surface);
-      border: 1px solid var(--border);
-      padding: 4px 10px;
-      border-radius: 4px;
+      font-weight: 600;
+      color: var(--primary-blue);
+      background: var(--blue-pill-bg);
+      border: 1px solid #BFDBFE;
+      padding: 5px 12px;
+      border-radius: 9999px;
     }
 
     /* Slide Controls */
@@ -83,35 +120,40 @@
       background: var(--surface);
       border: 1px solid var(--border);
       color: var(--text-pri);
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      padding: 8px 14px;
-      border-radius: 4px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 600;
+      font-size: 13px;
+      padding: 8px 16px;
+      border-radius: 10px;
       cursor: pointer;
       transition: all 0.15s ease;
+      box-shadow: 0 1px 2px rgba(30, 41, 59, 0.04);
     }
 
     .btn:hover {
-      border-color: var(--text-muted);
-      background: #18191D;
+      border-color: var(--primary-blue);
+      color: var(--primary-blue);
+      background: var(--blue-pill-bg);
     }
 
-    .btn.active {
-      border-color: var(--accent-orange);
-      color: var(--accent-orange);
+    .slide-counter {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
     }
 
-    /* 16:9 Slide Canvas */
+    /* 16:9 Slide Canvas matching Frontend #F8F9FC */
     .slide-viewport {
       width: 100%;
       max-width: 1100px;
       aspect-ratio: 16 / 9;
-      background: var(--bg);
+      background: var(--canvas);
       border: 1px solid var(--border);
-      border-radius: 6px;
+      border-radius: 20px;
       position: relative;
       overflow: hidden;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+      box-shadow: 0 12px 36px -4px rgba(30, 41, 59, 0.08), 0 4px 12px -2px rgba(30, 41, 59, 0.04);
       display: flex;
       flex-direction: column;
       padding: 5.5% 6%;
@@ -129,7 +171,7 @@
       display: flex;
     }
 
-    /* Monospace Slide Index */
+    /* Monospace Slide Index Badge */
     .slide-idx {
       position: absolute;
       bottom: 0px;
@@ -145,55 +187,79 @@
       font-family: 'JetBrains Mono', monospace;
       font-size: 11px;
       font-weight: 700;
-      color: var(--text-muted);
+      color: var(--primary-blue);
       letter-spacing: 0.08em;
       margin-bottom: 20px;
       text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
     }
 
-    /* Common Card Styles */
+    .cat-tag.orange {
+      color: var(--secondary-orange);
+    }
+
+    /* Cards (.saas-card) */
     .card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 4px;
+      border-radius: 16px;
       padding: 24px;
+      box-shadow: 0 1px 3px rgba(30, 41, 59, 0.02), 0 4px 12px rgba(30, 41, 59, 0.02);
     }
 
-    .card.emerald-border {
-      border-color: var(--accent-emerald);
-      border-width: 1.5px;
+    .card.blue-tint {
+      background: var(--blue-pill-bg);
+      border-color: #BFDBFE;
+    }
+
+    .card.orange-tint {
+      background: var(--orange-pill-bg);
+      border-color: #FED7AA;
+    }
+
+    .card.green-tint {
+      background: var(--green-pill-bg);
+      border-color: #A7F3D0;
     }
 
     /* Slide 1 Elements */
-    .hero-badge {
-      display: inline-block;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10px;
-      font-weight: 700;
-      color: var(--text-muted);
-      background: var(--surface);
-      border: 1px solid var(--border);
-      padding: 6px 12px;
-      border-radius: 4px;
+    .hero-badge-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
       margin-bottom: 24px;
     }
 
+    .hero-badge {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px;
+      font-weight: 700;
+      color: var(--primary-blue);
+      background: var(--blue-pill-bg);
+      border: 1px solid #BFDBFE;
+      padding: 5px 12px;
+      border-radius: 9999px;
+    }
+
     .hero-title {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: clamp(38px, 6vw, 68px);
+      font-size: clamp(40px, 6vw, 68px);
       font-weight: 800;
       letter-spacing: -0.04em;
       line-height: 1;
       margin-bottom: 22px;
+      color: var(--text-pri);
     }
 
     .hero-title span {
-      color: var(--accent-orange);
+      color: var(--primary-blue);
     }
 
     .hero-hook {
-      font-size: clamp(15px, 2vw, 22px);
-      line-height: 1.35;
+      font-size: clamp(16px, 2.1vw, 22px);
+      line-height: 1.4;
       color: var(--text-muted);
       max-width: 780px;
       margin-bottom: auto;
@@ -201,15 +267,20 @@
 
     .hero-hook strong {
       color: var(--text-pri);
-      font-weight: 600;
+      font-weight: 700;
     }
 
     .hero-telemetry {
       font-family: 'JetBrains Mono', monospace;
       font-size: 12px;
       font-weight: 700;
-      color: var(--accent-emerald);
-      letter-spacing: 0.02em;
+      color: var(--success-green);
+      background: var(--green-pill-bg);
+      border: 1px solid #A7F3D0;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      display: inline-block;
+      width: fit-content;
     }
 
     /* Grid Splits */
@@ -236,7 +307,6 @@
 
     /* Metrics */
     .metric-hero {
-      font-family: 'Space Grotesk', sans-serif;
       font-size: clamp(40px, 5.5vw, 68px);
       font-weight: 800;
       line-height: 1;
@@ -244,11 +314,11 @@
       margin-bottom: 12px;
     }
 
-    .metric-hero.orange { color: var(--accent-orange); }
-    .metric-hero.emerald { color: var(--accent-emerald); }
+    .metric-hero.blue { color: var(--primary-blue); }
+    .metric-hero.orange { color: var(--secondary-orange); }
+    .metric-hero.green { color: var(--success-green); }
 
     .card-title {
-      font-family: 'Space Grotesk', sans-serif;
       font-size: 15px;
       font-weight: 700;
       margin-bottom: 10px;
@@ -257,7 +327,7 @@
 
     .card-body {
       font-size: 14px;
-      line-height: 1.45;
+      line-height: 1.5;
       color: var(--text-muted);
     }
 
@@ -276,42 +346,44 @@
     .timeline-time {
       font-family: 'JetBrains Mono', monospace;
       font-weight: 700;
-      color: var(--text-muted);
+      color: var(--primary-blue);
       min-width: 55px;
     }
 
     .timeline-time.critical {
-      color: var(--accent-orange);
+      color: var(--secondary-orange);
     }
 
     .timeline-desc.critical {
-      color: var(--accent-orange);
-      font-weight: 600;
+      color: var(--secondary-orange);
+      font-weight: 700;
     }
 
-    /* Architecture Flow Nodes */
+    /* Flow Nodes */
     .flow-node {
       font-family: 'JetBrains Mono', monospace;
       font-size: 12px;
-      background: #0E0F12;
+      font-weight: 600;
+      background: #F8F9FC;
       border: 1px solid var(--border);
       padding: 10px 14px;
-      border-radius: 4px;
+      border-radius: 8px;
       margin-bottom: 10px;
-      color: var(--text-pri);
+      color: var(--text-muted);
       display: flex;
       justify-content: space-between;
     }
 
     .flow-node.highlight {
-      border-color: var(--accent-orange);
-      color: var(--accent-orange);
+      background: var(--blue-pill-bg);
+      border-color: #BFDBFE;
+      color: var(--primary-blue);
     }
 
     /* Thumbnail Strip */
     .thumb-strip {
       display: flex;
-      gap: 8px;
+      gap: 10px;
       max-width: 1100px;
       width: 100%;
       margin-top: 24px;
@@ -321,33 +393,36 @@
 
     .thumb-item {
       flex: 1;
-      min-width: 110px;
+      min-width: 120px;
       aspect-ratio: 16 / 9;
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: 8px;
+      border-radius: 10px;
+      padding: 10px;
       cursor: pointer;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       transition: all 0.15s ease;
+      box-shadow: 0 1px 3px rgba(30, 41, 59, 0.03);
     }
 
     .thumb-item:hover, .thumb-item.active {
-      border-color: var(--accent-orange);
-      background: #18191E;
+      border-color: var(--primary-blue);
+      box-shadow: 0 4px 12px rgba(13, 110, 253, 0.12);
+      transform: translateY(-2px);
     }
 
     .thumb-num {
       font-family: 'JetBrains Mono', monospace;
       font-size: 10px;
-      color: var(--text-muted);
+      font-weight: 700;
+      color: var(--primary-blue);
     }
 
     .thumb-title {
       font-size: 10px;
-      font-weight: 600;
+      font-weight: 700;
       color: var(--text-pri);
       white-space: nowrap;
       overflow: hidden;
@@ -358,13 +433,19 @@
 <body>
 
   <div class="top-bar">
-    <div class="brand">ProcureX<span>.</span> <span style="font-size: 12px; color: var(--text-muted); font-weight: 400; margin-left: 8px;">// Pitch Deck Preview</span></div>
-    <div class="meta-tag">16:9 Widescreen · Native PPTX Compiled · &le; 30 Words / Slide</div>
+    <div class="brand-wrap">
+      <div class="glyph-mark">
+        <span class="glyph-c1"></span>
+        <span class="glyph-c2"></span>
+      </div>
+      <div class="brand-title">ProcureX<span>.</span> <span style="font-size: 12px; color: var(--text-muted); font-weight: 500; margin-left: 6px;">SupplyChain AI Command Center</span></div>
+    </div>
+    <div class="meta-tag">16:9 Widescreen · Frontend SaaS Palette · &le; 30 Words / Slide</div>
   </div>
 
   <div class="controls">
     <button class="btn" onclick="prevSlide()">← Prev</button>
-    <span id="slideIndicator" style="font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text-muted);">Slide 01 of 07</span>
+    <span id="slideIndicator" class="slide-counter">Slide 01 of 07</span>
     <button class="btn" onclick="nextSlide()">Next →</button>
   </div>
 
@@ -372,7 +453,13 @@
 
     <!-- SLIDE 01 (27 words) -->
     <div class="slide active" id="s1">
-      <div class="hero-badge">AMD ACT III · TRACK 1</div>
+      <div class="hero-badge-row">
+        <div class="glyph-mark" style="transform: scale(0.9);">
+          <span class="glyph-c1"></span>
+          <span class="glyph-c2"></span>
+        </div>
+        <div class="hero-badge">AMD ACT III · TRACK 1</div>
+      </div>
       <div class="hero-title">ProcureX<span>.</span></div>
       <div class="hero-hook">
         Autonomous supply chain exception handler. Resolves factory delays in <strong>3 seconds</strong> on MI300X.
@@ -383,9 +470,9 @@
 
     <!-- SLIDE 02 (26 words) -->
     <div class="slide" id="s2">
-      <div class="cat-tag">PROBLEM // 48-HOUR SCRAMBLE</div>
+      <div class="cat-tag orange">PROBLEM // 48-HOUR SCRAMBLE</div>
       <div class="split-40-60">
-        <div class="card">
+        <div class="card orange-tint">
           <div class="metric-hero orange">$235K</div>
           <div class="card-title">Unmitigated Exposure</div>
           <div class="card-body">PO-8842 steel delayed 14d.</div>
@@ -420,11 +507,11 @@
             SLA fine: $66K.
           </div>
         </div>
-        <div class="card emerald-border">
-          <div class="card-title" style="color: var(--accent-emerald);">PROCUREX (3S)</div>
+        <div class="card blue-tint" style="border: 1.8px solid var(--primary-blue);">
+          <div class="card-title" style="color: var(--primary-blue);">PROCUREX (3S)</div>
           <div class="card-body" style="margin-top: 14px; color: var(--text-pri);">
             Swaps in aluminum orders.<br>
-            <span style="color: var(--accent-emerald); font-weight: 700;">Kessler bridge buy saves $221K (15.9x ROI).</span>
+            <strong style="color: var(--primary-blue);">Kessler bridge buy saves $221K (15.9x ROI).</strong>
           </div>
         </div>
       </div>
@@ -441,14 +528,14 @@
             PO-8842 delay email parsed with confidence.
           </div>
         </div>
-        <div class="card">
-          <div class="cat-tag" style="color: var(--accent-orange); margin-bottom: 10px;">02 RE-SEQUENCE</div>
+        <div class="card orange-tint" style="border-color: var(--secondary-orange);">
+          <div class="cat-tag" style="color: var(--secondary-orange); margin-bottom: 10px;">02 RE-SEQUENCE</div>
           <div class="card-body" style="color: var(--text-pri);">
             Shifts swap to on-hand aluminum.
           </div>
         </div>
-        <div class="card" style="border-color: var(--accent-emerald);">
-          <div class="cat-tag" style="color: var(--accent-emerald); margin-bottom: 10px;">03 EXECUTE</div>
+        <div class="card blue-tint" style="border-color: var(--primary-blue);">
+          <div class="cat-tag" style="color: var(--primary-blue); margin-bottom: 10px;">03 EXECUTE</div>
           <div class="card-body" style="color: var(--text-pri);">
             Approved bridge RFQ saves $221K.
           </div>
@@ -464,11 +551,11 @@
         <div class="card">
           <div class="flow-node"><span>FastAPI</span></div>
           <div class="flow-node highlight"><span>Gemma-2-27B</span></div>
-          <div class="flow-node"><span>Shift Optimizer</span></div>
+          <div class="flow-node highlight"><span>Shift Optimizer</span></div>
           <div class="flow-node"><span>HITL Approval</span></div>
         </div>
-        <div class="card">
-          <div class="metric-hero emerald" style="font-size: 40px; margin-bottom: 6px;">85 TOKENS/S</div>
+        <div class="card blue-tint">
+          <div class="metric-hero blue" style="font-size: 38px; margin-bottom: 6px;">85 TOKENS/S</div>
           <div class="card-title">AMD Instinct MI300X.</div>
           <div class="card-body" style="margin-top: 12px;">
             Sub-1,200ms pipeline with deterministic replay.
@@ -482,16 +569,16 @@
     <div class="slide" id="s6">
       <div class="cat-tag">VALIDATED BENCHMARKS</div>
       <div class="split-3-col">
-        <div class="card">
-          <div class="metric-hero emerald" style="font-size: 38px;">&lt;1,200ms</div>
+        <div class="card blue-tint">
+          <div class="metric-hero blue" style="font-size: 38px;">&lt;1,200ms</div>
           <div class="card-body">Multi-agent MI300X execution.</div>
         </div>
-        <div class="card">
+        <div class="card orange-tint">
           <div class="metric-hero orange" style="font-size: 38px;">15.9x</div>
           <div class="card-body">$13.9K spend recovers $221K.</div>
         </div>
-        <div class="card">
-          <div class="metric-hero emerald" style="font-size: 38px;">0 IDLE</div>
+        <div class="card green-tint">
+          <div class="metric-hero green" style="font-size: 38px;">0 IDLE</div>
           <div class="card-body">100% press utilization.</div>
         </div>
       </div>
@@ -504,23 +591,23 @@
       <div class="split-50-50">
         <div class="card">
           <div class="timeline-row">
-            <div class="timeline-time" style="color: var(--accent-orange);">+30D:</div>
+            <div class="timeline-time">+30D:</div>
             <div class="timeline-desc">ERP webhooks.</div>
           </div>
           <div class="timeline-row">
-            <div class="timeline-time" style="color: var(--accent-orange);">+60D:</div>
+            <div class="timeline-time">+60D:</div>
             <div class="timeline-desc">Port congestion AIS feeds.</div>
           </div>
           <div class="timeline-row">
-            <div class="timeline-time" style="color: var(--accent-orange);">+90D:</div>
+            <div class="timeline-time">+90D:</div>
             <div class="timeline-desc">Autonomous supplier negotiations.</div>
           </div>
         </div>
         <div class="card">
-          <div style="font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--accent-orange); margin-bottom: 12px;">
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; color: var(--primary-blue); margin-bottom: 12px;">
             github.com/b3rtuso/ProcureX
           </div>
-          <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--accent-emerald); margin-bottom: 16px;">
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: var(--success-green); margin-bottom: 16px;">
             Live on localhost:8000
           </div>
           <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted);">
