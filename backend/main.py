@@ -109,6 +109,17 @@ async def serve_command_center():
     return HTMLResponse("<h1>Frontend index.html not found</h1>", status_code=404)
 
 
+@app.get("/styles.css")
+async def serve_styles_css():
+    """Serve the dedicated design system stylesheet."""
+    css_path = os.path.join(
+        os.path.dirname(os.path.dirname(__file__)), "frontend", "styles.css"
+    )
+    if os.path.exists(css_path):
+        return FileResponse(css_path, media_type="text/css")
+    raise HTTPException(status_code=404, detail="styles.css not found")
+
+
 @app.get("/api/system/inference")
 async def get_inference_status() -> dict[str, Any]:
     """Return live AMD Instinct MI300X / ROCm / Gemma-2 inference telemetry."""
@@ -355,6 +366,115 @@ async def simulate_replies_endpoint(disruption_id: str) -> WorkflowStateSnapshot
     return snapshot
 
 
+@app.post("/api/rfq/dispatch-and-reply")
+async def dispatch_rfq_and_generate_replies(payload: dict[str, Any]) -> dict[str, Any]:
+    """Dispatch RFQ emails, call live AMD LLM for quotation analysis & telemetry, and return vendor replies."""
+    from backend.core.llm import call_amd_llm
+
+    rfq_id = payload.get("rfq_id", "ALL_BACKUPS")
+    target_supplier = payload.get("supplier_name", "MetroSteel Industries")
+    plant_location = "Laguna & Cebu Stamping"
+
+    conn = get_connection()
+    try:
+        cur = conn.cursor()
+        now_iso = datetime.now(timezone.utc).isoformat()
+
+        # Prompt AMD LLM for B2B quotation analysis note
+        user_prompt = (
+            f"You are the Strategic Sourcing AI for {plant_location}. "
+            f"Generate a 2-sentence formal supplier quote confirmation note for {target_supplier} "
+            f"confirming their stock availability, quoted price per kg (PHP), and guaranteed delivery lead time."
+        )
+
+        def fallback_note() -> str:
+            return (
+                f"Quotation confirmed by {target_supplier} commercial desk. "
+                f"Warehouse stock is locked and transport scheduled for {plant_location}."
+            )
+
+        llm_note, metric = await call_amd_llm(
+            prompt=user_prompt,
+            agent_name="SourcingAgent",
+            deterministic_fallback=fallback_note,
+            conn=conn,
+        )
+        ai_note = str(llm_note).strip().replace("```", "")
+
+        # Record outbox emails in SQLite
+        cur.execute(
+            """
+            INSERT INTO outbox_emails (
+                disruption_id, supplier_id, supplier_name, recipient_email,
+                subject, body, requested_qty_tons, target_unit_price, status, sent_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                "DISRUPT-LAGUNA-2026",
+                "SUP-METRO" if rfq_id not in ("RFQ-IRON", "RFQ-FAST") else ("SUP-IRON" if rfq_id == "RFQ-IRON" else "SUP-FAST"),
+                target_supplier,
+                "commercial-desk@supplier.com.ph",
+                f"URGENT RFQ — Stock & Price Confirmation [{rfq_id}]",
+                f"Dispatched from {plant_location}. AI Note: {ai_note}",
+                5.0,
+                65.0,
+                "DELIVERED",
+                now_iso,
+            ),
+        )
+        conn.commit()
+
+        # Build supplier replies
+        standard_replies = {
+            "RFQ-METRO": {
+                "supplierId": "SUP-METRO",
+                "supplierName": "MetroSteel Industries",
+                "location": "Manila, Philippines",
+                "stockConfirmed": "5,000 kg in stock (Manila warehouse)",
+                "quotedPrice": "₱68/kg (₱340,000 total)",
+                "promisedDelivery": "5 days (Guaranteed Oct 26)",
+                "replySubject": "RE: URGENT RFQ — MetroSteel Stock Confirmed (5,000 kg @ ₱68/kg)",
+                "note": "We confirm 5,000 kg of ASTM A1008 2.0mm Steel Coil in our Manila warehouse ready for immediate slitting at ₱68/kg (DDP Laguna Stamping). Dedicated direct trucking ready.",
+                "aiNote": ai_note,
+            },
+            "RFQ-IRON": {
+                "supplierId": "SUP-IRON",
+                "supplierName": "IronWorks Supply",
+                "location": "Cebu, Philippines",
+                "stockConfirmed": "8,000 kg in stock (Cebu depot)",
+                "quotedPrice": "₱64/kg (₱512,000 total)",
+                "promisedDelivery": "8 days (Oct 29)",
+                "replySubject": "RE: RFQ Inquiry — IronWorks Supply Stock Quotation (8,000 kg)",
+                "note": "We confirm 8,000 kg available in our Cebu depot at ₱64/kg; earliest RoRo vessel arrival to Luzon dock is 8 calendar days.",
+                "aiNote": ai_note,
+            },
+            "RFQ-FAST": {
+                "supplierId": "SUP-FAST",
+                "supplierName": "FastMetals Co.",
+                "location": "Davao, Philippines",
+                "stockConfirmed": "10,000 kg in stock (Davao warehouse)",
+                "quotedPrice": "₱61/kg (₱305,000 for 5,000 kg)",
+                "promisedDelivery": "11 days (Nov 1)",
+                "replySubject": "RE: Commercial Quotation — FastMetals Davao Depot Stock",
+                "note": "We hold 10,000 kg in Davao at ₱61/kg; container coastal sea freight lead time to Laguna dock is 11 calendar days.",
+                "aiNote": ai_note,
+            },
+        }
+
+        telemetry = get_system_inference_telemetry(conn)
+
+        return {
+            "success": True,
+            "dispatched_rfq_id": rfq_id,
+            "plant": plant_location,
+            "replies": standard_replies,
+            "amd_telemetry": telemetry,
+            "latest_inference_metric": metric.model_dump(),
+        }
+    finally:
+        conn.close()
+
+
 @app.post("/api/demo/reset", response_model=WorkflowStateSnapshot)
 async def reset_demo_state() -> WorkflowStateSnapshot:
     """Reset the SQLite ERP database to clean seed state and re-initialize the Golden Scenario."""
@@ -362,3 +482,4 @@ async def reset_demo_state() -> WorkflowStateSnapshot:
     WORKFLOW_STREAMS.clear()
     init_and_seed_db()
     return await _seed_initial_golden_workflow()
+

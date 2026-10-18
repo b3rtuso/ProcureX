@@ -17,12 +17,12 @@
     tailwind.config = {
       theme: {
         extend: {
-          colors: {
+            colors: {
             canvas: '#f8f9fc',
             primary: '#0d6efd',
             secondary: '#f97316',
             success: '#10b981',
-            pinkAccent: '#ec4899',
+            pinkAccent: '#0d6efd',
             purpleAccent: '#a855f7',
             navy: {
               950: '#090E1A',
@@ -52,108 +52,8 @@
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-  <style>
-    body {
-      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-      background-color: #f8f9fc;
-      color: #1e293b;
-      -webkit-font-smoothing: antialiased;
-      overflow-x: hidden;
-    }
-    .tabular {
-      font-variant-numeric: tabular-nums;
-    }
-    .saas-card {
-      background: #ffffff;
-      border: 1px solid #f3f4f6;
-      border-radius: 24px;
-      box-shadow: 0 1px 2px 0 rgba(30, 41, 59, 0.03), 0 4px 16px -4px rgba(30, 41, 59, 0.03);
-      transition: all 300ms ease-in-out;
-    }
-    .saas-card-hover {
-      transition: all 300ms ease-in-out;
-    }
-    .saas-card-hover:hover {
-      transform: translateY(-2px);
-      border-color: #e2e8f0;
-      box-shadow: 0 12px 24px -6px rgba(13, 110, 253, 0.08), 0 4px 10px -2px rgba(30, 41, 59, 0.04);
-    }
-    .chart-bar-transition {
-      transition: height 400ms ease-in-out, transform 300ms ease-in-out, opacity 300ms ease-in-out;
-    }
-    @keyframes fadeSlide {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .animate-in {
-      animation: fadeSlide 300ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-
-    /* Standardized Single-Line Badge, Pill & Status Geometry (R1) */
-    .badge-pill,
-    .status-pill,
-    [data-badge] {
-      white-space: nowrap !important;
-      display: inline-flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      flex-shrink: 0 !important;
-      line-height: 1 !important;
-    }
-
-    /* Universal safety protection: all status-like spans, badges, and tags never wrap or distort pill radius */
-    span[class*="rounded-full"],
-    span[class*="rounded-md"],
-    span[class*="rounded-lg"],
-    span[class*="rounded-xl"],
-    span[class~="rounded"],
-    .badge-pill,
-    .status-pill {
-      white-space: nowrap;
-    }
-
-    /* Standardized Button & Table Action Single-Line Geometry */
-    table button,
-    .btn-nowrap,
-    [data-btn-nowrap] {
-      white-space: nowrap !important;
-      flex-shrink: 0 !important;
-    }
-
-    /* Standardized Table & Cell Geometry (R2) - Cross-browser fallback */
-    .table-nowrap th,
-    .table-nowrap td,
-    th.cell-nowrap,
-    td.cell-nowrap,
-    table th {
-      white-space: nowrap;
-    }
-
-    /* Modern engine progressive enhancement for badge/button cells */
-    @supports selector(:has(*)) {
-      table td:has(.badge-pill),
-      table td:has(button) {
-        white-space: nowrap;
-      }
-    }
-
-    /* Responsive Table Cell Padding */
-    .responsive-table th,
-    .responsive-table td {
-      padding-left: clamp(0.625rem, 0.8vw + 0.25rem, 1rem);
-      padding-right: clamp(0.625rem, 0.8vw + 0.25rem, 1rem);
-      padding-top: clamp(0.625rem, 0.6vw + 0.35rem, 0.875rem);
-      padding-bottom: clamp(0.625rem, 0.6vw + 0.35rem, 0.875rem);
-    }
-
-    /* Fluid Typography and Card Padding */
-    .fluid-kpi-val {
-      font-size: clamp(1.25rem, 1.8vw, 1.5rem);
-    }
-    .fluid-card-p {
-      padding: clamp(1rem, 1.5vw, 1.5rem);
-    }
-  </style>
+  <!-- Dedicated Design System Stylesheet -->
+  <link rel="stylesheet" href="/styles.css">
 </head>
 <body class="h-screen overflow-hidden flex flex-col bg-[#f8f9fc]">
   <div id="root" class="flex-1 flex flex-col h-screen overflow-hidden"></div>
@@ -861,7 +761,7 @@
 
       const [selectedCalendarDay, setSelectedCalendarDay] = useState("Oct 21");
       const [hoveredBarIndex, setHoveredBarIndex] = useState(null);
-      const [selectedPlant, setSelectedPlant] = useState("Brescia & Manila Plant");
+      const [selectedPlant, setSelectedPlant] = useState("Laguna & Cebu Stamping");
 
       // Interactive Calendar Pop-up & Scheduled Deliveries State
       const [showCalendarModal, setShowCalendarModal] = useState(false);
@@ -1170,14 +1070,45 @@
         }
       }, [simStageIndex]);
 
+      // Dispatches RFQ via live AMD LLM backend endpoint (POST /api/rfq/dispatch-and-reply)
+      const dispatchRfqViaBackend = async (rfqId) => {
+        const targetSupplier =
+          rfqId === "RFQ-IRON" ? "IronWorks Supply" :
+          rfqId === "RFQ-FAST" ? "FastMetals Corp" :
+          "MetroSteel Industries";
+
+        try {
+          const res = await fetch("/api/rfq/dispatch-and-reply", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              rfq_id: rfqId || "ALL_BACKUPS",
+              supplier_name: targetSupplier,
+              plant: "Laguna & Cebu Stamping"
+            })
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.amd_telemetry) {
+              setAmdTelemetry(data.amd_telemetry);
+            }
+            applySupplierQuoteReply(rfqId, data.replies);
+            return;
+          }
+        } catch (err) {
+          console.warn("Backend RFQ dispatch error, using local fallback:", err);
+        }
+        applySupplierQuoteReply(rfqId);
+      };
+
       // Reveal supplier stock & price ONLY AFTER the RFQ email is sent!
-      const applySupplierQuoteReply = (rfqId) => {
-        const replyData = {
+      const applySupplierQuoteReply = (rfqId, customReplies = null) => {
+        const replyData = customReplies || {
           "RFQ-METRO": {
             stockConfirmed: "5,000 kg in stock (Manila warehouse)",
             quotedPrice: "₱68/kg (₱340,000 total)",
             promisedDelivery: "5 days (Guaranteed Oct 26)",
-            note: "We confirm 5,000 kg of ASTM A1008 2.0mm Steel Coil is in stock in Manila ready for immediate slitting at ₱68/kg (DDP Laguna)."
+            note: "We confirm 5,000 kg of ASTM A1008 2.0mm Steel Coil is in stock in Manila ready for immediate slitting at ₱68/kg (DDP Laguna Stamping). Dedicated direct trucking ready."
           },
           "RFQ-IRON": {
             stockConfirmed: "8,000 kg in stock (Cebu depot)",
@@ -1189,7 +1120,7 @@
             stockConfirmed: "10,000 kg in stock (Davao warehouse)",
             quotedPrice: "₱61/kg (₱305,000 for 5,000 kg)",
             promisedDelivery: "11 days (Nov 1)",
-            note: "We hold 10,000 kg in Davao at ₱61/kg; container sea freight lead time to Laguna is 11 calendar days."
+            note: "We hold 10,000 kg in Davao at ₱61/kg; container sea freight lead time to Laguna dock is 11 calendar days."
           }
         };
 
@@ -1334,7 +1265,7 @@
         if (type === "RFQ") {
           if (targetId === "ALL_BACKUPS") {
             setRfqs(prev => prev.map(r => ({ ...r, status: "Sent — Awaiting Quote" })));
-            setTimeout(() => applySupplierQuoteReply(null), 500);
+            dispatchRfqViaBackend("ALL_BACKUPS");
             markRecComplete("REC_RFQ_METRO");
             markRecComplete("REC_RFQ_BACKUPS");
             showToast("All 3 RFQs dispatched! Suppliers replied with their confirmed stock & unit prices.");
@@ -1344,7 +1275,7 @@
               prev.map(r => (r.id === targetId ? { ...r, status: nextStatus } : r))
             );
             if (subAction === "SEND") {
-              setTimeout(() => applySupplierQuoteReply(targetId), 500);
+              dispatchRfqViaBackend(targetId);
             }
             if (targetId === "RFQ-METRO") {
               markRecComplete("REC_RFQ_METRO");
@@ -1544,39 +1475,10 @@
                     SupplyChain AI
                   </div>
                   <div className="text-[11px] font-medium text-[#64748b]">
-                    Autonomous Exception Handler
+                    Autonomous Exception Handler · Laguna & Cebu Stamping
                   </div>
                 </div>
               </div>
-
-              {/* Organization / Plant Selector Button (Orange #fff7ed, 12px radius) */}
-              <button
-                type="button"
-                onClick={() => {
-                  const next =
-                    selectedPlant === "Brescia & Manila Plant"
-                      ? "Laguna & Cebu Stamping"
-                      : "Brescia & Manila Plant";
-                  setSelectedPlant(next);
-                  showToast(`Switched active plant view to: ${next}`);
-                }}
-                className="w-full bg-[#fff7ed] hover:bg-orange-100/70 border border-orange-200/70 rounded-[12px] px-3.5 py-3 flex items-center justify-between text-left transition-all duration-300"
-              >
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <span className="w-7 h-7 rounded-[9px] bg-[#f97316] text-white flex items-center justify-center font-extrabold text-xs shrink-0 shadow-2xs">
-                    P1
-                  </span>
-                  <div className="truncate">
-                    <div className="text-xs font-extrabold text-[#c2410c] truncate">
-                      {selectedPlant}
-                    </div>
-                    <div className="text-[10px] font-semibold text-[#ea580c]/80">
-                      Active Plant Workspace
-                    </div>
-                  </div>
-                </div>
-                <Icon name="chevrons-up-down" className="w-4 h-4 text-[#f97316]" />
-              </button>
 
               {/* STRICTLY 5 MAIN NAVIGATION ITEMS with #0d6efd Active State + Right Vertical Indicator Pill */}
               <nav className="space-y-1.5" aria-label="Primary Sidebar Links">
@@ -1744,7 +1646,7 @@
                       aria-label="Notifications"
                     >
                       <Icon name="bell" className="w-5 h-5" />
-                      <span className="badge-pill whitespace-nowrap inline-flex items-center justify-center shrink-0 leading-none absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#ec4899] text-white text-[10px] font-bold select-none" role="status" aria-label={`${alerts.length} active disruptions`}>
+                      <span className="badge-pill whitespace-nowrap inline-flex items-center justify-center shrink-0 leading-none absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#0d6efd] text-white text-[10px] font-bold select-none" role="status" aria-label={`${alerts.length} active disruptions`}>
                         {alerts.length}
                       </span>
                     </button>
@@ -2143,13 +2045,13 @@
                           </button>
                         </div>
 
-                        <div className="overflow-x-auto">
-                          <table className="w-full text-left text-xs sm:text-sm tabular table-nowrap responsive-table">
+                        <div className="w-full overflow-x-auto no-scrollbar">
+                          <table className="w-full text-left text-xs sm:text-sm tabular responsive-table">
                             <thead>
                               <tr className="bg-[#f8f9fc] border-y border-[#f3f4f6] text-[#64748b] text-xs">
                                 <th className="py-2.5 px-3 xl:px-4 xl:py-3 font-bold rounded-l-[10px] whitespace-nowrap">Order ↑</th>
-                                <th className="py-2.5 px-3 xl:px-4 xl:py-3 font-bold whitespace-nowrap">Product</th>
-                                <th className="py-2.5 px-3 xl:px-4 xl:py-3 font-bold whitespace-nowrap">Material</th>
+                                <th className="py-2.5 px-3 xl:px-4 xl:py-3 font-bold">Product</th>
+                                <th className="py-2.5 px-3 xl:px-4 xl:py-3 font-bold">Material</th>
                                 <th className="py-2.5 px-3 xl:px-4 xl:py-3 font-bold whitespace-nowrap">Required Date</th>
                                 <th className="py-2.5 px-3 xl:px-4 xl:py-3 font-bold text-right rounded-r-[10px] whitespace-nowrap">Status</th>
                               </tr>
@@ -2162,8 +2064,8 @@
                                   className="hover:bg-[#f8f9fc] transition-colors cursor-pointer"
                                 >
                                   <td className="py-3 px-3 xl:px-4 xl:py-3.5 font-mono font-extrabold text-[#1e293b] whitespace-nowrap" title={ord.orderId}>{ord.orderId}</td>
-                                  <td className="py-3 px-3 xl:px-4 xl:py-3.5 font-bold text-[#1e293b] whitespace-nowrap" title={ord.product}>{ord.product}</td>
-                                  <td className="py-3 px-3 xl:px-4 xl:py-3.5 font-medium text-[#64748b] whitespace-nowrap" title={ord.material}>{ord.material}</td>
+                                  <td className="py-3 px-3 xl:px-4 xl:py-3.5 font-bold text-[#1e293b]" title={ord.product}>{ord.product}</td>
+                                  <td className="py-3 px-3 xl:px-4 xl:py-3.5 font-medium text-[#64748b]" title={ord.material}>{ord.material}</td>
                                   <td className="py-3 px-3 xl:px-4 xl:py-3.5 font-mono font-semibold text-[#1e293b] whitespace-nowrap" title={ord.currentDate}>{ord.currentDate}</td>
                                   <td className="py-3 px-3 xl:px-4 xl:py-3.5 text-right whitespace-nowrap">
                                     <span role="status" aria-label={`Order Status: ${ord.status}`} className={`badge-pill whitespace-nowrap inline-flex items-center justify-center shrink-0 leading-none text-xs font-bold px-3 py-1.5 rounded-full ${
@@ -2283,7 +2185,7 @@
                       </p>
                     </div>
 
-                    <div className="flex items-center gap-1.5 bg-white p-1 rounded-xl border border-slate-200 self-start overflow-x-auto max-w-full">
+                    <div className="flex flex-wrap items-center gap-1.5 bg-white p-1 rounded-xl border border-slate-200 self-start no-scrollbar">
                       {["All", "Delays", "Shortages", "Information"].map((tab) => (
                         <button
                           key={tab}
@@ -2377,7 +2279,7 @@
                       </p>
                     </div>
 
-                    <div className="flex items-center gap-1.5 bg-white p-1 rounded-xl border border-slate-200 self-start overflow-x-auto max-w-full">
+                    <div className="flex flex-wrap items-center gap-1.5 bg-white p-1 rounded-xl border border-slate-200 self-start no-scrollbar">
                       {["Purchase Orders", "Inventory", "Affected Orders"].map((tab) => (
                         <button
                           key={tab}
@@ -2401,13 +2303,13 @@
                         <h3 className="text-base font-bold text-slate-900">Purchase Orders</h3>
                         <span className="text-xs text-slate-500">Click any order row to inspect full PO details</span>
                       </div>
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-left text-xs sm:text-sm tabular table-nowrap responsive-table">
+                      <div className="w-full overflow-x-auto no-scrollbar">
+                        <table className="w-full text-left text-xs sm:text-sm tabular responsive-table">
                           <thead>
                             <tr className="border-b border-slate-200 text-slate-500 text-xs uppercase">
                               <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold whitespace-nowrap">PO Number</th>
-                              <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold whitespace-nowrap">Supplier</th>
-                              <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold whitespace-nowrap">Material</th>
+                              <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold">Supplier</th>
+                              <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold">Material</th>
                               <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold whitespace-nowrap">Quantity</th>
                               <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold whitespace-nowrap">Expected Delivery</th>
                               <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold whitespace-nowrap">Status</th>
@@ -2432,8 +2334,8 @@
                                   className="hover:bg-slate-50 cursor-pointer"
                                 >
                                   <td className="py-3 px-3 xl:px-4 xl:py-3.5 font-mono font-bold text-brand-700 whitespace-nowrap" title={po.poNumber}>{po.poNumber}</td>
-                                  <td className="py-3 px-3 xl:px-4 xl:py-3.5 font-medium text-slate-900 whitespace-nowrap" title={po.supplier}>{po.supplier}</td>
-                                  <td className="py-3 px-3 xl:px-4 xl:py-3.5 text-slate-600 whitespace-nowrap" title={po.material}>{po.material}</td>
+                                  <td className="py-3 px-3 xl:px-4 xl:py-3.5 font-medium text-slate-900" title={po.supplier}>{po.supplier}</td>
+                                  <td className="py-3 px-3 xl:px-4 xl:py-3.5 text-slate-600" title={po.material}>{po.material}</td>
                                   <td className="py-3 px-3 xl:px-4 xl:py-3.5 font-mono text-slate-700 whitespace-nowrap" title={po.quantity}>{po.quantity}</td>
                                   <td className="py-3 px-3 xl:px-4 xl:py-3.5 font-mono text-slate-700 whitespace-nowrap" title={po.expectedDelivery}>{po.expectedDelivery}</td>
                                   <td className="py-3 px-3 xl:px-4 xl:py-3.5 whitespace-nowrap">
@@ -2512,11 +2414,11 @@
 
                       <div className="saas-card p-6">
                         <h3 className="text-base font-bold text-slate-900 mb-4">Raw Material Inventory Table</h3>
-                        <div className="overflow-x-auto">
-                          <table className="w-full text-left text-xs sm:text-sm tabular table-nowrap responsive-table">
+                        <div className="w-full overflow-x-auto no-scrollbar">
+                          <table className="w-full text-left text-xs sm:text-sm tabular responsive-table">
                             <thead>
                               <tr className="border-b border-slate-200 text-slate-500 text-xs uppercase">
-                                <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold whitespace-nowrap">Material</th>
+                                <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold">Material</th>
                                 <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold whitespace-nowrap">Current Stock</th>
                                 <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold whitespace-nowrap">Daily Usage</th>
                                 <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold whitespace-nowrap">Days Remaining</th>
@@ -2527,7 +2429,7 @@
                             <tbody className="divide-y divide-slate-100">
                               {inventory.map((item) => (
                                 <tr key={item.material} className="hover:bg-slate-50">
-                                  <td className="py-3 px-3 xl:px-4 xl:py-3.5 font-bold text-slate-900 whitespace-nowrap" title={item.material}>{item.material}</td>
+                                  <td className="py-3 px-3 xl:px-4 xl:py-3.5 font-bold text-slate-900" title={item.material}>{item.material}</td>
                                   <td className="py-3 px-3 xl:px-4 xl:py-3.5 font-mono whitespace-nowrap">{item.currentStock}</td>
                                   <td className="py-3 px-3 xl:px-4 xl:py-3.5 font-mono text-slate-600 whitespace-nowrap">{item.dailyUsage}</td>
                                   <td className="py-3 px-3 xl:px-4 xl:py-3.5 font-mono font-semibold whitespace-nowrap">
@@ -2573,13 +2475,13 @@
                         </button>
                       </div>
 
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-left text-xs sm:text-sm tabular table-nowrap responsive-table">
+                      <div className="w-full overflow-x-auto no-scrollbar">
+                        <table className="w-full text-left text-xs sm:text-sm tabular responsive-table">
                           <thead>
                             <tr className="border-b border-slate-200 text-slate-500 text-xs uppercase">
                               <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold whitespace-nowrap">Order</th>
-                              <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold whitespace-nowrap">Product</th>
-                              <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold whitespace-nowrap">Material</th>
+                              <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold">Product</th>
+                              <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold">Material</th>
                               <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold whitespace-nowrap">Required Quantity</th>
                               <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold whitespace-nowrap">Scheduled Date</th>
                               <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold whitespace-nowrap">Risk</th>
@@ -2590,8 +2492,8 @@
                             {productionOrders.filter(o => o.orderId === "PO-102" || o.orderId === "PO-103" || o.status === "AT RISK").map((ord) => (
                               <tr key={ord.orderId} className="hover:bg-slate-50">
                                 <td className="py-3 px-3 xl:px-4 xl:py-3.5 font-mono font-bold text-slate-900 whitespace-nowrap" title={ord.orderId}>{ord.orderId}</td>
-                                <td className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold text-slate-800 whitespace-nowrap" title={ord.product}>{ord.product}</td>
-                                <td className="py-3 px-3 xl:px-4 xl:py-3.5 text-slate-600 whitespace-nowrap" title={ord.material}>{ord.material}</td>
+                                <td className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold text-slate-800" title={ord.product}>{ord.product}</td>
+                                <td className="py-3 px-3 xl:px-4 xl:py-3.5 text-slate-600" title={ord.material}>{ord.material}</td>
                                 <td className="py-3 px-3 xl:px-4 xl:py-3.5 font-mono whitespace-nowrap">{ord.requiredQty}</td>
                                 <td className="py-3 px-3 xl:px-4 xl:py-3.5 font-mono whitespace-nowrap">{ord.currentDate}</td>
                                 <td className="py-3 px-3 xl:px-4 xl:py-3.5 whitespace-nowrap">
@@ -2642,7 +2544,7 @@
                         <span>Add Supplier</span>
                       </button>
 
-                      <div className="flex items-center gap-1.5 bg-white p-1 rounded-xl border border-slate-200 overflow-x-auto max-w-full">
+                      <div className="flex flex-wrap items-center gap-1.5 bg-white p-1 rounded-xl border border-slate-200 no-scrollbar">
                         {["Suppliers", "Compare", "RFQ Drafts"].map((tab) => (
                           <button
                             key={tab}
@@ -2660,31 +2562,208 @@
                     </div>
                   </div>
 
-                  {/* Procurement Sequence Helper Banner */}
-                  <div className={`saas-card p-4 flex flex-col xl:flex-row xl:items-center justify-between gap-3 text-xs ${
-                    anyQuoteReceived ? "bg-emerald-50/70 border-emerald-200" : "bg-amber-50/70 border-amber-200"
-                  }`}>
-                    <div className="flex flex-wrap sm:flex-nowrap items-start sm:items-center gap-2.5 min-w-0 flex-1">
-                      <span role="status" aria-label={`Workflow Step: ${anyQuoteReceived ? "Step 2 Active · Quotes & Prices Revealed" : "Step 1 Required · Price & Stock Unknown"}`} className={`badge-pill whitespace-nowrap inline-flex items-center justify-center shrink-0 leading-none px-2.5 py-1 rounded-md font-bold ${
-                        anyQuoteReceived ? "bg-emerald-700 text-white" : "bg-amber-600 text-white"
-                      }`}>
-                        {anyQuoteReceived ? "Step 2 Active · Quotes & Prices Revealed" : "Step 1 Required · Price & Stock Unknown"}
-                      </span>
-                      <span className="text-slate-700 min-w-0">
-                        {anyQuoteReceived
-                          ? "Suppliers have replied to your RFQs! Current stock quantities, unit prices, and the AI's Best Option ranking are now unlocked."
-                          : "Supplier prices and current stock levels are NOT pre-determined before sending an inquiry. Send the RFQ emails first to ask suppliers if they have stock and how much they charge."}
-                      </span>
-                    </div>
-                    {!anyQuoteReceived && (
+                  {/* When RFQs are NOT yet sent: Show Step 1 Inquiry Prompt */}
+                  {!anyQuoteReceived && (
+                    <div className="saas-card p-4 flex flex-col xl:flex-row xl:items-center justify-between gap-3 text-xs bg-amber-50/70 border-amber-200">
+                      <div className="flex flex-wrap sm:flex-nowrap items-start sm:items-center gap-2.5 min-w-0 flex-1">
+                        <span role="status" aria-label="Workflow Step: Step 1 Required" className="badge-pill whitespace-nowrap inline-flex items-center justify-center shrink-0 leading-none px-2.5 py-1 rounded-md font-bold bg-amber-600 text-white">
+                          Step 1 Required · Price & Stock Unknown
+                        </span>
+                        <span className="text-slate-700 min-w-0">
+                          Supplier prices and current stock levels are NOT pre-determined before sending an inquiry. Send the RFQ emails first to ask suppliers if they have stock and how much they charge.
+                        </span>
+                      </div>
                       <button
                         onClick={() => setSuppliersTab("RFQ Drafts")}
                         className="px-3.5 py-2 rounded-lg bg-brand-600 text-white font-semibold shrink-0 whitespace-nowrap"
                       >
                         Go to RFQ Drafts to Ask Stock & Price →
                       </button>
-                    )}
-                  </div>
+                    </div>
+                  )}
+
+                  {/* Once RFQs are Sent: Prominent Supplier Quote Replies (Step 1 Required is COMPLETELY REMOVED) */}
+                  {anyQuoteReceived && (
+                    <div className="saas-card p-5 2xl:p-6 bg-gradient-to-br from-emerald-50/80 via-white to-blue-50/60 border border-emerald-200 space-y-4 animate-in">
+                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-emerald-100 pb-3">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 font-bold">
+                            <Icon name="check" className="w-4 h-4 text-emerald-600" />
+                          </div>
+                          <div>
+                            <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
+                              <span>Incoming Supplier Quote Replies (3/3 Received)</span>
+                              <span className="badge-pill whitespace-nowrap inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-600 text-white">
+                                Stock & Pricing Unlocked
+                              </span>
+                            </h3>
+                            <p className="text-xs text-slate-600">
+                              Official commercial desk responses received for Laguna & Cebu Stamping. Confirmed stock, binding unit prices, and transit times:
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="badge-pill whitespace-nowrap inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold bg-[#111827] text-white shrink-0">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#10b981] animate-pulse" />
+                            AMD MI300X Sourcing Engine
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* 3 Supplier Reply Cards Grid */}
+                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                        {/* MetroSteel Industries */}
+                        <div className="p-4 rounded-2xl bg-white border-2 border-emerald-500 shadow-sm space-y-3 relative flex flex-col justify-between">
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="font-extrabold text-slate-900 text-sm">MetroSteel Industries</span>
+                              <span className="badge-pill whitespace-nowrap text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                                BEST OPTION
+                              </span>
+                            </div>
+                            <p className="text-xs text-slate-500">Manila, Philippines · Direct Trucking</p>
+                            <div className="p-2.5 rounded-xl bg-emerald-50/70 border border-emerald-200 text-xs text-emerald-950 italic">
+                              “We confirm 5,000 kg of ASTM A1008 2.0mm Steel Coil is in stock in Manila ready for immediate slitting at ₱68/kg (DDP Laguna Stamping). Dedicated direct trucking ready.”
+                            </div>
+                            <div className="grid grid-cols-2 gap-2 text-xs font-mono pt-1">
+                              <div className="bg-slate-50 p-2 rounded-lg">
+                                <span className="text-[10px] font-sans text-slate-500 block uppercase">Confirmed Stock</span>
+                                <span className="font-bold text-emerald-700">5,000 kg</span>
+                              </div>
+                              <div className="bg-slate-50 p-2 rounded-lg">
+                                <span className="text-[10px] font-sans text-slate-500 block uppercase">Quoted Price</span>
+                                <span className="font-bold text-slate-900">₱68/kg</span>
+                              </div>
+                              <div className="bg-slate-50 p-2 rounded-lg">
+                                <span className="text-[10px] font-sans text-slate-500 block uppercase">Guaranteed Delivery</span>
+                                <span className="font-bold text-blue-700">5 days (Oct 26)</span>
+                              </div>
+                              <div className="bg-slate-50 p-2 rounded-lg">
+                                <span className="text-[10px] font-sans text-slate-500 block uppercase">Total Quote</span>
+                                <span className="font-bold text-slate-900">₱340,000</span>
+                              </div>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() =>
+                              setApprovalModal({
+                                type: "SUPPLIER",
+                                targetId: "SUP-METRO",
+                                stepBadge: "Step 2 of 2 · Award Emergency Purchase Order",
+                                title: "Award PO to MetroSteel Industries",
+                                summary: "Issue emergency purchase order for 5,000 kg of ASTM A1008 Steel Coil at confirmed price of ₱68/kg (₱340,000 total).",
+                                delivery: "5 days (Guaranteed arrival Oct 26)",
+                                reason: "Fastest confirmed delivery window directly prevents line starvation on PO-102 & PO-103."
+                              })
+                            }
+                            className="w-full py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-colors shadow-xs"
+                          >
+                            Award Emergency PO to MetroSteel →
+                          </button>
+                        </div>
+
+                        {/* IronWorks Supply */}
+                        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-3 relative flex flex-col justify-between">
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="font-extrabold text-slate-900 text-sm">IronWorks Supply</span>
+                              <span className="badge-pill whitespace-nowrap text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
+                                Option B · Regional Mill
+                              </span>
+                            </div>
+                            <p className="text-xs text-slate-500">Cebu, Philippines · Inter-Island RoRo</p>
+                            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 italic">
+                              “We confirm 8,000 kg available in our Cebu depot at ₱64/kg; earliest RoRo vessel arrival to Luzon is 8 calendar days.”
+                            </div>
+                            <div className="grid grid-cols-2 gap-2 text-xs font-mono pt-1">
+                              <div className="bg-slate-50 p-2 rounded-lg">
+                                <span className="text-[10px] font-sans text-slate-500 block uppercase">Confirmed Stock</span>
+                                <span className="font-bold text-emerald-700">8,000 kg</span>
+                              </div>
+                              <div className="bg-slate-50 p-2 rounded-lg">
+                                <span className="text-[10px] font-sans text-slate-500 block uppercase">Quoted Price</span>
+                                <span className="font-bold text-slate-900">₱64/kg</span>
+                              </div>
+                              <div className="bg-slate-50 p-2 rounded-lg">
+                                <span className="text-[10px] font-sans text-slate-500 block uppercase">Transit Lead Time</span>
+                                <span className="font-bold text-slate-800">8 days (Oct 29)</span>
+                              </div>
+                              <div className="bg-slate-50 p-2 rounded-lg">
+                                <span className="text-[10px] font-sans text-slate-500 block uppercase">Total Quote</span>
+                                <span className="font-bold text-slate-900">₱512,000</span>
+                              </div>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() =>
+                              setApprovalModal({
+                                type: "SUPPLIER",
+                                targetId: "SUP-IRON",
+                                stepBadge: "Step 2 of 2 · Award Emergency Purchase Order",
+                                title: "Award PO to IronWorks Supply",
+                                summary: "Issue emergency purchase order for 8,000 kg of ASTM A1008 Steel Coil at ₱64/kg.",
+                                delivery: "8 days (RoRo arrival Oct 29)",
+                                reason: "Higher inventory reserve but requires 2-day aluminum shift swap."
+                              })
+                            }
+                            className="w-full py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs transition-colors"
+                          >
+                            Award PO to IronWorks →
+                          </button>
+                        </div>
+
+                        {/* FastMetals Corp */}
+                        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-3 relative flex flex-col justify-between">
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="font-extrabold text-slate-900 text-sm">FastMetals Corp</span>
+                              <span className="badge-pill whitespace-nowrap text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
+                                Option C · Cost Optimized
+                              </span>
+                            </div>
+                            <p className="text-xs text-slate-500">Davao, Philippines · Coastal Freight</p>
+                            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 italic">
+                              “We hold 10,000 kg in Davao at ₱61/kg; container sea freight lead time to Laguna dock is 11 calendar days.”
+                            </div>
+                            <div className="grid grid-cols-2 gap-2 text-xs font-mono pt-1">
+                              <div className="bg-slate-50 p-2 rounded-lg">
+                                <span className="text-[10px] font-sans text-slate-500 block uppercase">Confirmed Stock</span>
+                                <span className="font-bold text-emerald-700">10,000 kg</span>
+                              </div>
+                              <div className="bg-slate-50 p-2 rounded-lg">
+                                <span className="text-[10px] font-sans text-slate-500 block uppercase">Quoted Price</span>
+                                <span className="font-bold text-slate-900">₱61/kg</span>
+                              </div>
+                              <div className="bg-slate-50 p-2 rounded-lg">
+                                <span className="text-[10px] font-sans text-slate-500 block uppercase">Transit Lead Time</span>
+                                <span className="font-bold text-slate-800">11 days (Nov 1)</span>
+                              </div>
+                              <div className="bg-slate-50 p-2 rounded-lg">
+                                <span className="text-[10px] font-sans text-slate-500 block uppercase">5,000 kg Total</span>
+                                <span className="font-bold text-slate-900">₱305,000</span>
+                              </div>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() =>
+                              setApprovalModal({
+                                type: "SUPPLIER",
+                                targetId: "SUP-FAST",
+                                stepBadge: "Step 2 of 2 · Award Emergency Purchase Order",
+                                title: "Award PO to FastMetals Corp",
+                                summary: "Issue emergency purchase order for 5,000 kg of ASTM A1008 Steel Coil at ₱61/kg.",
+                                delivery: "11 days (Arrival Nov 1)",
+                                reason: "Lowest unit price, but transit time exceeds stockout threshold."
+                              })
+                            }
+                            className="w-full py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs transition-colors"
+                          >
+                            Award PO to FastMetals →
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   {/* TAB 1: SUPPLIERS DIRECTORY */}
                   {suppliersTab === "Suppliers" && (
@@ -2845,11 +2924,11 @@
 
                       <div className="saas-card p-6">
                         <h3 className="text-base font-bold text-slate-900 mb-4">Backup Supplier Comparison Table</h3>
-                        <div className="overflow-x-auto">
-                          <table className="w-full text-left text-xs sm:text-sm tabular table-nowrap responsive-table">
+                        <div className="w-full overflow-x-auto no-scrollbar">
+                          <table className="w-full text-left text-xs sm:text-sm tabular responsive-table">
                             <thead>
                               <tr className="border-b border-slate-200 text-slate-500 text-xs uppercase">
-                                <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold whitespace-nowrap">Supplier</th>
+                                <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold">Supplier</th>
                                 <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold whitespace-nowrap">Quoted Price</th>
                                 <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold whitespace-nowrap">Available Quantity</th>
                                 <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold whitespace-nowrap">Lead Time</th>
@@ -2864,7 +2943,7 @@
                                   key={sup.id}
                                   className={sup.quoteReceived && sup.recommendedAfterQuote ? "bg-emerald-50/40" : "hover:bg-slate-50"}
                                 >
-                                  <td className="py-3 px-3 xl:px-4 xl:py-3.5 whitespace-nowrap" title={`${sup.name} (${sup.location})`}>
+                                  <td className="py-3 px-3 xl:px-4 xl:py-3.5" title={`${sup.name} (${sup.location})`}>
                                     <div className="font-bold text-slate-900">{sup.name}</div>
                                     <div className="text-xs text-slate-500">{sup.location}</div>
                                   </td>
@@ -2950,34 +3029,53 @@
                   {/* TAB 3: RFQ DRAFTS */}
                   {suppliersTab === "RFQ Drafts" && (
                     <div className="space-y-5">
-                      <div className="saas-card p-4 bg-amber-50/70 border-amber-200 flex flex-col xl:flex-row xl:items-center justify-between gap-3 text-xs text-amber-900">
-                        <div className="flex flex-wrap sm:flex-nowrap items-start sm:items-center gap-2.5 min-w-0 flex-1">
-                          <span role="status" aria-label="Workflow Step: Step 1 Required" className="badge-pill whitespace-nowrap inline-flex items-center justify-center shrink-0 leading-none px-2.5 py-1 rounded-md font-bold bg-amber-600 text-white">
-                            Step 1 Required
-                          </span>
-                          <span className="min-w-0">
-                            <strong>Send Formal RFQs to Reveal Stock & Pricing:</strong> Click <strong>Send Email</strong> on any supplier below (or <strong>Send All 3 RFQs</strong>) to transmit the inquiry. Once sent, the supplier replies with their confirmed warehouse stock and unit price, unlocking the AI ranking on the <strong>Compare</strong> tab!
-                          </span>
+                      {!anyQuoteReceived ? (
+                        <div className="saas-card p-4 bg-amber-50/70 border-amber-200 flex flex-col xl:flex-row xl:items-center justify-between gap-3 text-xs text-amber-900">
+                          <div className="flex flex-wrap sm:flex-nowrap items-start sm:items-center gap-2.5 min-w-0 flex-1">
+                            <span role="status" aria-label="Workflow Step: Step 1 Required" className="badge-pill whitespace-nowrap inline-flex items-center justify-center shrink-0 leading-none px-2.5 py-1 rounded-md font-bold bg-amber-600 text-white">
+                              Step 1 Required
+                            </span>
+                            <span className="min-w-0">
+                              <strong>Send Formal RFQs to Reveal Stock & Pricing:</strong> Click <strong>Send Email</strong> on any supplier below (or <strong>Send All 3 RFQs</strong>) to transmit the inquiry. Once sent, the supplier replies with their confirmed warehouse stock and unit price, unlocking the AI ranking on the <strong>Compare</strong> tab!
+                            </span>
+                          </div>
+                          <button
+                            onClick={() =>
+                              setApprovalModal({
+                                type: "RFQ",
+                                subAction: "SEND",
+                                targetId: "ALL_BACKUPS",
+                                recKey: "REC_RFQ_BACKUPS",
+                                stepBadge: "Step 1 of 2 · Send All 3 Stock & Price RFQs",
+                                title: "All 3 Backup Suppliers (MetroSteel, IronWorks, FastMetals)",
+                                summary: "Dispatch formal RFQ emails to all 3 pre-approved backup suppliers to request their current stock availability and unit pricing.",
+                                delivery: "3–14 days (Historical window)",
+                                reason: "Suppliers must reply with their stock quantity and price before the AI can rank the best option."
+                              })
+                            }
+                            className="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-lg font-semibold shrink-0 whitespace-nowrap"
+                          >
+                            Send All 3 RFQs
+                          </button>
                         </div>
-                        <button
-                          onClick={() =>
-                            setApprovalModal({
-                              type: "RFQ",
-                              subAction: "SEND",
-                              targetId: "ALL_BACKUPS",
-                              recKey: "REC_RFQ_BACKUPS",
-                              stepBadge: "Step 1 of 2 · Send All 3 Stock & Price RFQs",
-                              title: "All 3 Backup Suppliers (MetroSteel, IronWorks, FastMetals)",
-                              summary: "Dispatch formal RFQ emails to all 3 pre-approved backup suppliers to request their current stock availability and unit pricing.",
-                              delivery: "3–14 days (Historical window)",
-                              reason: "Suppliers must reply with their stock quantity and price before the AI can rank the best option."
-                            })
-                          }
-                          className="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-lg font-semibold shrink-0 whitespace-nowrap"
-                        >
-                          Send All 3 RFQs
-                        </button>
-                      </div>
+                      ) : (
+                        <div className="saas-card p-4 bg-emerald-50/70 border-emerald-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-emerald-950 animate-in">
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <span className="badge-pill whitespace-nowrap inline-flex items-center justify-center shrink-0 leading-none px-2.5 py-1 rounded-md font-bold bg-emerald-700 text-white">
+                              ✓ RFQs Dispatched & Quotations Received
+                            </span>
+                            <span className="truncate">
+                              All 3 backup suppliers have replied with official quotes. Review confirmed stock & revealed pricing below or on the Compare tab.
+                            </span>
+                          </div>
+                          <button
+                            onClick={() => setSuppliersTab("Compare")}
+                            className="px-3.5 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs whitespace-nowrap shrink-0 transition-colors"
+                          >
+                            View Best Option Ranking →
+                          </button>
+                        </div>
+                      )}
 
                       <div className="grid grid-cols-1 gap-5">
                         {rfqs.map((rfq) => {
@@ -3159,7 +3257,7 @@
                       </p>
                     </div>
 
-                    <div className="flex items-center gap-1.5 bg-white p-1 rounded-xl border border-slate-200 self-start overflow-x-auto max-w-full">
+                    <div className="flex flex-wrap items-center gap-1.5 bg-white p-1 rounded-xl border border-slate-200 self-start no-scrollbar">
                       {["Current Schedule", "AI Recommended Schedule", "Approval History"].map((tab) => (
                         <button
                           key={tab}
@@ -3180,14 +3278,14 @@
                   {scheduleTab === "Current Schedule" && (
                     <div className="saas-card p-6">
                       <h3 className="text-base font-bold text-slate-900 mb-4">Current Production Schedule</h3>
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-left text-xs sm:text-sm tabular table-nowrap responsive-table">
+                      <div className="w-full overflow-x-auto no-scrollbar">
+                        <table className="w-full text-left text-xs sm:text-sm tabular responsive-table">
                           <thead>
                             <tr className="border-b border-slate-200 text-slate-500 text-xs uppercase">
                               <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold whitespace-nowrap">Production Order</th>
-                              <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold whitespace-nowrap">Product</th>
+                              <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold">Product</th>
                               <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold whitespace-nowrap">Current Date</th>
-                              <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold whitespace-nowrap">Material</th>
+                              <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold">Material</th>
                               <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold whitespace-nowrap">Material Status</th>
                               <th className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold text-right whitespace-nowrap">Action</th>
                             </tr>
@@ -3196,9 +3294,9 @@
                             {productionOrders.map((ord) => (
                               <tr key={ord.orderId} className="hover:bg-slate-50">
                                 <td className="py-3 px-3 xl:px-4 xl:py-3.5 font-mono font-bold text-slate-900 whitespace-nowrap" title={ord.orderId}>{ord.orderId}</td>
-                                <td className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold text-slate-800 whitespace-nowrap" title={ord.product}>{ord.product}</td>
+                                <td className="py-3 px-3 xl:px-4 xl:py-3.5 font-semibold text-slate-800" title={ord.product}>{ord.product}</td>
                                 <td className="py-3 px-3 xl:px-4 xl:py-3.5 font-mono text-slate-700 whitespace-nowrap" title={ord.currentDate}>{ord.currentDate}</td>
-                                <td className="py-3 px-3 xl:px-4 xl:py-3.5 text-slate-600 whitespace-nowrap" title={`${ord.material} (${ord.requiredQty})`}>{ord.material} ({ord.requiredQty})</td>
+                                <td className="py-3 px-3 xl:px-4 xl:py-3.5 text-slate-600" title={`${ord.material} (${ord.requiredQty})`}>{ord.material} ({ord.requiredQty})</td>
                                 <td className="py-3 px-3 xl:px-4 xl:py-3.5 whitespace-nowrap">
                                   <span role="status" aria-label={`Material Status: ${ord.materialStatus}`} className={`badge-pill whitespace-nowrap inline-flex items-center justify-center shrink-0 leading-none text-xs font-bold px-2.5 py-1 rounded-full ${
                                     ord.materialStatus.includes("SHORTAGE")
@@ -3480,7 +3578,7 @@
             <div className="saas-card p-4 2xl:p-5 space-y-4">
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="relative w-12 h-12 rounded-full p-0.5 bg-gradient-to-tr from-[#0d6efd] via-[#a855f7] to-[#ec4899] shrink-0 shadow-xs">
+                  <div className="relative w-12 h-12 rounded-full p-0.5 bg-gradient-to-tr from-[#0d6efd] via-[#3b82f6] to-[#0d6efd] shrink-0 shadow-xs">
                     <div className="w-full h-full rounded-full bg-white flex items-center justify-center text-[#1e293b] font-extrabold text-sm">
                       PM
                     </div>
@@ -3531,7 +3629,7 @@
                 <button
                   type="button"
                   onClick={() => handleOpenCalendarPopup(selectedCalendarDay)}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-pink-50 hover:bg-pink-100 text-[#ec4899] text-[11px] font-extrabold transition-colors whitespace-nowrap shrink-0"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 hover:bg-blue-100 text-[#0d6efd] text-[11px] font-extrabold transition-colors whitespace-nowrap shrink-0"
                   title="Open full calendar to set date & assign supplier"
                 >
                   <Icon name="calendar" className="w-3.5 h-3.5" />
@@ -3550,11 +3648,11 @@
                       onClick={() => handleOpenCalendarPopup(d.key)}
                       className={`py-3 px-1 rounded-[16px] flex flex-col items-center justify-center transition-all duration-300 ${
                         isActive
-                          ? "bg-[#ec4899] text-white -translate-y-1 shadow-lg shadow-pink-500/30 font-extrabold"
-                          : "bg-white border border-[#f3f4f6] text-[#1e293b] hover:border-pink-200 font-bold shadow-2xs"
+                          ? "bg-[#0d6efd] text-white -translate-y-1 shadow-lg shadow-blue-500/30 font-extrabold"
+                          : "bg-white border border-[#f3f4f6] text-[#1e293b] hover:border-blue-200 font-bold shadow-2xs"
                       }`}
                     >
-                      <span className={`text-[10px] font-semibold ${isActive ? "text-pink-100" : "text-[#64748b]"}`}>
+                      <span className={`text-[10px] font-semibold ${isActive ? "text-blue-100" : "text-[#64748b]"}`}>
                         {d.dayName}
                       </span>
                       <span className="text-sm font-extrabold mt-1">{d.dateNum}</span>
@@ -3563,7 +3661,7 @@
                           isActive
                             ? "bg-white"
                             : hasEvent
-                            ? "bg-[#ec4899]"
+                            ? "bg-[#0d6efd]"
                             : "bg-transparent"
                         }`}
                       />
@@ -3577,9 +3675,9 @@
                 <button
                   type="button"
                   onClick={() => handleOpenCalendarPopup(selectedCalendarDay)}
-                  className="py-2 px-2.5 rounded-[12px] bg-[#f8f9fc] hover:bg-pink-50 text-[#1e293b] hover:text-[#ec4899] border border-[#e2e8f0] hover:border-pink-200 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all whitespace-nowrap shrink-0"
+                  className="py-2 px-2.5 rounded-[12px] bg-[#f8f9fc] hover:bg-blue-50 text-[#1e293b] hover:text-[#0d6efd] border border-[#e2e8f0] hover:border-blue-200 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all whitespace-nowrap shrink-0"
                 >
-                  <Icon name="calendar" className="w-3.5 h-3.5 text-[#ec4899]" />
+                  <Icon name="calendar" className="w-3.5 h-3.5 text-[#0d6efd]" />
                   <span>Set Date</span>
                 </button>
                 <button
@@ -3768,7 +3866,7 @@
                 </div>
 
                 {/* 4 Alert Details Tabs */}
-                <div className="border-b border-slate-200 flex items-center gap-2 overflow-x-auto">
+                <div className="border-b border-slate-200 flex flex-wrap items-center gap-2 no-scrollbar">
                   {["Summary", "Affected Orders", "Inventory Impact", "AI Recommendations"].map((tab) => (
                     <button
                       key={tab}
@@ -4550,7 +4648,7 @@
               <div className="bg-white rounded-[24px] max-w-3xl w-full p-6 sm:p-7 space-y-5 shadow-2xl border border-[#f3f4f6] animate-in max-h-[92vh] overflow-y-auto">
                 <div className="flex items-start justify-between gap-4 border-b border-[#f3f4f6] pb-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-11 h-11 rounded-[14px] bg-pink-50 text-[#ec4899] flex items-center justify-center shrink-0">
+                    <div className="w-11 h-11 rounded-[14px] bg-blue-50 text-[#0d6efd] flex items-center justify-center shrink-0">
                       <Icon name="calendar" className="w-5 h-5" />
                     </div>
                     <div>
@@ -4595,7 +4693,7 @@
                               dateKey: newKey,
                             }));
                           }}
-                          className="px-2.5 py-1 rounded-[10px] bg-white border border-[#e2e8f0] text-xs font-bold text-[#1e293b] focus:outline-none focus:border-[#ec4899]"
+                          className="px-2.5 py-1 rounded-[10px] bg-white border border-[#e2e8f0] text-xs font-bold text-[#1e293b] focus:outline-none focus:border-[#0d6efd]"
                         />
                       </div>
                     </div>
@@ -4629,8 +4727,8 @@
                             }}
                             className={`h-10 rounded-[12px] flex flex-col items-center justify-center text-xs transition-all ${
                               isSelected
-                                ? "bg-[#ec4899] text-white font-extrabold shadow-md shadow-pink-500/25 scale-105"
-                                : "bg-white hover:bg-pink-50 text-[#1e293b] font-bold border border-[#f3f4f6]"
+                                ? "bg-[#0d6efd] text-white font-extrabold shadow-md shadow-blue-500/25 scale-105"
+                                : "bg-white hover:bg-blue-50 text-[#1e293b] font-bold border border-[#f3f4f6]"
                             }`}
                           >
                             <span>{d.rawNum}</span>
@@ -4639,7 +4737,7 @@
                                 isSelected
                                   ? "bg-white"
                                   : hasEvent
-                                  ? "bg-[#ec4899]"
+                                  ? "bg-[#0d6efd]"
                                   : "bg-transparent"
                               }`}
                             />
@@ -4654,7 +4752,7 @@
                         <span className="font-extrabold text-[#1e293b]">
                           Scheduled on {calendarScheduleForm.dateKey}, 2026:
                         </span>
-                        <span className="font-bold text-[#ec4899]">
+                        <span className="font-bold text-[#0d6efd]">
                           {calendarEvents.filter((ev) => ev.dateKey === calendarScheduleForm.dateKey).length} Event(s)
                         </span>
                       </div>
@@ -4688,9 +4786,9 @@
                   {/* Right (5 cols): Set Date & Assign Supplier Form */}
                   <form onSubmit={handleScheduleCalendarEvent} className="md:col-span-5 flex flex-col justify-between space-y-4">
                     <div className="space-y-3.5">
-                      <div className="p-3.5 rounded-[16px] bg-pink-50/70 border border-pink-200/70 flex items-center justify-between">
+                      <div className="p-3.5 rounded-[16px] bg-blue-50/70 border border-blue-200/70 flex items-center justify-between">
                         <div>
-                          <div className="text-[10px] font-bold uppercase tracking-wider text-[#ec4899]">
+                          <div className="text-[10px] font-bold uppercase tracking-wider text-[#0d6efd]">
                             Selected Plant Date
                           </div>
                           <div className="text-base font-extrabold text-[#1e293b] mt-0.5">
@@ -4704,7 +4802,7 @@
                             setShowCalendarModal(false);
                             showToast(`Active calendar date set to ${calendarScheduleForm.dateKey}, 2026.`);
                           }}
-                          className="px-3 py-1.5 rounded-[10px] bg-white hover:bg-pink-100 text-[#ec4899] border border-pink-200 text-xs font-extrabold transition-colors whitespace-nowrap shrink-0"
+                          className="px-3 py-1.5 rounded-[10px] bg-white hover:bg-blue-100 text-[#0d6efd] border border-blue-200 text-xs font-extrabold transition-colors whitespace-nowrap shrink-0"
                         >
                           Set Date Only
                         </button>
@@ -4813,7 +4911,7 @@
                       </button>
                       <button
                         type="submit"
-                        className="px-4 py-2.5 rounded-[12px] bg-[#ec4899] hover:bg-pink-600 text-white text-xs font-extrabold shadow-lg shadow-pink-500/25 transition-all whitespace-nowrap shrink-0"
+                        className="px-4 py-2.5 rounded-[12px] bg-[#0d6efd] hover:bg-blue-700 text-white text-xs font-extrabold shadow-lg shadow-blue-500/25 transition-all whitespace-nowrap shrink-0"
                       >
                         Set Date & Schedule Supplier
                       </button>
