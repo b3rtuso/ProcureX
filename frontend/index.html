@@ -2323,7 +2323,7 @@ Tel: +63 (82) 298-4410 | Web: www.fastmetals.com.ph`
                         <Icon name="shield" className="w-5 h-5" />
                       </div>
                       <div className="min-w-0">
-                        <div className="text-xs font-medium text-[#64748b]">Supply Chain Resilience</div>
+                        <div className="text-xs font-medium text-[#64748b]">Supply Stability</div>
                         <div className="text-xl 2xl:text-2xl fluid-kpi-val font-extrabold text-[#1e293b] mt-0.5">85.0%</div>
                         <div className="text-[11px] font-semibold text-[#10b981] truncate mt-0.5">
                           Steel Coil: 7 days runway active
@@ -3054,8 +3054,8 @@ Tel: +63 (82) 298-4410 | Web: www.fastmetals.com.ph`
 
 
 
-                  {/* Once RFQs are Sent: Prominent Supplier Quote Replies (Step 1 Required is COMPLETELY REMOVED) */}
-                  {anyQuoteReceived && (
+                  {/* Once RFQs are Sent: Prominent Supplier Quote Replies (Only available on Compare Tab) */}
+                  {suppliersTab === "Compare" && anyQuoteReceived && (
                     <div className="saas-card p-5 2xl:p-6 bg-gradient-to-br from-emerald-50/80 via-white to-blue-50/60 border border-emerald-200 space-y-4 animate-in">
                       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-emerald-100 pb-3">
                         <div className="flex items-center gap-2.5">
@@ -3130,16 +3130,16 @@ Tel: +63 (82) 298-4410 | Web: www.fastmetals.com.ph`
                                 setApprovalModal({
                                   type: "SUPPLIER",
                                   targetId: "SUP-METRO",
-                                  stepBadge: "Step 2 of 2 · Award Emergency Purchase Order",
-                                  title: "Award PO to MetroSteel Industries",
-                                  summary: "Issue emergency purchase order for 5,000 kg of ASTM A1008 Steel Coil at confirmed price of ₱68/kg (₱340,000 total).",
+                                  stepBadge: "Step 2 of 2 · Select Supplier & Award PO",
+                                  title: "Select Supplier: MetroSteel Industries",
+                                  summary: "Issue purchase order for 5,000 kg of ASTM A1008 Steel Coil at confirmed price of ₱68/kg (₱340,000 total).",
                                   delivery: "5 days (Guaranteed arrival Oct 26)",
                                   reason: "Fastest confirmed delivery window directly prevents line starvation on PO-102 & PO-103."
                                 })
                               }
                               className="w-full py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-colors shadow-xs"
                             >
-                              Award Emergency PO to MetroSteel →
+                              Select Supplier →
                             </button>
                           </div>
                         </div>
@@ -3154,8 +3154,8 @@ Tel: +63 (82) 298-4410 | Web: www.fastmetals.com.ph`
                               </span>
                             </div>
                             <p className="text-xs text-slate-500">Cebu, Philippines · Inter-Island RoRo</p>
-                            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 italic">
-                              “We confirm 8,000 kg available in our Cebu depot at ₱64/kg; earliest RoRo vessel arrival to Luzon is 8 calendar days.”
+                            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 italic">
+                              “We confirm 8,000 kg available in our Cebu depot at ₱64/kg; earliest RoRo vessel arrival to Luzon dock is 8 calendar days.”
                             </div>
                             <div className="grid grid-cols-2 gap-2 text-xs font-mono pt-1">
                               <div className="bg-slate-50 p-2 rounded-lg">
@@ -3168,7 +3168,7 @@ Tel: +63 (82) 298-4410 | Web: www.fastmetals.com.ph`
                               </div>
                               <div className="bg-slate-50 p-2 rounded-lg">
                                 <span className="text-[10px] font-sans text-slate-500 block uppercase">Transit Lead Time</span>
-                                <span className="font-bold text-slate-800">8 days (Oct 29)</span>
+                                <span className="font-bold text-slate-900">8 days (Oct 29)</span>
                               </div>
                               <div className="bg-slate-50 p-2 rounded-lg">
                                 <span className="text-[10px] font-sans text-slate-500 block uppercase">Total Quote</span>
@@ -3190,16 +3190,16 @@ Tel: +63 (82) 298-4410 | Web: www.fastmetals.com.ph`
                                 setApprovalModal({
                                   type: "SUPPLIER",
                                   targetId: "SUP-IRON",
-                                  stepBadge: "Step 2 of 2 · Award Emergency Purchase Order",
-                                  title: "Award PO to IronWorks Supply",
-                                  summary: "Issue emergency purchase order for 8,000 kg of ASTM A1008 Steel Coil at ₱64/kg.",
+                                  stepBadge: "Step 2 of 2 · Select Supplier & Award PO",
+                                  title: "Select Supplier: IronWorks Supply",
+                                  summary: "Issue purchase order for 8,000 kg of ASTM A1008 Steel Coil at ₱64/kg.",
                                   delivery: "8 days (RoRo arrival Oct 29)",
                                   reason: "Higher inventory reserve but requires 2-day aluminum shift swap."
                                 })
                               }
                               className="w-full py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs transition-colors"
                             >
-                              Award PO to IronWorks →
+                              Select Supplier →
                             </button>
                           </div>
                         </div>
@@ -3214,7 +3214,7 @@ Tel: +63 (82) 298-4410 | Web: www.fastmetals.com.ph`
                               </span>
                             </div>
                             <p className="text-xs text-slate-500">Davao, Philippines · Coastal Freight</p>
-                            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 italic">
+                            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 italic">
                               “We hold 10,000 kg in Davao at ₱61/kg; container sea freight lead time to Laguna dock is 11 calendar days.”
                             </div>
                             <div className="grid grid-cols-2 gap-2 text-xs font-mono pt-1">
@@ -3228,7 +3228,7 @@ Tel: +63 (82) 298-4410 | Web: www.fastmetals.com.ph`
                               </div>
                               <div className="bg-slate-50 p-2 rounded-lg">
                                 <span className="text-[10px] font-sans text-slate-500 block uppercase">Transit Lead Time</span>
-                                <span className="font-bold text-slate-800">11 days (Nov 1)</span>
+                                <span className="font-bold text-slate-900">11 days (Nov 1)</span>
                               </div>
                               <div className="bg-slate-50 p-2 rounded-lg">
                                 <span className="text-[10px] font-sans text-slate-500 block uppercase">5,000 kg Total</span>
@@ -3250,16 +3250,16 @@ Tel: +63 (82) 298-4410 | Web: www.fastmetals.com.ph`
                                 setApprovalModal({
                                   type: "SUPPLIER",
                                   targetId: "SUP-FAST",
-                                  stepBadge: "Step 2 of 2 · Award Emergency Purchase Order",
-                                  title: "Award PO to FastMetals Corp",
-                                  summary: "Issue emergency purchase order for 5,000 kg of ASTM A1008 Steel Coil at ₱61/kg.",
+                                  stepBadge: "Step 2 of 2 · Select Supplier & Award PO",
+                                  title: "Select Supplier: FastMetals Corp",
+                                  summary: "Issue purchase order for 5,000 kg of ASTM A1008 Steel Coil at ₱61/kg.",
                                   delivery: "11 days (Arrival Nov 1)",
                                   reason: "Lowest unit price, but transit time exceeds stockout threshold."
                                 })
                               }
                               className="w-full py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs transition-colors"
                             >
-                              Award PO to FastMetals →
+                              Select Supplier →
                             </button>
                           </div>
                         </div>
@@ -3537,7 +3537,7 @@ Tel: +63 (82) 298-4410 | Web: www.fastmetals.com.ph`
                                             }
                                             className="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold whitespace-nowrap shadow-xs transition-colors"
                                           >
-                                            Award Emergency PO
+                                            Select Supplier
                                           </button>
                                           <button
                                             type="button"
@@ -5819,62 +5819,19 @@ Tel: +63 (82) 298-4410 | Web: www.fastmetals.com.ph`
                   </button>
                 </div>
 
-                {/* Supplier Quote Queue Bar (When multiple quotes are available) */}
+                {/* Supplier Quote Queue Indicator: Shows only what is selected */}
                 {queuedSupplierEmails && queuedSupplierEmails.length > 1 && (
-                  <div className="bg-[#0f172a] px-6 py-2.5 border-b border-slate-700/60 flex flex-wrap items-center justify-between gap-2 text-xs">
+                  <div className="bg-[#0f172a] px-6 py-2.5 border-b border-slate-700/60 flex items-center justify-between text-xs">
                     <div className="flex items-center gap-2">
-                      <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">
-                        Quote Queue ({queuedEmailIndex + 1} of {queuedSupplierEmails.length})
+                      <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                        Selected:
                       </span>
-                    </div>
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      {queuedSupplierEmails.map((item, qIdx) => {
-                        const isCurrent = viewingSupplierEmailRfq.id === item.id;
-                        return (
-                          <button
-                            key={item.id}
-                            type="button"
-                            onClick={() => {
-                              setQueuedEmailIndex(qIdx);
-                              setViewingSupplierEmailRfq(item);
-                            }}
-                            className={`px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
-                              isCurrent
-                                ? "bg-emerald-500 text-white shadow-xs"
-                                : "bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white"
-                            }`}
-                          >
-                            <span>{qIdx + 1}. {item.supplierName}</span>
-                            <span className="text-[10px] opacity-80">({item.leadTime})</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <button
-                        type="button"
-                        disabled={queuedEmailIndex === 0}
-                        onClick={() => {
-                          const prevIdx = Math.max(0, queuedEmailIndex - 1);
-                          setQueuedEmailIndex(prevIdx);
-                          setViewingSupplierEmailRfq(queuedSupplierEmails[prevIdx]);
-                        }}
-                        className="px-2.5 py-1 rounded-md bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-semibold transition-colors"
-                      >
-                        ← Prev
-                      </button>
-                      <button
-                        type="button"
-                        disabled={queuedEmailIndex >= queuedSupplierEmails.length - 1}
-                        onClick={() => {
-                          const nextIdx = Math.min(queuedSupplierEmails.length - 1, queuedEmailIndex + 1);
-                          setQueuedEmailIndex(nextIdx);
-                          setViewingSupplierEmailRfq(queuedSupplierEmails[nextIdx]);
-                        }}
-                        className="px-2.5 py-1 rounded-md bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-semibold transition-colors"
-                      >
-                        Next →
-                      </button>
+                      <span className="badge-pill bg-emerald-500 text-white font-extrabold text-xs px-2.5 py-0.5 rounded-md shadow-xs">
+                        {viewingSupplierEmailRfq.supplierName} ({viewingSupplierEmailRfq.leadTime})
+                      </span>
+                      <span className="text-[11px] text-slate-400 font-mono ml-1">
+                        (Quote {queuedEmailIndex + 1} of {queuedSupplierEmails.length})
+                      </span>
                     </div>
                   </div>
                 )}
@@ -5951,45 +5908,11 @@ Tel: +63 (82) 298-4410 | Web: www.fastmetals.com.ph`
                 </div>
 
                 {/* Modal Footer */}
-                <div className="p-4 sm:px-6 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3 shrink-0">
-                  <div className="flex items-center gap-2">
+                <div className="p-4 sm:px-6 bg-slate-50 border-t border-slate-200 space-y-3 shrink-0">
+                  {/* Top Row: Compare Ranking & Step 2: Award PO */}
+                  <div className="flex flex-wrap items-center justify-between gap-3">
                     <button
-                      onClick={() => setViewingSupplierEmailRfq(null)}
-                      className="px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-50 transition-all whitespace-nowrap shrink-0"
-                    >
-                      Close Window
-                    </button>
-                    {queuedSupplierEmails && queuedSupplierEmails.length > 1 && (
-                      <div className="flex items-center gap-1.5">
-                        <button
-                          type="button"
-                          disabled={queuedEmailIndex === 0}
-                          onClick={() => {
-                            const prevIdx = Math.max(0, queuedEmailIndex - 1);
-                            setQueuedEmailIndex(prevIdx);
-                            setViewingSupplierEmailRfq(queuedSupplierEmails[prevIdx]);
-                          }}
-                          className="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-bold text-slate-700 transition-colors whitespace-nowrap shrink-0"
-                        >
-                          ← Previous Quote
-                        </button>
-                        <button
-                          type="button"
-                          disabled={queuedEmailIndex >= queuedSupplierEmails.length - 1}
-                          onClick={() => {
-                            const nextIdx = Math.min(queuedSupplierEmails.length - 1, queuedEmailIndex + 1);
-                            setQueuedEmailIndex(nextIdx);
-                            setViewingSupplierEmailRfq(queuedSupplierEmails[nextIdx]);
-                          }}
-                          className="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-bold text-slate-700 transition-colors whitespace-nowrap shrink-0"
-                        >
-                          Next Quote →
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
+                      type="button"
                       onClick={() => {
                         setViewingSupplierEmailRfq(null);
                         setSuppliersTab("Compare");
@@ -5999,6 +5922,7 @@ Tel: +63 (82) 298-4410 | Web: www.fastmetals.com.ph`
                       Compare Ranking
                     </button>
                     <button
+                      type="button"
                       onClick={() => {
                         const targetRfq = viewingSupplierEmailRfq;
                         setViewingSupplierEmailRfq(null);
@@ -6017,6 +5941,46 @@ Tel: +63 (82) 298-4410 | Web: www.fastmetals.com.ph`
                     >
                       Step 2: Award PO to {viewingSupplierEmailRfq.supplierName} →
                     </button>
+                  </div>
+
+                  {/* Bottom Row: Red Close Window on Left, Previous & Next on Right */}
+                  <div className="flex items-center justify-between gap-3 pt-2.5 border-t border-slate-200/80">
+                    <button
+                      type="button"
+                      onClick={() => setViewingSupplierEmailRfq(null)}
+                      className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-all shadow-xs whitespace-nowrap shrink-0"
+                    >
+                      Close Window
+                    </button>
+
+                    <div className="flex items-center gap-2 ml-auto">
+                      {queuedSupplierEmails && queuedSupplierEmails.length > 1 && queuedEmailIndex > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const prevIdx = Math.max(0, queuedEmailIndex - 1);
+                            setQueuedEmailIndex(prevIdx);
+                            setViewingSupplierEmailRfq(queuedSupplierEmails[prevIdx]);
+                          }}
+                          className="px-3.5 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 text-xs font-bold text-slate-700 transition-colors whitespace-nowrap shrink-0"
+                        >
+                          Previous
+                        </button>
+                      )}
+                      {queuedSupplierEmails && queuedSupplierEmails.length > 1 && queuedEmailIndex < queuedSupplierEmails.length - 1 && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const nextIdx = queuedEmailIndex + 1;
+                            setQueuedEmailIndex(nextIdx);
+                            setViewingSupplierEmailRfq(queuedSupplierEmails[nextIdx]);
+                          }}
+                          className="px-4 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 text-xs font-bold text-slate-700 transition-colors whitespace-nowrap shrink-0"
+                        >
+                          Next
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
