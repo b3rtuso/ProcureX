@@ -100,42 +100,66 @@ table button,
   flex-shrink: 0 !important;
 }
 
-/* Zero-Scrollbar Responsive Table Layout (Fits 100% of Container Width) */
-.no-scrollbar {
-  overflow-x: hidden !important;
+/* ============================================================================
+   Zero Scrollbar Design — Universally Hide Scrollbars Across All Elements
+   Eliminates all visible scrollbar thumbs, tracks, and arrows across all browsers
+   (Chrome, Safari, Edge, Firefox, Opera) while maintaining full scrolling functionality.
+   ============================================================================ */
+html,
+body,
+#root,
+*,
+*::before,
+*::after {
   scrollbar-width: none !important;
   -ms-overflow-style: none !important;
 }
 
-.no-scrollbar::-webkit-scrollbar {
+::-webkit-scrollbar,
+*::-webkit-scrollbar,
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+div::-webkit-scrollbar,
+aside::-webkit-scrollbar,
+main::-webkit-scrollbar,
+section::-webkit-scrollbar,
+ul::-webkit-scrollbar,
+ol::-webkit-scrollbar {
   display: none !important;
   width: 0 !important;
   height: 0 !important;
+  background: transparent !important;
+  -webkit-appearance: none !important;
 }
 
-.no-scrollbar-x {
-  overflow-x: auto !important;
-  scrollbar-width: none !important;
-  -ms-overflow-style: none !important;
-}
-
-.no-scrollbar-x::-webkit-scrollbar {
+::-webkit-scrollbar-thumb,
+*::-webkit-scrollbar-thumb,
+::-webkit-scrollbar-track,
+*::-webkit-scrollbar-track,
+::-webkit-scrollbar-corner,
+*::-webkit-scrollbar-corner {
   display: none !important;
-  width: 0 !important;
-  height: 0 !important;
+  background: transparent !important;
+  visibility: hidden !important;
 }
 
+/* Zero-Scrollbar Utility Classes */
+.no-scrollbar,
+.no-scrollbar-x,
+.no-scrollbar-y,
 .table-container-clean {
-  width: 100%;
-  overflow-x: auto;
   scrollbar-width: none !important;
   -ms-overflow-style: none !important;
 }
 
+.no-scrollbar::-webkit-scrollbar,
+.no-scrollbar-x::-webkit-scrollbar,
+.no-scrollbar-y::-webkit-scrollbar,
 .table-container-clean::-webkit-scrollbar {
   display: none !important;
   width: 0 !important;
   height: 0 !important;
+  background: transparent !important;
 }
 
 .responsive-table {

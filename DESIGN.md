@@ -1,7 +1,7 @@
 # SupplyChain AI Command Center (`ProcureX`) — Design System Specification
 
 ## 1. Overview & Aesthetic Direction
-- **Layout Architecture**: Refined 3-Column Multi-Pane Dashboard prioritizing whitespace, scannability, and zero horizontal table scrollbars.
+- **Layout Architecture**: Refined 3-Column Multi-Pane Dashboard prioritizing whitespace, scannability, and universal zero scrollbars across all viewports.
 - **Active Plant Identity**: Locked to **`Laguna & Cebu Stamping`** across all views, headers, and B2B communications.
 - **Stylesheet Location**: [`frontend/styles.css`](file:///c:/Users/Marriel/Downloads/HECKETONS/frontend/styles.css) (served at `/styles.css`).
 
@@ -23,11 +23,12 @@
 ## 4. Three-Column Shell Structure
 1. **Left Navigation Sidebar (`w-64 lg:w-60 xl:w-64`, `h-screen`)**:
    - Dual circular glyph logo (`#0d6efd` & `#f97316`), 5 primary navigation links (`Dashboard`, `Alerts`, `Orders`, `Suppliers`, `Schedule`) with `#0d6efd` active state and right-edge vertical indicator pill, and bottom `AMD MI300X · ROCm` live telemetry card.
-2. **Central Main Content Area (`flex-1 min-w-0`, independent `h-screen overflow-y-auto`)**:
+2. **Central Main Content Area (`flex-1 min-w-0`, independent `h-screen overflow-y-auto no-scrollbar`)**:
    - Top header with greeting and elongated pill search bar, 2×2 Icon-Left KPI card, `#fff7ed` Simulate / Quick PO Trigger card with organic blob SVG, custom CSS Bar Chart with interactive tooltips, and zero-scrollbar responsive tables (`.responsive-table`).
-3. **Right Sidebar (`lg:w-64 xl:w-72 2xl:w-80`, `h-screen`)**:
+3. **Right Sidebar (`lg:w-64 xl:w-72 2xl:w-80`, `h-screen no-scrollbar`)**:
    - User Profile card (`Procurement Manager · Laguna & Cebu Stamping`), Navbar-Blue (`#0d6efd`) Plant Schedule Mini-Calendar with interactive Calendar Pop-up & Supplier Delivery Scheduler, Upcoming Deliveries & Shifts list, and AI Action Checklist.
 
 ## 5. Component Sizing & Table Rules
 - **Single-Line Badges (`.badge-pill`)**: All status pills (`Delayed`, `At Risk`, `ON TRACK`, `AT RISK`, `BEST OPTION`, `PRE-APPROVED`) enforce `white-space: nowrap !important` and `inline-flex` geometry.
-- **Zero-Scrollbar Tables (`.responsive-table`, `.no-scrollbar`)**: Tables fit 100% of their card container without horizontal scrollbars by using compact responsive padding (`clamp()`) and allowing descriptive text columns to wrap naturally while keeping status pills and action buttons on a single line.
+- **Universal Zero-Scrollbar Design (`.no-scrollbar`, `*::-webkit-scrollbar`, `scrollbar-width: none`)**: All browser scrollbars (WebKit, Firefox, Edge) are eliminated across the entire application (sidebars, main dashboard container, tables, modals, and drawers) while maintaining fluid mouse-wheel, touchpad, and touch scrollability.
+- **Responsive Tables (`.responsive-table`)**: Tables fit 100% of their card container without horizontal scrollbars by using compact responsive padding (`clamp()`) and allowing descriptive text columns to wrap naturally while keeping status pills and action buttons on a single line.
