@@ -1647,6 +1647,21 @@
                   );
                 })}
               </nav>
+
+              {/* Simulate Disruption Action Button in Sidebar Navigation */}
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSimStageIndex(-1);
+                    setShowSimulateModal(true);
+                  }}
+                  className="w-full flex items-center justify-center gap-2 px-3.5 py-3 rounded-[14px] bg-[#0d6efd] hover:bg-blue-700 text-white text-xs sm:text-sm font-bold shadow-md shadow-[#0d6efd]/20 transition-all duration-300 whitespace-nowrap cursor-pointer"
+                >
+                  <Icon name="bolt" className="w-4 h-4" />
+                  <span>Simulate Disruption</span>
+                </button>
+              </div>
             </div>
 
             {/* Bottom Section: Gradient Promo & AMD Live Telemetry Card with Non-Overlapping Floating Badge */}
@@ -1748,17 +1763,6 @@
                     )}
                   </div>
 
-                  <button
-                    onClick={() => {
-                      setSimStageIndex(-1);
-                      setShowSimulateModal(true);
-                    }}
-                    className="bg-[#0d6efd] hover:bg-blue-700 text-white px-4 py-2.5 rounded-[12px] text-xs sm:text-sm font-bold flex items-center gap-2 shadow-lg shadow-[#0d6efd]/20 transition-all duration-300 shrink-0 whitespace-nowrap"
-                  >
-                    <Icon name="bolt" className="w-4 h-4" />
-                    <span>Simulate Disruption</span>
-                  </button>
-
                   {/* Notification Bell */}
                   <div className="relative shrink-0">
                     <button
@@ -1830,121 +1834,86 @@
                  ===================================================================== */}
               {activeNav === "dashboard" && (
                 <div className="space-y-6 animate-in">
-                  {/* ROW 1: Unified 2x2 Icon-Left KPI Card (7 cols) + Supply Chain Status 85% Donut Card (5 cols) */}
-                  <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
-                    {/* Unified 2x2 Icon-Left KPI Card (matches top-left of Mockup) */}
-                    <div className="xl:col-span-7 saas-card p-4 sm:p-5 2xl:p-6 grid grid-cols-1 sm:grid-cols-2 gap-4 2xl:gap-5 tabular items-center fluid-card-p">
-                      <div
-                        onClick={() => navigateMain("alerts")}
-                        className="p-3 rounded-[18px] hover:bg-[#f8f9fc] cursor-pointer flex items-center gap-4 transition-all duration-300"
-                      >
-                        <div className="w-12 h-12 rounded-full bg-blue-50 border border-blue-100 text-[#0d6efd] flex items-center justify-center shrink-0">
-                          <Icon name="alerts" className="w-5 h-5" />
-                        </div>
-                        <div className="min-w-0">
-                          <div className="text-xs font-medium text-[#64748b]">Active Disruptions</div>
-                          <div className="text-xl 2xl:text-2xl fluid-kpi-val font-extrabold text-[#1e293b] mt-0.5">{alerts.length} Critical</div>
-                          <div className="text-[11px] font-semibold text-[#f97316] truncate mt-0.5">
-                            {alerts[0]?.title}
-                          </div>
-                        </div>
+                  {/* ROW 1: 4 Distinct Executive KPI Cards across full width */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 2xl:gap-6">
+                    {/* Card 1: Active Disruptions */}
+                    <div
+                      onClick={() => navigateMain("alerts")}
+                      className="saas-card p-5 2xl:p-6 cursor-pointer hover:border-blue-300 transition-all duration-300 flex items-center gap-4 tabular shadow-xs hover:shadow-md"
+                    >
+                      <div className="w-12 h-12 rounded-full bg-blue-50 border border-blue-100 text-[#0d6efd] flex items-center justify-center shrink-0">
+                        <Icon name="alerts" className="w-5 h-5" />
                       </div>
-
-                      <div
-                        onClick={() => {
-                          navigateMain("orders");
-                          setOrdersTab("Purchase Orders");
-                        }}
-                        className="p-3 rounded-[18px] hover:bg-[#f8f9fc] cursor-pointer flex items-center gap-4 transition-all duration-300"
-                      >
-                        <div className="w-12 h-12 rounded-full bg-[#fff7ed] border border-orange-100 text-[#f97316] flex items-center justify-center shrink-0">
-                          <Icon name="orders" className="w-5 h-5" />
-                        </div>
-                        <div className="min-w-0">
-                          <div className="text-xs font-medium text-[#64748b]">Purchase Orders</div>
-                          <div className="text-xl 2xl:text-2xl fluid-kpi-val font-extrabold text-[#1e293b] mt-0.5">12 Active</div>
-                          <div className="text-[11px] font-medium text-[#64748b] mt-0.5">
-                            9 On Time · 1 Delayed · 2 At Risk
-                          </div>
-                        </div>
-                      </div>
-
-                      <div
-                        onClick={() => {
-                          navigateMain("orders");
-                          setOrdersTab("Inventory");
-                        }}
-                        className="p-3 rounded-[18px] hover:bg-[#f8f9fc] cursor-pointer flex items-center gap-4 transition-all duration-300"
-                      >
-                        <div className="w-12 h-12 rounded-full bg-emerald-50 border border-emerald-100 text-[#10b981] flex items-center justify-center shrink-0">
-                          <Icon name="shield" className="w-5 h-5" />
-                        </div>
-                        <div className="min-w-0">
-                          <div className="text-xs font-medium text-[#64748b]">Inventory Health</div>
-                          <div className="text-xl 2xl:text-2xl fluid-kpi-val font-extrabold text-[#1e293b] mt-0.5">85.0%</div>
-                          <div className="text-[11px] font-semibold text-[#10b981] mt-0.5">
-                            Steel Coil: 7 days buffer left
-                          </div>
-                        </div>
-                      </div>
-
-                      <div
-                        onClick={() => {
-                          navigateMain("orders");
-                          setOrdersTab("Affected Orders");
-                        }}
-                        className="p-3 rounded-[18px] hover:bg-[#f8f9fc] cursor-pointer flex items-center gap-4 transition-all duration-300"
-                      >
-                        <div className="w-12 h-12 rounded-full bg-emerald-50 border border-emerald-100 text-[#10b981] flex items-center justify-center shrink-0">
-                          <Icon name="clock" className="w-5 h-5" />
-                        </div>
-                        <div className="min-w-0">
-                          <div className="text-xs font-medium text-[#64748b]">Production Orders at Risk</div>
-                          <div className="text-xl 2xl:text-2xl fluid-kpi-val font-extrabold text-[#1e293b] mt-0.5">
-                            {scheduleApproved === "APPROVED" ? "0 At Risk" : `${productionOrders.filter(o => o.status === "AT RISK").length} Orders`}
-                          </div>
-                          <div className="text-[11px] font-medium text-[#64748b] mt-0.5">
-                            {scheduleApproved === "APPROVED"
-                              ? "Mitigated via shift swap"
-                              : "Lead time: 5d 4h · PO-102 & PO-103"}
-                          </div>
+                      <div className="min-w-0">
+                        <div className="text-xs font-medium text-[#64748b]">Active Disruptions</div>
+                        <div className="text-xl 2xl:text-2xl fluid-kpi-val font-extrabold text-[#1e293b] mt-0.5">{alerts.length} Critical</div>
+                        <div className="text-[11px] font-semibold text-[#f97316] truncate mt-0.5">
+                          {alerts[0]?.title}
                         </div>
                       </div>
                     </div>
 
-                    {/* Supply Chain Status Breakdown & 85% On Track Donut Chart */}
-                    <div className="xl:col-span-5 saas-card p-5 2xl:p-6 flex flex-col items-center justify-center text-center space-y-3">
-                      <div className="flex items-center justify-between w-full">
-                        <h2 className="text-sm font-extrabold text-[#1e293b]">Supply Chain Health</h2>
-                        <span className="text-[11px] font-bold text-[#10b981] bg-emerald-50 border border-emerald-100 px-2.5 py-0.5 rounded-full">
-                          85% On Track
-                        </span>
+                    {/* Card 2: Purchase Orders */}
+                    <div
+                      onClick={() => {
+                        navigateMain("orders");
+                        setOrdersTab("Purchase Orders");
+                      }}
+                      className="saas-card p-5 2xl:p-6 cursor-pointer hover:border-orange-300 transition-all duration-300 flex items-center gap-4 tabular shadow-xs hover:shadow-md"
+                    >
+                      <div className="w-12 h-12 rounded-full bg-[#fff7ed] border border-orange-100 text-[#f97316] flex items-center justify-center shrink-0">
+                        <Icon name="orders" className="w-5 h-5" />
                       </div>
-                      <div className="relative w-28 h-28 shrink-0 my-1">
-                        <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
-                          <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#f3f4f6" strokeWidth="3.8" />
-                          <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#10b981" strokeWidth="3.8" strokeDasharray="85 15" strokeDashoffset="0" />
-                          <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#f97316" strokeWidth="3.8" strokeDasharray="9 91" strokeDashoffset="-85" />
-                          <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#0d6efd" strokeWidth="3.8" strokeDasharray="6 94" strokeDashoffset="-94" />
-                        </svg>
-                        <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                          <span className="text-xl font-extrabold text-[#1e293b] tabular">85%</span>
-                          <span className="text-[10px] font-medium text-[#64748b]">On Track</span>
+                      <div className="min-w-0">
+                        <div className="text-xs font-medium text-[#64748b]">Purchase Orders</div>
+                        <div className="text-xl 2xl:text-2xl fluid-kpi-val font-extrabold text-[#1e293b] mt-0.5">12 Active</div>
+                        <div className="text-[11px] font-medium text-[#64748b] truncate mt-0.5">
+                          9 On Time · 1 Delayed · 2 At Risk
                         </div>
                       </div>
-                      <div className="flex flex-wrap items-center justify-center gap-4 pt-1 text-xs font-semibold text-[#64748b]">
-                        <span className="flex items-center gap-1.5 whitespace-nowrap shrink-0">
-                          <span className="w-2.5 h-2.5 rounded-full bg-[#10b981] inline-block shrink-0" />
-                          On Time (85%)
-                        </span>
-                        <span className="flex items-center gap-1.5 whitespace-nowrap shrink-0">
-                          <span className="w-2.5 h-2.5 rounded-full bg-[#f97316] inline-block shrink-0" />
-                          Delayed (9%)
-                        </span>
-                        <span className="flex items-center gap-1.5 whitespace-nowrap shrink-0">
-                          <span className="w-2.5 h-2.5 rounded-full bg-[#0d6efd] inline-block shrink-0" />
-                          At Risk (6%)
-                        </span>
+                    </div>
+
+                    {/* Card 3: Inventory Health */}
+                    <div
+                      onClick={() => {
+                        navigateMain("orders");
+                        setOrdersTab("Inventory");
+                      }}
+                      className="saas-card p-5 2xl:p-6 cursor-pointer hover:border-emerald-300 transition-all duration-300 flex items-center gap-4 tabular shadow-xs hover:shadow-md"
+                    >
+                      <div className="w-12 h-12 rounded-full bg-emerald-50 border border-emerald-100 text-[#10b981] flex items-center justify-center shrink-0">
+                        <Icon name="shield" className="w-5 h-5" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-xs font-medium text-[#64748b]">Inventory Health</div>
+                        <div className="text-xl 2xl:text-2xl fluid-kpi-val font-extrabold text-[#1e293b] mt-0.5">85.0%</div>
+                        <div className="text-[11px] font-semibold text-[#10b981] truncate mt-0.5">
+                          Steel Coil: 7 days buffer left
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Card 4: Production Orders at Risk */}
+                    <div
+                      onClick={() => {
+                        navigateMain("orders");
+                        setOrdersTab("Affected Orders");
+                      }}
+                      className="saas-card p-5 2xl:p-6 cursor-pointer hover:border-emerald-300 transition-all duration-300 flex items-center gap-4 tabular shadow-xs hover:shadow-md"
+                    >
+                      <div className="w-12 h-12 rounded-full bg-emerald-50 border border-emerald-100 text-[#10b981] flex items-center justify-center shrink-0">
+                        <Icon name="clock" className="w-5 h-5" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-xs font-medium text-[#64748b]">Production Orders at Risk</div>
+                        <div className="text-xl 2xl:text-2xl fluid-kpi-val font-extrabold text-[#1e293b] mt-0.5">
+                          {scheduleApproved === "APPROVED" ? "0 At Risk" : `${productionOrders.filter(o => o.status === "AT RISK").length} Orders`}
+                        </div>
+                        <div className="text-[11px] font-medium text-[#64748b] truncate mt-0.5">
+                          {scheduleApproved === "APPROVED"
+                            ? "Mitigated via shift swap"
+                            : "Lead time: 5d 4h · PO-102 & PO-103"}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -2578,25 +2547,7 @@
                     </div>
                   </div>
 
-                  {/* When RFQs are NOT yet sent: Show Step 1 Inquiry Prompt */}
-                  {!anyQuoteReceived && (
-                    <div className="saas-card p-4 flex flex-col xl:flex-row xl:items-center justify-between gap-3 text-xs bg-amber-50/70 border-amber-200">
-                      <div className="flex flex-wrap sm:flex-nowrap items-start sm:items-center gap-2.5 min-w-0 flex-1">
-                        <span role="status" aria-label="Workflow Step: Step 1 Required" className="badge-pill whitespace-nowrap inline-flex items-center justify-center shrink-0 leading-none px-2.5 py-1 rounded-md font-bold bg-amber-600 text-white">
-                          Step 1 Required · Price & Stock Unknown
-                        </span>
-                        <span className="text-slate-700 min-w-0">
-                          Supplier prices and current stock levels are NOT pre-determined before sending an inquiry. Send the RFQ emails first to ask suppliers if they have stock and how much they charge.
-                        </span>
-                      </div>
-                      <button
-                        onClick={() => setSuppliersTab("RFQ Drafts")}
-                        className="px-3.5 py-2 rounded-lg bg-brand-600 text-white font-semibold shrink-0 whitespace-nowrap"
-                      >
-                        Go to RFQ Drafts to Ask Stock & Price →
-                      </button>
-                    </div>
-                  )}
+
 
                   {/* Once RFQs are Sent: Prominent Supplier Quote Replies (Step 1 Required is COMPLETELY REMOVED) */}
                   {anyQuoteReceived && (
